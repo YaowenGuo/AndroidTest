@@ -9,7 +9,7 @@
         tools:showIn="@layout/app_bar_main"
         tools:context=".MainActivity">
 
-    <tech.yaowen.customview.draw.CustomDrawView
+    <tech.yaowen.customview.draw.ClipView
             android:layout_width="match_parent"
             android:layout_height="match_parent"/>
 
