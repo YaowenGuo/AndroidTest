@@ -1,5 +1,11 @@
 package tech.yaowen.customview
 
+import android.animation.AnimatorSet
+import android.animation.LayoutTransition
+import android.animation.ObjectAnimator
+import android.graphics.Color
+import android.graphics.drawable.AnimationDrawable
+import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.navigation.NavigationView
@@ -8,13 +14,18 @@ import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AppCompatActivity
 import android.view.Menu
 import android.view.MenuItem
+import android.view.View
+import androidx.core.view.isVisible
 import androidx.databinding.DataBindingUtil
-import androidx.recyclerview.widget.RecyclerView
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.app_bar_main.*
+import kotlinx.android.synthetic.main.content_main.*
 import tech.yaowen.customview.databinding.ActivityMainBinding
+import tech.yaowen.customview.dialog.TransparentBgDialog
 
 class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
+    private lateinit var rocketAnimation: AnimationDrawable
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -34,7 +45,41 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
         nav_view.setNavigationItemSelectedListener(this)
 
+//        imageAnim.animate()
+//            .translationX(100f)
+//            .setStartDelay(1000)
+//            .setDuration(1000)
+//            .start()
 
+
+
+        val objAnim = ObjectAnimator.ofFloat(imageAnim, "x", 100.dpToPx())
+
+        objAnim.startDelay = 1000
+        objAnim.reverse()
+        objAnim.start()
+
+//        val animSet = AnimatorSet()
+//        imageAnim.apply {
+//            setBackgroundResource(R.drawable.i)
+//            rocketAnimation = background as AnimationDrawable
+//        }
+//
+//        imageAnim.setOnClickListener { rocketAnimation.start() }
+
+//        val dialog = TransparentBgDialog()
+//        dialog.show(supportFragmentManager, "sd")
+
+        val layoutAnim = LayoutTransition()
+//        layoutAnim.setAnimator()
+
+        visibleBtn.setOnClickListener {
+            if (imageAnim.isVisible) {
+                imageAnim.visibility = View.GONE
+            } else {
+                imageAnim.visibility = View.VISIBLE
+            }
+        }
     }
 
     override fun onBackPressed() {
