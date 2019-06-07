@@ -3,6 +3,7 @@ package tech.yaowen.customview
 import android.animation.AnimatorSet
 import android.animation.LayoutTransition
 import android.animation.ObjectAnimator
+import android.animation.PropertyValuesHolder
 import android.graphics.Color
 import android.graphics.drawable.AnimationDrawable
 import android.graphics.drawable.ColorDrawable
@@ -62,7 +63,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 //        val animSet = AnimatorSet()
 //        imageAnim.apply {
 //            setBackgroundResource(R.drawable.i)
-//            rocketAnimation = background as AnimationDrawable
+//            rocketAnimation = background as AnimxxationDrawable
 //        }
 //
 //        imageAnim.setOnClickListener { rocketAnimation.start() }
@@ -80,6 +81,13 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                 imageAnim.visibility = View.VISIBLE
             }
         }
+
+        val holder1 = PropertyValuesHolder.ofFloat("scaleX", 1f)
+        val holder2 = PropertyValuesHolder.ofFloat("scaleY", 1f)
+        val holder3 = PropertyValuesHolder.ofFloat("alpha", 1f)
+
+        val animator = ObjectAnimator.ofPropertyValuesHolder(visibleBtn, holder1, holder2, holder3)
+        animator.start()
     }
 
     override fun onBackPressed() {
