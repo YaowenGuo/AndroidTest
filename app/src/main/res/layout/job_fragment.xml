@@ -6,6 +6,10 @@
         <variable
             name="listener"
             type="tech.yaowen.customview.ui.jobservice.JobFragment" />
+
+        <variable
+            name="user"
+            type="tech.yaowen.customview.ui.jobservice.JobFragment.User" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -83,6 +87,17 @@
             app:layout_constraintStart_toStartOf="parent"
             android:layout_marginTop="50dp"
             android:onClick="@{() -> listener.cancelJobs()}"/>
+
+        <TextView
+            android:id="@+id/textView2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            android:text="@{@string/nameFormat(user.firstName, user.lastName)}"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/cancelJobs" />
 
 
     </androidx.constraintlayout.widget.ConstraintLayout>

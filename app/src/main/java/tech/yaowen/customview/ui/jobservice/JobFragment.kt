@@ -11,11 +11,10 @@ import android.view.View
 import android.view.ViewGroup
 import tech.yaowen.customview.service.NotificationJobService
 import android.content.ComponentName
+import android.database.DatabaseUtils
 import android.widget.Toast
-
-
-
-
+import androidx.databinding.DataBindingUtil
+import tech.yaowen.customview.R
 
 
 class JobFragment : Fragment() {
@@ -32,15 +31,18 @@ class JobFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        return inflater.inflate(tech.yaowen.customview.R.layout.job_fragment, container, false)
+        binding = DataBindingUtil.inflate(inflater, R.layout.job_fragment, container, false)
+        return binding.root
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
         viewModel = ViewModelProviders.of(this).get(JobViewModel::class.java)
-
+        binding.user = User("Yaowen", "Guo")
 
     }
+
+    data class User(val firstName: String, val lastName: String)
 
     fun scheduleJob(networkType: Int) {
         val constraintSet = networkType != JobInfo.NETWORK_TYPE_NONE

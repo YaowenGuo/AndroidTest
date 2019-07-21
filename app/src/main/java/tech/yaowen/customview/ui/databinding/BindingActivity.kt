@@ -1,25 +1,21 @@
-package tech.yaowen.customview.ui.jobservice
+package tech.yaowen.customview.ui.databinding
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import tech.yaowen.customview.R
 
-
-class JobServiceActivity : AppCompatActivity() {
+class BindingActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.job_activity)
+        setContentView(R.layout.binding_activity)
         if (savedInstanceState == null) {
             supportFragmentManager.beginTransaction()
-                .replace(R.id.container, JobFragment.newInstance())
+                .replace(R.id.container, BindingFragment.newInstance())
                 .commitNow()
         }
 
-        drawBadge()
+
     }
-
-
-
 
 }
