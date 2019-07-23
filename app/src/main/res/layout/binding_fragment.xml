@@ -38,5 +38,14 @@
             app:layout_constraintLeft_toLeftOf="parent"
             android:onClick="@{() -> handler.changeBounnd()}"
             android:text="Button" />
+
+        <CheckBox
+            android:id="@+id/rememberMe"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:checked="@={viewModel.rememberMe}"
+            android:text="Button" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

@@ -8,6 +8,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.databinding.DataBindingUtil
+import tech.yaowen.customview.R
 import tech.yaowen.customview.databinding.BindingFragmentBinding
 
 
@@ -28,7 +29,7 @@ class BindingFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        binding = DataBindingUtil.inflate(inflater, tech.yaowen.customview.R.layout.binding_fragment, container, false)
+        binding = DataBindingUtil.inflate(inflater, R.layout.binding_fragment, container, false)
         binding.lifecycleOwner = this
         binding.handler = this
         return binding.root
@@ -37,7 +38,6 @@ class BindingFragment : Fragment() {
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
         viewModel = ViewModelProviders.of(requireActivity()).get(BindingViewModel::class.java)
-
 
         // Assign the component to a property in the binding class.
         binding.viewModel = viewModel

@@ -4,23 +4,37 @@ import androidx.databinding.Bindable
 import androidx.databinding.Observable
 import androidx.databinding.PropertyChangeRegistry
 import androidx.databinding.library.baseAdapters.BR
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 
 class BindingViewModel : ViewModel(), Observable {
+    var firstName: MutableLiveData<String> = MutableLiveData<String>()
     private val callbacks: PropertyChangeRegistry = PropertyChangeRegistry()
 
-    @get:Bindable
-    var firstName: String = ""
+    var rememberMe = false
+        @Bindable get() {
+            return field
+        }
         set(value) {
-            field = value
-            notifyPropertyChanged(BR.firstName)
+            // Avoids infinite loops.
+            if (field != value) {
+                field = value
+
+                // React to the change.
+                // saveData()
+
+                // Notify observers of a new value.
+                notifyPropertyChanged(BR.rememberMe)
+            }
         }
 
+
     init {
-//        userName = MutableLiveData<String>()
-//        userName.value = "Hahah"
-        firstName = "Albert"
+        firstName.value = "Albert"
     }
+
+
+
 
     override fun removeOnPropertyChangedCallback(callback: Observable.OnPropertyChangedCallback?) {
         callbacks.add(callback)
