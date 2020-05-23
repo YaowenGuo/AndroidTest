@@ -10,6 +10,7 @@ import android.graphics.PorterDuff
 import android.graphics.PorterDuffXfermode
 import android.util.Log
 import android.view.FocusFinder
+import android.widget.TextView
 import tech.yaowen.customview.R
 import tech.yaowen.customview.px2Inch
 
@@ -50,7 +51,6 @@ open class AnimatorSetView : View {
         blackPaint.strokeWidth = 50f
 
 //        blackPaint.style = Paint.Style.STROKE
-
 
     }
 

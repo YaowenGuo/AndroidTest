@@ -7,11 +7,12 @@ import android.content.Intent
 import android.graphics.Color
 import android.net.Uri
 import android.os.Build
-import android.util.Log
+import androidx.work.Configuration
 import tech.yaowen.customview.MainActivity
 import tech.yaowen.customview.R
+import java.util.concurrent.Executors
 
-class CustomApplication : Application() {
+class CustomApplication : Application(), Configuration.Provider {
 
     companion object {
         private val channelId = "1"//消息通道的ID，以后可以通过该ID找到该消息通道
@@ -46,13 +47,15 @@ class CustomApplication : Application() {
 
     private fun shownDownloadCompleteNotification(notification: String, contents: String) {
 
-        val mNotificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        val mNotificationManager =
+            getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         // pending implicit intent to view url
         val resultIntent = Intent(this, MainActivity::class.java)
         resultIntent.action = Intent.ACTION_VIEW
         val addCategory = resultIntent.addCategory(Intent.CATEGORY_LAUNCHER)
         resultIntent.data = Uri.parse(contents)
-        val pendingIntent = PendingIntent.getActivity(this, 0, resultIntent, PendingIntent.FLAG_UPDATE_CURRENT)
+        val pendingIntent =
+            PendingIntent.getActivity(this, 0, resultIntent, PendingIntent.FLAG_UPDATE_CURRENT)
         val notificationBuilder = Notification.Builder(this)
             //.setAutoCancel(true)
             .setSmallIcon(R.drawable.ic_keyboard_arrow_left_black_24dp)
@@ -71,7 +74,8 @@ class CustomApplication : Application() {
             //mNotificationManager.deleteNotificationChannel("igdownload");
         }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val channel = NotificationChannel(channelId, channelName, NotificationManager.IMPORTANCE_HIGH)
+            val channel =
+                NotificationChannel(channelId, channelName, NotificationManager.IMPORTANCE_HIGH)
             mNotificationManager.createNotificationChannel(channel)
             notificationBuilder.setChannelId(channelId)
         } else {
@@ -83,6 +87,18 @@ class CustomApplication : Application() {
     }
 
 
+    override fun getWorkManagerConfiguration() =
+        Configuration.Builder()
+            .setMinimumLoggingLevel(android.util.Log.INFO)
+            .setExecutor(Executors.newSingleThreadExecutor())
+            .build()
 
+
+
+    fun getSingleWordManagerConfiguration() =
+        Configuration.Builder()
+            .setMinimumLoggingLevel(android.util.Log.INFO)
+//            .setExecutor(Executors.newSingleThreadExecutor())
+            .build()
 
 }

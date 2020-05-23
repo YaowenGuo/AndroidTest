@@ -1,1 +1,5 @@
+include ':aidl'
+include ':offer'
+include ':test_OKHttp'
+include ':test_retrofit'
 include ':app'
