@@ -1,11 +1,14 @@
 package tech.yaowen.customview.ui.workmanager
 
+import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
+import android.view.View
 import androidx.lifecycle.Observer
 import androidx.work.*
 import tech.yaowen.customview.R
+import tech.yaowen.customview.ui.databinding.BindingActivity
 import java.util.concurrent.TimeUnit
 
 class JobQueueActivity : AppCompatActivity() {
@@ -77,5 +80,12 @@ class JobQueueActivity : AppCompatActivity() {
             })*/
 
 
+    }
+
+    fun startSecondActivity(view: View) {
+
+        val intent = Intent(this, BindingActivity::class.java)
+        startActivity(intent)
+        finish()
     }
 }

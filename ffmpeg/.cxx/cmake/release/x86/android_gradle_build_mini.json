@@ -1,0 +1,20 @@
+{
+  "buildFiles": [
+    "/home/albert/Android/Sdk/ndk/21.3.6528147/build/cmake/android.toolchain.cmake",
+    "/home/albert/Android/Sdk/ndk/21.3.6528147/build/cmake/platforms.cmake",
+    "/home/albert/project/android/CustomView/ffmpeg/src/main/cpp/CMakeLists.txt"
+  ],
+  "cleanCommands": [
+    "/home/albert/Android/Sdk/cmake/3.10.2.4988404/bin/ninja -C \"/home/albert/project/android/CustomView/ffmpeg/.cxx/cmake/release/x86\" clean"
+  ],
+  "buildTargetsCommand": "/home/albert/Android/Sdk/cmake/3.10.2.4988404/bin/ninja  -C \"/home/albert/project/android/CustomView/ffmpeg/.cxx/cmake/release/x86\" {LIST_OF_TARGETS_TO_BUILD}",
+  "libraries": {
+    "native-lib-Release-x86": {
+      "artifactName": "native-lib",
+      "buildCommand": "/home/albert/Android/Sdk/cmake/3.10.2.4988404/bin/ninja -C \"/home/albert/project/android/CustomView/ffmpeg/.cxx/cmake/release/x86\" native-lib",
+      "abi": "x86",
+      "output": "/home/albert/project/android/CustomView/ffmpeg/build/intermediates/cmake/release/obj/x86/libnative-lib.so",
+      "runtimeFiles": []
+    }
+  }
+}

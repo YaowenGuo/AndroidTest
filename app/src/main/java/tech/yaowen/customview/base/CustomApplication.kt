@@ -7,6 +7,10 @@ import android.content.Intent
 import android.graphics.Color
 import android.net.Uri
 import android.os.Build
+import android.util.Log
+import androidx.lifecycle.DefaultLifecycleObserver
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.ProcessLifecycleOwner
 import androidx.work.Configuration
 import tech.yaowen.customview.MainActivity
 import tech.yaowen.customview.R
@@ -17,31 +21,65 @@ class CustomApplication : Application(), Configuration.Provider {
     companion object {
         private val channelId = "1"//消息通道的ID，以后可以通过该ID找到该消息通道
         private val channelName = "igDownload"//消息通道的名字
+//        private val lifecycleObserver = object : DefaultLifecycleObserver {
+//            override fun onCreate(owner: LifecycleOwner) {
+//                Log.e("CustomApplication", "onCreate")
+//
+//            }
+//
+//            override fun onResume(owner: LifecycleOwner) {
+//                Log.e("CustomApplication", "onResume")
+//
+//            }
+//
+//            override fun onPause(owner: LifecycleOwner) {
+//                Log.e("CustomApplication", "onPause")
+//
+//            }
+//
+//            override fun onStart(owner: LifecycleOwner) {
+//                Log.e("CustomApplication", "onStart")
+//
+//            }
+//
+//            override fun onStop(owner: LifecycleOwner) {
+//                Log.e("CustomApplication", "onStop")
+//
+//            }
+//
+//            override fun onDestroy(owner: LifecycleOwner) {
+//                Log.e("CustomApplication", "onDestroy")
+//
+//            }
+//
+//        }
     }
 
     /**
-     * Android 9.0 上 onCreate 被调用多次，不知道是系统原因还是其它引起的
+     *  每个进程创建都会调用一次 application，如果一个应用创建了多个进程，就会调用多次。
      */
     override fun onCreate() {
         super.onCreate()
 
-        val clipboardManager = getSystemService(CLIPBOARD_SERVICE) as ClipboardManager
-        clipboardManager.addPrimaryClipChangedListener {
-            try {
-                val cb = getSystemService(CLIPBOARD_SERVICE) as ClipboardManager
-                if (cb.hasPrimaryClip()) {
-                    val cd = cb.primaryClip
-                    if (cd?.getItemAt(0) != null && cd.getItemAt(0).text != null) {
-                        shownDownloadCompleteNotification("HHHH", "hshhd")
-
-                    }
-                }
-            } catch (e: Exception) {
-                e.printStackTrace()
-            }
-
-        }
-
+//        ProcessLifecycleOwner.get().lifecycle.addObserver(lifecycleObserver)
+//
+//        val clipboardManager = getSystemService(CLIPBOARD_SERVICE) as ClipboardManager
+//        clipboardManager.addPrimaryClipChangedListener {
+//            try {
+//                val cb = getSystemService(CLIPBOARD_SERVICE) as ClipboardManager
+//                if (cb.hasPrimaryClip()) {
+//                    val cd = cb.primaryClip
+//                    if (cd?.getItemAt(0) != null && cd.getItemAt(0).text != null) {
+//                        shownDownloadCompleteNotification("HHHH", "hshhd")
+//
+//                    }
+//                }
+//            } catch (e: Exception) {
+//                e.printStackTrace()
+//            }
+//
+//        }
+//
 
     }
 
@@ -58,7 +96,7 @@ class CustomApplication : Application(), Configuration.Provider {
             PendingIntent.getActivity(this, 0, resultIntent, PendingIntent.FLAG_UPDATE_CURRENT)
         val notificationBuilder = Notification.Builder(this)
             //.setAutoCancel(true)
-            .setSmallIcon(R.drawable.ic_keyboard_arrow_left_black_24dp)
+            .setSmallIcon(R.drawable.ic_menu_send)
             .setContentIntent(pendingIntent)
             .setDefaults(Notification.DEFAULT_LIGHTS or Notification.DEFAULT_VIBRATE)
             .setContentTitle(notification)

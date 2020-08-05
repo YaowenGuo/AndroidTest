@@ -4,10 +4,14 @@ import android.animation.AnimatorSet
 import android.animation.LayoutTransition
 import android.animation.ObjectAnimator
 import android.animation.PropertyValuesHolder
+import android.content.Intent
 import android.graphics.Color
 import android.graphics.drawable.AnimationDrawable
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
+import android.os.MessageQueue
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.navigation.NavigationView
 import androidx.core.view.GravityCompat
@@ -16,26 +20,40 @@ import androidx.appcompat.app.AppCompatActivity
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
+import android.view.ViewGroup
+import android.widget.TextView
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.isVisible
 import androidx.databinding.DataBindingUtil
+import androidx.localbroadcastmanager.content.LocalBroadcastManager
+import com.hencoder.a33_lib_annotations.BindView
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.app_bar_main.*
 import kotlinx.android.synthetic.main.content_main.*
 import tech.yaowen.customview.databinding.ActivityMainBinding
 import tech.yaowen.customview.dialog.TransparentBgDialog
+import tech.yaowen.customview.ui.TouchActivity
+
+//import tech.yaowen.test_annotation.Binding
+//import tech.yaowen.test_annotation.ButterKnife
 
 class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
     private lateinit var rocketAnimation: AnimationDrawable
 
+    @JvmField
+    @BindView(R.id.textView)
+    public var textView: TextView? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val binding = DataBindingUtil.setContentView<ActivityMainBinding>(this, R.layout.activity_main)
-        setSupportActionBar(toolbar)
+//        setSupportActionBar(toolbar)
 
         fab.setOnClickListener { view ->
-            Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                .setAction("Action", null).show()
+//            Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
+//                .setAction("Action", null).show()
+            val intent = Intent(this@MainActivity, TouchActivity::class.java)
+            startActivity(intent)
         }
 
         val toggle = ActionBarDrawerToggle(
@@ -43,15 +61,16 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         )
         drawer_layout.addDrawerListener(toggle)
         toggle.syncState()
-
+//        main.findViewById<>()
         nav_view.setNavigationItemSelectedListener(this)
+
+
 
 //        imageAnim.animate()
 //            .translationX(100f)
 //            .setStartDelay(1000)
 //            .setDuration(1000)
 //            .start()
-
 
 
         val objAnim = ObjectAnimator.ofFloat(imageAnim, "x", 100.dpToPx())
@@ -88,6 +107,8 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
         val animator = ObjectAnimator.ofPropertyValuesHolder(visibleBtn, holder1, holder2, holder3)
         animator.start()
+
+
     }
 
     override fun onBackPressed() {

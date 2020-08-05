@@ -1,8 +1,13 @@
+@file:JvmName("TestOkHttp")
 package com.example.test_okhttp
 
 import okhttp3.*
 import okhttp3.Request.*
 import java.io.IOException
+
+fun callNotNullParam(value: IntArray) {
+    
+}
 
 fun main() {
     run()
@@ -10,7 +15,10 @@ fun main() {
 
 
 fun run() {
-    val client = OkHttpClient()
+    val client = OkHttpClient.Builder()
+        //.authenticator =  认证重连
+        //.certificatePinner = 自认证
+        .build()
 
     val request = Builder()
         .url("http://publicobject.com/helloworld.txt")

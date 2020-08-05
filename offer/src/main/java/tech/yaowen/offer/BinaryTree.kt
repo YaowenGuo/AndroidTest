@@ -10,6 +10,63 @@ open class BinaryTreeNode<T>(
     var right: BinaryTreeNode<T>? = null
 ) {
 
+    companion object {
+        /**
+         * listData a list of data give by complete binary tree(完全二叉树).
+         */
+        private var index = 0
+
+        @JvmStatic
+        private fun <T> buildTree(listData: Array<T?>): BinaryTreeNode<T>? {
+            index = 0
+            return build(listData)
+        }
+
+
+        @JvmStatic
+        private fun <T> build(listData: Array<T?>): BinaryTreeNode<T>? {
+            return if (index < listData.size) {
+                val data = listData[index++]
+                if (data != null) {
+                    val node = BinaryTreeNode(data, null, null)
+                    node.left = build(listData)
+                    node.right = build(listData)
+                    node
+                } else {
+                    null
+                }
+            } else {
+                null
+            }
+        }
+
+        @JvmStatic
+        private fun <T> buildByCycle(listData: Array<T?>): BinaryTreeNode<T>? {
+            var i = 0
+            val stack = Stack<BinaryTreeNode<T>>()
+            var last: BinaryTreeNode<T>? = null
+            while (i < listData.size) {
+                val data = listData[i++]
+                if (data != null) {
+                    val node = BinaryTreeNode(data, null, null)
+                    if (last != null) {
+                        last.left = node
+                        last = node
+                        stack.push(node)
+                    } else if (!stack.isEmpty()) {
+                        last = stack.pop()
+                        last.right = node
+                    }
+
+                } else {
+                    last = null
+                }
+            }
+
+            return last
+        }
+    }
+
     constructor(preOrder: Array<T>, inOrder: Array<T>) : this(null, null, null) {
         if (preOrder.isEmpty() || inOrder.isEmpty()) {
             throw Exception("Input is Empty!")
@@ -105,16 +162,66 @@ open class BinaryTreeNode<T>(
         right?.let { it.preOrderTraversal(nodeOpt) }
     }
 
+    public fun preOrderTraversal1(nodeOpt: (BinaryTreeNode<T>) -> Unit) {
+        val stack = Stack<BinaryTreeNode<T>>()
+        stack.push(this)
+        while (!stack.empty()) {
+            val node = stack.pop()
+            nodeOpt(node)
+            if (node.right != null) {
+                stack.push(right)
+            }
+            if (node.left != null) {
+                stack.push(left)
+            }
+        }
+    }
+
     public fun inOrderTraversal(nodeOpt: (BinaryTreeNode<T>) -> Unit) {
         left?.let { it.inOrderTraversal(nodeOpt) }
         value?.let { nodeOpt(this) }
         right?.let { it.inOrderTraversal(nodeOpt) }
     }
 
+    public fun inOrderTraversal1(nodeOpt: (BinaryTreeNode<T>) -> Unit) {
+        var node: BinaryTreeNode<T>? = this
+        val stack = Stack<BinaryTreeNode<T>>()
+        while (node != null || !stack.empty()) {
+            if (node != null) {
+                stack.push(node)
+                node = node.left
+            } else {
+                node = stack.pop()
+                nodeOpt(node!!)
+                node = node.right
+            }
+        }
+    }
+
+
     public fun postOrderTraversal(nodeOpt: (BinaryTreeNode<T>) -> Unit) {
         left?.let { it.postOrderTraversal(nodeOpt) }
         right?.let { it.postOrderTraversal(nodeOpt) }
         value?.let { nodeOpt(this) }
+    }
+
+    public fun postOrderTraversal1(nodeOpt: (BinaryTreeNode<T>) -> Unit) {
+        val stack1 = Stack<BinaryTreeNode<T>>()
+        val stack2 = Stack<BinaryTreeNode<T>>()
+        stack1.push(this)
+        while (stack1.empty()) {
+            val node = stack1.pop()
+            stack2.push(node)
+            if (node.left != null) {
+                stack1.push(node.left)
+            }
+            if (node.right != null) {
+                stack1.push(node.right)
+            }
+        }
+        while (!stack2.empty()) {
+            nodeOpt(stack2.pop())
+        }
     }
 
 
