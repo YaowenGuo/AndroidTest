@@ -1,3 +1,3 @@
 # ninja log v5
-0	1352	1596668611	CMakeFiles/native-lib.dir/native-lib.cpp.o	5cd42da4a48352b
-1352	1449	1596668611	/home/albert/project/android/CustomView/ffmpeg/build/intermediates/cmake/debug/obj/x86/libnative-lib.so	982fcbaa35cdd2af
+1	1071	1596670040	CMakeFiles/native-lib.dir/native-lib.cpp.o	5cd42da4a48352b
+1071	1128	1596670040	/home/albert/project/android/CustomView/ffmpeg/build/intermediates/cmake/debug/obj/x86/libnative-lib.so	982fcbaa35cdd2af
