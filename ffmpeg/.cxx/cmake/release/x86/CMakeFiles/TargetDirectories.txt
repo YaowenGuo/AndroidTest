@@ -1,3 +1,0 @@
-/home/albert/project/android/CustomView/ffmpeg/.cxx/cmake/release/x86/CMakeFiles/rebuild_cache.dir
-/home/albert/project/android/CustomView/ffmpeg/.cxx/cmake/release/x86/CMakeFiles/edit_cache.dir
-/home/albert/project/android/CustomView/ffmpeg/.cxx/cmake/release/x86/CMakeFiles/native-lib.dir
