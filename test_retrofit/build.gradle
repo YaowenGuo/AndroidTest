@@ -4,7 +4,9 @@ apply plugin: 'kotlin'
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
-    implementation 'com.squareup.retrofit2:retrofit:2.5.0'
+    implementation 'com.squareup.retrofit2:retrofit:2.9.0'
+    implementation "io.reactivex.rxjava3:rxkotlin:3.0.0"
+    implementation 'com.squareup.retrofit2:adapter-rxjava3:2.9.0'
 }
 
 sourceCompatibility = "8"

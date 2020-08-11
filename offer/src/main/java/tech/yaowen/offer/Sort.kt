@@ -102,12 +102,25 @@ fun bubbleSort(array: IntArray) {
     }
 }
 
+fun insertionSort(array: IntArray) {
+    var temp = 0
+    for (i in 1 until array.size) {
+        temp = array[i]
+        var j = i - 1
+        while (j >= 0 && array[j] > temp) {
+            array[j + 1] = array[j]
+            --j
+        }
+        array[j + 1] = temp
+    }
+}
+
 fun main() {
 
 //    val value1 = Scanner(System.`in`).nextInt()
     val testData = intArrayOf(2, 5, 1, 18, 3, 9, 0)
 
-    quickSort(testData)
+    insertionSort(testData)
 
     for (date in testData) {
         print("$date, ")

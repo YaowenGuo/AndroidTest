@@ -1,5 +1,7 @@
-package tools777.ighashtags.model.net
+package com.example.test_retrofit.net
 
+import io.reactivex.rxjava3.core.Single
+import okhttp3.Response
 import okhttp3.ResponseBody
 import retrofit2.Call
 import retrofit2.http.GET
@@ -11,4 +13,7 @@ interface ServerAPI {
 
     @GET("users/{user}/repos")
     fun groupList(@Path("user") user: String): Call<ResponseBody>
+
+    @GET("htes")
+    fun testResponseCode(): Single<ResponseBody>
 }
