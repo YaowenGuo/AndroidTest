@@ -1,4 +1,4 @@
-package tech.yaowen.offer;
+package tech.yaowen.algorithm;
 
 fun maxSubArray(array: IntArray): IntArray? {
     if (array.isEmpty()) {

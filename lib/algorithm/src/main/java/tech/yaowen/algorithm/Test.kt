@@ -1,4 +1,4 @@
-package tech.yaowen.offer
+package tech.yaowen.algorithm
 
 import java.util.*
 

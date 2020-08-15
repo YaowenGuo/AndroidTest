@@ -1,6 +1,4 @@
-package tech.yaowen.offer
-
-import kotlin.math.min
+package tech.yaowen.algorithm
 
 
 fun getUglyNumber(size: Int): Int {

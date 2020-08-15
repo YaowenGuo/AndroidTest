@@ -1,4 +1,4 @@
-package tech.yaowen.offer
+package tech.yaowen.algorithm
 
 @ExperimentalUnsignedTypes
 fun <T> findKthToTail(linkHead: LinkNode<T>?, k: UInt):LinkNode<T>? {

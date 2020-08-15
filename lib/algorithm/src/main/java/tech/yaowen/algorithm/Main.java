@@ -1,4 +1,4 @@
-package tech.yaowen.offer;/*
+package tech.yaowen.algorithm;/*
 package tech.yaowen.offer;
 
 public class DictionaryOrderNumber {
@@ -29,12 +29,6 @@ public class DictionaryOrderNumber {
     }
 }
 */
-
-
-
-import java.util.ArrayList;
-import java.util.Scanner;
-
 
 
 class Test<T> {

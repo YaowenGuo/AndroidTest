@@ -1,10 +1,11 @@
-package tools777.ighashtags.model.net
+package com.example.test_retrofit.net
 
 
-import com.example.test_retrofit.net.ServerAPI
 import okhttp3.*
+import retrofit2.HttpException
 import retrofit2.Retrofit
 import retrofit2.adapter.rxjava3.RxJava3CallAdapterFactory
+import retrofit2.converter.gson.GsonConverterFactory
 import java.util.concurrent.TimeUnit
 
 class Client private constructor() {
@@ -22,8 +23,7 @@ class Client private constructor() {
                 okHttpClient = if (Companion::okHttpClient.isInitialized) okHttpClient else {
                     val builder = OkHttpClient.Builder()
 
-                    builder
-                        .retryOnConnectionFailure(true)
+                    builder.retryOnConnectionFailure(true)
                         .authenticator(object :Authenticator {
                             override fun authenticate(route: Route?, response: Response): Request? {
                                 val request = Request.Builder().url("authenticator url").build()
@@ -33,8 +33,15 @@ class Client private constructor() {
                                     .addHeader("Authorization","Bearer {$token}")
                                     .build()
                             }
-
                         } )
+                        .addInterceptor { chain ->
+                            val response = chain.proceed(chain.request())
+                            if (!response.isSuccessful) {
+                                val error: retrofit2.Response<Any> = retrofit2.Response.error(response.code(), response?.body())
+                                throw ApiException(response.code(), response.message(), error)
+                            }
+                            response
+                        }
                         .readTimeout(60, TimeUnit.SECONDS)
                         .writeTimeout(30, TimeUnit.SECONDS)
                         .connectTimeout(10, TimeUnit.SECONDS)
@@ -42,6 +49,7 @@ class Client private constructor() {
                 }
 
                 Retrofit.Builder()
+                    .addConverterFactory(GsonConverterFactory.create())
                     .addCallAdapterFactory(RxJava3CallAdapterFactory.create())
                     .baseUrl(LOCAL)
                     .client(okHttpClient)

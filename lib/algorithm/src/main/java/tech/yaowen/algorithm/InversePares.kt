@@ -1,4 +1,4 @@
-package tech.yaowen.offer
+package tech.yaowen.algorithm
 
 
 fun inversePares(values: IntArray): Int {

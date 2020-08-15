@@ -1,7 +1,6 @@
-package tech.yaowen.offer
+package tech.yaowen.algorithm
 
 import java.util.*
-import java.util.concurrent.ArrayBlockingQueue
 
 fun quickSortRecursive(intArray: IntArray, low: Int, high: Int) {
     if (low in 0 until high && high < intArray.size) {

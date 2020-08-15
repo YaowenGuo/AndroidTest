@@ -1,4 +1,4 @@
-package tech.yaowen.offer
+package tech.yaowen.algorithm
 
 
 // 右移位算法，防止负数移位高位一直置 1

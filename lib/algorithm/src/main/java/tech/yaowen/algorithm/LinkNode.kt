@@ -1,4 +1,4 @@
-package tech.yaowen.offer
+package tech.yaowen.algorithm
 
 open class LinkNode<V>(var value: V?) {
     var next: LinkNode<V>? = null

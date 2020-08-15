@@ -1,4 +1,4 @@
-package tech.yaowen.offer;
+package tech.yaowen.algorithm;
 
 public class TestLogicOpt<T> {
     T t;

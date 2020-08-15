@@ -1,4 +1,4 @@
-package tech.yaowen.offer
+package tech.yaowen.algorithm
 
 
 fun <T> printMatrixInCircle(matrix: Array<Array<T>>?, optFunc: (T) -> Unit) {

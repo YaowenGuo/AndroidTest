@@ -3,7 +3,8 @@ package com.example.test_retrofit
 import io.reactivex.rxjava3.kotlin.subscribeBy
 import okhttp3.OkHttpClient
 import okhttp3.Request
-import tools777.ighashtags.model.net.Client
+import com.example.test_retrofit.net.Client
+import io.reactivex.rxjava3.schedulers.Schedulers
 import java.io.IOException
 
 
@@ -12,13 +13,39 @@ fun main() {
     val serverAPI = Client.getServerApi()
 
     serverAPI.testResponseCode()
+        .subscribeOn(Schedulers.io())
         .subscribeBy(
             onError = {
                 println(it.message)
             }, onSuccess = {
+                print(it.message())
                 println(it)
             }
         )
+
+    Thread.sleep(4000)
+/*    serverAPI.testRetrofitCall()
+        .enqueue(object :Callback<ResponseBody> {
+            override fun onFailure(call: Call<ResponseBody>, t: Throwable) {
+
+            }
+
+            override fun onResponse(call: Call<ResponseBody>, response: Response<ResponseBody>) {
+                if (response.isSuccessful) {
+                    println("Success")
+
+                } else {
+                    println("Error")
+                }
+                println("body: ")
+                println(response.body())
+                println("errorBody: ")
+                println(response.errorBody())
+                println("raw: ")
+                println(response.raw().headers())
+            }
+
+        })*/
 
 }
 
