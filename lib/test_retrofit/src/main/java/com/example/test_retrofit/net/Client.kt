@@ -1,6 +1,7 @@
 package com.example.test_retrofit.net
 
 
+import io.reactivex.rxjava3.schedulers.Schedulers
 import okhttp3.*
 import retrofit2.HttpException
 import retrofit2.Retrofit
@@ -35,6 +36,7 @@ class Client private constructor() {
                             }
                         } )
                         .addInterceptor { chain ->
+                            println("Network......" + Thread.currentThread().name)
                             val response = chain.proceed(chain.request())
                             if (!response.isSuccessful) {
                                 val error: retrofit2.Response<Any> = retrofit2.Response.error(response.code(), response?.body())
@@ -50,7 +52,8 @@ class Client private constructor() {
 
                 Retrofit.Builder()
                     .addConverterFactory(GsonConverterFactory.create())
-                    .addCallAdapterFactory(RxJava3CallAdapterFactory.create())
+                    .addCallAdapterFactory(ObserveOnMainCallAdapterFactory(Schedulers.newThread()))
+                    .addCallAdapterFactory(RxJava3CallAdapterFactory.createWithScheduler(Schedulers.io()))
                     .baseUrl(LOCAL)
                     .client(okHttpClient)
                     .build()

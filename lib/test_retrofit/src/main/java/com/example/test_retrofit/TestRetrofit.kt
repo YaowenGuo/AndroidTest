@@ -1,11 +1,13 @@
 package com.example.test_retrofit
 
-import io.reactivex.rxjava3.kotlin.subscribeBy
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import com.example.test_retrofit.net.Client
-import io.reactivex.rxjava3.schedulers.Schedulers
+import io.reactivex.rxjava3.core.SingleObserver
+import io.reactivex.rxjava3.disposables.Disposable
+import retrofit2.Response
 import java.io.IOException
+import kotlin.jvm.Throws
 
 
 fun main() {
@@ -13,17 +15,37 @@ fun main() {
     val serverAPI = Client.getServerApi()
 
     serverAPI.testResponseCode()
-        .subscribeOn(Schedulers.io())
-        .subscribeBy(
-            onError = {
-                println(it.message)
-            }, onSuccess = {
-                print(it.message())
-                println(it)
-            }
-        )
+//        .subscribeBy(
+//            onError = {
+//                println("H......" + Thread.currentThread().name)
+//                println(it.message)
+//            }, onSuccess = {
+//                println("--------------")
+//                println(Thread.currentThread().getName())
+//                println("--------------")
+//                print(it.message())
+//                println(it)
+//            }
+//        )
+//        .subscribeOn(Schedulers.io())
 
-    Thread.sleep(4000)
+        .subscribe(object : SingleObserver<Response<Void>> {
+            override fun onSubscribe(d: Disposable?) {
+                println("Subscribe......" + Thread.currentThread().name)
+            }
+
+            override fun onSuccess(t: Response<Void>?) {
+                println("Success......" + Thread.currentThread().name)
+            }
+
+            override fun onError(e: Throwable?) {
+                println("error......" + Thread.currentThread().name)
+
+            }
+
+        })
+
+    Thread.sleep(10000)
 /*    serverAPI.testRetrofitCall()
         .enqueue(object :Callback<ResponseBody> {
             override fun onFailure(call: Call<ResponseBody>, t: Throwable) {

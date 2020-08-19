@@ -10,5 +10,11 @@ dependencies {
     implementation 'com.squareup.retrofit2:converter-gson:2.9.0'
 }
 
+compileKotlin {
+    kotlinOptions {
+        jvmTarget = "1.8"
+    }
+}
+
 sourceCompatibility = "8"
 targetCompatibility = "8"

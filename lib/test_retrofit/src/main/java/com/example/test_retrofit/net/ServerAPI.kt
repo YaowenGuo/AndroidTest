@@ -1,5 +1,6 @@
 package com.example.test_retrofit.net
 
+import io.reactivex.rxjava3.core.Completable
 import io.reactivex.rxjava3.core.Single
 import okhttp3.ResponseBody
 import retrofit2.Call
@@ -17,6 +18,10 @@ interface ServerAPI {
 
     @GET("test")
     fun testResponseCode(): Single<Response<Void>>
+
+
+    @GET("empty.html")
+    fun testEmptyBody(): Completable
 
     @GET("test")
     fun testRetrofitCall(): Call<ResponseBody>
