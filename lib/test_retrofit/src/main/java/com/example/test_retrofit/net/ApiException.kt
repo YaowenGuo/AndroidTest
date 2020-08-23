@@ -8,5 +8,9 @@ class ApiException constructor(
     message: String,
     private val response: Response<*>? = null): IOException(message) {
 
+    constructor(code: Int, message: String) : this(code, message, null) {
+
+    }
+
 
 }

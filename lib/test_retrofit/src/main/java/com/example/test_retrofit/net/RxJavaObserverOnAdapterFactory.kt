@@ -56,4 +56,14 @@ internal class ObserveOnMainCallAdapterFactory(val scheduler: Scheduler) : CallA
             }
         }
     }
+
+//    fun <T> proceed(retrofit: Retrofit, call: Call<Any>): T {
+//        val delegate: CallAdapter<Any, Any> =
+//            retrofit.nextCallAdapter(
+//                this,
+//                returnType,
+//                annotations
+//            ) as CallAdapter<Any, Any>
+//        return delegate.adapt(call)
+//    }
 }

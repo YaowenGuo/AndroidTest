@@ -7,12 +7,17 @@ import io.reactivex.rxjava3.schedulers.Schedulers
 
 fun main() {
     Single.just(1)
+        .doOnSubscribe {
+            printThread("doOnSubscribe")
+        }
+
         .subscribeOn(Schedulers.io())
+        .observeOn(Schedulers.newThread())
         .map {
             printThread("Map")
             it
         }
-        .observeOn(Schedulers.newThread())
+
         .subscribe(object : SingleObserver<Int> {
             override fun onSuccess(t: Int?) {
                printThread("onSuccess")
@@ -27,8 +32,8 @@ fun main() {
                 printThread("onError")
 
             }
-
         })
 
-    Thread.sleep(100)
+
+    Thread.sleep(200)
 }

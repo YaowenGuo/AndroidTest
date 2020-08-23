@@ -7,6 +7,8 @@ import retrofit2.HttpException
 import retrofit2.Retrofit
 import retrofit2.adapter.rxjava3.RxJava3CallAdapterFactory
 import retrofit2.converter.gson.GsonConverterFactory
+import java.io.IOException
+import java.lang.Exception
 import java.util.concurrent.TimeUnit
 
 class Client private constructor() {
@@ -27,23 +29,26 @@ class Client private constructor() {
                     builder.retryOnConnectionFailure(true)
                         .authenticator(object :Authenticator {
                             override fun authenticate(route: Route?, response: Response): Request? {
-                                val request = Request.Builder().url("authenticator url").build()
-                                val response = okHttpClient.newCall(request).execute()
-                                val token = "" // response.body(). 获取token.
-                                return response.request().newBuilder()
-                                    .addHeader("Authorization","Bearer {$token}")
-                                    .build()
+                                synchronized(Client::class.java) {
+                                    val token = if (getCachedAuth() == response.request().header("Authorization" )) {
+                                        val request = Request.Builder().url("authenticator url").build()
+                                        val response = okHttpClient.newCall(request).execute()
+                                        "从请求结果 response 中拿到" // response.body(). 获取token.
+                                    } else {
+                                        getCachedAuth()
+                                    }
+
+                                    return response.request().newBuilder()
+                                        .addHeader("Authorization","Bearer {$token}")
+                                        .build()
+                                }
                             }
                         } )
-                        .addInterceptor { chain ->
-                            println("Network......" + Thread.currentThread().name)
-                            val response = chain.proceed(chain.request())
-                            if (!response.isSuccessful) {
-                                val error: retrofit2.Response<Any> = retrofit2.Response.error(response.code(), response?.body())
-                                throw ApiException(response.code(), response.message(), error)
-                            }
-                            response
-                        }
+//                        .addInterceptor {chain ->
+//                             throw IOException("Hellp")
+//                             chain.proceed(chain.request())
+//                        }
+                        .addInterceptor(ResponseStatusInterceptor())
                         .readTimeout(60, TimeUnit.SECONDS)
                         .writeTimeout(30, TimeUnit.SECONDS)
                         .connectTimeout(10, TimeUnit.SECONDS)
@@ -61,6 +66,10 @@ class Client private constructor() {
             }
 
             return serverApi
+        }
+
+        fun getCachedAuth(): String  {
+            return "本地存贮的值"
         }
     }
 }

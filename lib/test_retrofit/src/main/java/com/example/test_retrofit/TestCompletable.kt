@@ -2,13 +2,14 @@ package com.example.test_retrofit
 
 import io.reactivex.rxjava3.core.CompletableObserver
 import io.reactivex.rxjava3.core.Observable
+import io.reactivex.rxjava3.core.ObservableOnSubscribe
 import io.reactivex.rxjava3.core.Observer
 import io.reactivex.rxjava3.core.Single
 import io.reactivex.rxjava3.disposables.Disposable
 import io.reactivex.rxjava3.schedulers.Schedulers
 
 fun main() {
-/*    Observable.create(ObservableOnSubscribe<Any> { emitter ->
+    Observable.create(ObservableOnSubscribe<Any> { emitter ->
         emitter?.onNext(null)
         emitter?.onComplete()
     })
@@ -27,7 +28,7 @@ fun main() {
                 println("onError")
             }
 
-        })*/
+        })
 
 
 
