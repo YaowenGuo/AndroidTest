@@ -114,6 +114,7 @@ fun insertionSort(array: IntArray) {
     }
 }
 
+
 fun main() {
 
 //    val value1 = Scanner(System.`in`).nextInt()

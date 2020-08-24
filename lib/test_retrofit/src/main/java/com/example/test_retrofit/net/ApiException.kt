@@ -11,6 +11,4 @@ class ApiException constructor(
     constructor(code: Int, message: String) : this(code, message, null) {
 
     }
-
-
 }

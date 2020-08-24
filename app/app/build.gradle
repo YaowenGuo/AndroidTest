@@ -56,7 +56,7 @@ dependencies {
 
     implementation 'androidx.dynamicanimation:dynamicanimation:1.0.0'
 
-    implementation "androidx.work:work-runtime-ktx:2.3.4"
+    implementation "androidx.work:work-runtime-ktx:2.4.0"
     implementation "androidx.concurrent:concurrent-futures:1.1.0-beta01"
 //    implementation project(path: ':test_annotation')
 //    annotationProcessor project(path: ':lib_butter_knife')

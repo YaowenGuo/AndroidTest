@@ -36,6 +36,7 @@ fun main() {
 
             override fun onSuccess(t: Response<Void>?) {
                 println("Success......" + Thread.currentThread().name)
+                t?.code()
             }
 
             override fun onError(e: Throwable?) {

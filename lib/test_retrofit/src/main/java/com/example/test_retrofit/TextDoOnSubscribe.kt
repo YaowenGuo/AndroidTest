@@ -10,7 +10,6 @@ fun main() {
         .doOnSubscribe {
             printThread("doOnSubscribe")
         }
-
         .subscribeOn(Schedulers.io())
         .observeOn(Schedulers.newThread())
         .map {

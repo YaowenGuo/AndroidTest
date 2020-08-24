@@ -1,6 +1,7 @@
 package com.example.test_retrofit.net
 
 import io.reactivex.rxjava3.core.Completable
+import io.reactivex.rxjava3.core.Observer
 import io.reactivex.rxjava3.core.Single
 import okhttp3.ResponseBody
 import retrofit2.Call
@@ -10,6 +11,7 @@ import retrofit2.http.GET
 import retrofit2.http.Headers
 import retrofit2.http.POST
 import retrofit2.http.Path
+import sun.security.provider.certpath.OCSPResponse
 
 
 interface ServerAPI {
@@ -43,6 +45,5 @@ interface ServerAPI {
     @Headers(ResponseStatusInterceptor.CHECK_HTTP_RESPONSE_CODE)
     @GET("not_exit_file")
     fun testRetrofitErrorCode(): Call<String>
-
 
 }
