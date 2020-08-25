@@ -17,26 +17,22 @@ open class BinaryTreeNode<T>(
         private var index = 0
 
         @JvmStatic
-        private fun <T> buildTree(listData: Array<T?>): BinaryTreeNode<T>? {
+        private fun <T> buildTree(listData: Array<T>): BinaryTreeNode<T>? {
             index = 0
             return build(listData)
         }
 
 
         @JvmStatic
-        private fun <T> build(listData: Array<T?>): BinaryTreeNode<T>? {
-            return if (index < listData.size) {
+        private fun <T> build(listData: Array<T>): BinaryTreeNode<T>? {
+             if (index < listData.size) {
                 val data = listData[index++]
-                if (data != null) {
-                    val node = BinaryTreeNode(data, null, null)
-                    node.left = build(listData)
-                    node.right = build(listData)
-                    node
-                } else {
-                    null
-                }
+                 val node = BinaryTreeNode(data, null, null)
+                 node.left = build(listData)
+                 node.right = build(listData)
+                 return node
             } else {
-                null
+                return null
             }
         }
 
@@ -47,19 +43,14 @@ open class BinaryTreeNode<T>(
             var last: BinaryTreeNode<T>? = null
             while (i < listData.size) {
                 val data = listData[i++]
-                if (data != null) {
-                    val node = BinaryTreeNode(data, null, null)
-                    if (last != null) {
-                        last.left = node
-                        last = node
-                        stack.push(node)
-                    } else if (!stack.isEmpty()) {
-                        last = stack.pop()
-                        last.right = node
-                    }
-
-                } else {
-                    last = null
+                val node = BinaryTreeNode(data, null, null)
+                if (last != null) {
+                    last.left = node
+                    last = node
+                    stack.push(node)
+                } else if (!stack.isEmpty()) {
+                    last = stack.pop()
+                    last.right = node
                 }
             }
 

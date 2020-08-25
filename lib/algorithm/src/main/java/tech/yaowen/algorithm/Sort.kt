@@ -115,12 +115,29 @@ fun insertionSort(array: IntArray) {
 }
 
 
+fun selectionSort(array: IntArray) {
+    for (i in 0 until array.size - 1) {
+        var subMin = i
+        for (j in i until array.size) {
+            if (array[j] < array[subMin]) {
+                subMin = j
+            }
+        }
+        if (i != subMin) {
+            val temp = array[i]
+            array[i] = array[subMin]
+            array[subMin] = temp
+        }
+    }
+}
+
+
 fun main() {
 
 //    val value1 = Scanner(System.`in`).nextInt()
     val testData = intArrayOf(2, 5, 1, 18, 3, 9, 0)
 
-    insertionSort(testData)
+    selectionSort(testData)
 
     for (date in testData) {
         print("$date, ")
