@@ -6,10 +6,5 @@ import java.io.Closeable
 
 class MainViewModel : ViewModel() {
     init {
-        setTagIfAbsent("sts", object: Closeable {
-            override fun close() {
-                Log.e("sts", "cleared")
-            }
-        })
     }
 }
