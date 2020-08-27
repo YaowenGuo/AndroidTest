@@ -2,6 +2,7 @@
 // Testing class Class.
 package typeinfo.toys;
 import static net.mindview.util.Print.*;
+import static net.mindview.util.Print.print;
 
 interface HasBatteries {}
 interface Waterproof {}
@@ -12,6 +13,19 @@ class Toy {
   // to see NoSuchMethodError from (*1*)
   Toy() {}
   Toy(int i) {}
+
+  {
+    innerClassObj = new InnerClass();
+  }
+
+  public InnerClass innerClassObj;
+  public class InnerClass {
+
+  }
+
+  public static class StaticInnerClass {
+
+  }
 }
 
 class FancyToy extends Toy
@@ -21,11 +35,14 @@ implements HasBatteries, Waterproof, Shoots {
 
 public class ToyTest {
   static void printInfo(Class cc) {
+    print(">>>>>-----------------------------------------");
     print("Class name: " + cc.getName() +
       " is interface? [" + cc.isInterface() + "]");
     print("Simple name: " + cc.getSimpleName());
     print("Canonical name : " + cc.getCanonicalName());
+    print("-----------------------------------------<<<<<<<");
   }
+
   public static void main(String[] args) {
     Class c = null;
     try {
@@ -34,7 +51,7 @@ public class ToyTest {
       print("Can't find FancyToy");
       System.exit(1);
     }
-    printInfo(c);	
+    printInfo(c);
     for(Class face : c.getInterfaces())
       printInfo(face);
     Class up = c.getSuperclass();
@@ -50,6 +67,19 @@ public class ToyTest {
       System.exit(1);
     }
     printInfo(obj.getClass());
+
+    print("inner getClass");
+    printInfo(Toy.InnerClass.class);
+
+    print("static inner getClass");
+    printInfo(Toy.StaticInnerClass.class);
+
+    if (obj instanceof Toy) {
+      Toy toy = (Toy) obj;
+      print("static getClass");
+      printInfo(toy.innerClassObj.getClass());
+    }
+
   }
 } /* Output:
 Class name: typeinfo.toys.FancyToy is interface? [false]

@@ -16,7 +16,15 @@ class Square extends Shape {
 
 class Triangle extends Shape {
   public String toString() { return "Triangle"; }
-}	
+}
+
+
+class Rhomboid extends Shape {
+  @Override
+  public String toString() {
+    return "Rhomboid";
+  }
+}
 
 public class Shapes {
   public static void main(String[] args) {
