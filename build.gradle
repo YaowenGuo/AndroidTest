@@ -2,8 +2,40 @@
 
 buildscript {
     ext {
+        // sdk
+        sdk_version = 30
+        build_tools_version = '30.0.1'
+        min_sdk_version = 21
+        target_sdk_version = 30
+        app_version = 1
+        version_name = '1.0'
+
+        // kotlin
+        core_ktx_version = '1.3.1'
         kotlin_version = '1.4.0'
         kotlin_gradle_version = '1.3.72'
+        coroutine_version = '1.3.4'
+
+        // lifecycle
+        lifecycle_version = '2.2.0'
+
+        // component
+        appcompat_version = '1.2.0'
+        constraintlayout_version = '2.0.1'
+        nav_version = "2.3.0"
+
+        // lib
+        okhttp_version = '4.8.1'
+        exifinterface_version = '1.2.0'
+
+        // test
+        junit_version = '4.13'
+        ext_junit_version = '1.1.2'
+        espresso_core_version = '3.3.0'
+
+        // CameraX core library using the camera2 implementation
+        camerax_version = "1.0.0-beta08"
+        camerax_view_version = "1.0.0-alpha15"
     }
 
     repositories {
@@ -16,11 +48,15 @@ buildscript {
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
         // NOTE: Do not place your application dependencies here; they belong
         // in the individual module build.gradle files
+        classpath "androidx.navigation:navigation-safe-args-gradle-plugin:2.3.0"
+
+
     }
 }
 
 allprojects {
     repositories {
+        mavenLocal()
         google()
         jcenter()
         

@@ -1,5 +1,6 @@
 package com.example.test_retrofit
 
+import com.example.test_retrofit.net.Client
 import io.reactivex.rxjava3.core.CompletableObserver
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.core.ObservableOnSubscribe
@@ -9,6 +10,7 @@ import io.reactivex.rxjava3.disposables.Disposable
 import io.reactivex.rxjava3.schedulers.Schedulers
 
 fun main() {
+/*
     Observable.create(ObservableOnSubscribe<Any> { emitter ->
         emitter?.onNext(null)
         emitter?.onComplete()
@@ -55,9 +57,10 @@ fun main() {
             }
 
         })
+*/
 
 
-/*    Client.getServerApi()
+    Client.getServerApi()
         .testEmptyBody()
         .subscribe(object : CompletableObserver {
             override fun onComplete() {
@@ -75,6 +78,6 @@ fun main() {
 
         })
 
-    Thread.sleep(50000)*/
+    Thread.sleep(50000)
 
 }

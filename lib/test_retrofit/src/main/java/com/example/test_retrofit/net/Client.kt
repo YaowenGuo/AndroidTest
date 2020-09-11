@@ -30,7 +30,7 @@ class Client private constructor() {
                         .authenticator(object :Authenticator {
                             override fun authenticate(route: Route?, response: Response): Request? {
                                 synchronized(Client::class.java) {
-                                    val token = if (getCachedAuth() == response.request().header("Authorization" )) {
+                                    val token = if (getCachedAuth() == response.request.header("Authorization" )) {
                                         val request = Request.Builder().url("authenticator url").build()
                                         val response = okHttpClient.newCall(request).execute()
                                         "从请求结果 response 中拿到" // response.body(). 获取token.
@@ -38,16 +38,16 @@ class Client private constructor() {
                                         getCachedAuth()
                                     }
 
-                                    return response.request().newBuilder()
+                                    return response.request.newBuilder()
                                         .addHeader("Authorization","Bearer {$token}")
                                         .build()
                                 }
                             }
                         } )
-//                        .addInterceptor {chain ->
-//                             throw IOException("Hellp")
-//                             chain.proceed(chain.request())
-//                        }
+                        .addInterceptor {chain ->
+                             throw IllegalStateException("Hellp")
+                             chain.proceed(chain.request())
+                        }
                         .addInterceptor(ResponseStatusInterceptor())
                         .readTimeout(60, TimeUnit.SECONDS)
                         .writeTimeout(30, TimeUnit.SECONDS)
@@ -57,8 +57,9 @@ class Client private constructor() {
 
                 Retrofit.Builder()
                     .addConverterFactory(GsonConverterFactory.create())
-                    .addCallAdapterFactory(ObserveOnMainCallAdapterFactory(Schedulers.newThread()))
-                    .addCallAdapterFactory(RxJava3CallAdapterFactory.createWithScheduler(Schedulers.io()))
+//                    .addCallAdapterFactory(ObserveOnMainCallAdapterFactory(Schedulers.newThread()))
+//                    .addCallAdapterFactory(RxJava3CallAdapterFactory.createWithScheduler(Schedulers.io()))
+                    .addCallAdapterFactory(RxJava3CallAdapterFactory.create())
                     .baseUrl(LOCAL)
                     .client(okHttpClient)
                     .build()

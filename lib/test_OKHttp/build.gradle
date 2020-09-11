@@ -4,7 +4,7 @@ apply plugin: 'kotlin'
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
-    implementation("com.squareup.okhttp3:okhttp:4.4.0")
+    implementation "com.squareup.okhttp3:okhttp:$okhttp_version"
 }
 
 sourceCompatibility = "8"

@@ -5,6 +5,9 @@ import okhttp3.Request
 import com.example.test_retrofit.net.Client
 import io.reactivex.rxjava3.core.SingleObserver
 import io.reactivex.rxjava3.disposables.Disposable
+import okhttp3.ResponseBody
+import retrofit2.Call
+import retrofit2.Callback
 import retrofit2.Response
 import java.io.IOException
 import kotlin.jvm.Throws
@@ -14,7 +17,7 @@ fun main() {
 
     val serverAPI = Client.getServerApi()
 
-    serverAPI.testResponseCode()
+/*    serverAPI.testResponseCode()
 //        .subscribeBy(
 //            onError = {
 //                println("H......" + Thread.currentThread().name)
@@ -41,14 +44,14 @@ fun main() {
 
             override fun onError(e: Throwable?) {
                 println("error......" + Thread.currentThread().name)
-
+                println("error......" + e?.message)
             }
 
-        })
+        })*/
 
     Thread.sleep(10000)
-/*    serverAPI.testRetrofitCall()
-        .enqueue(object :Callback<ResponseBody> {
+    serverAPI.testRetrofitCall()
+        .enqueue(object : Callback<ResponseBody> {
             override fun onFailure(call: Call<ResponseBody>, t: Throwable) {
 
             }
@@ -65,10 +68,10 @@ fun main() {
                 println("errorBody: ")
                 println(response.errorBody())
                 println("raw: ")
-                println(response.raw().headers())
+                println(response.raw().headers)
             }
 
-        })*/
+        })
 
 }
 
@@ -77,7 +80,7 @@ internal class GetExample {
     var client = OkHttpClient()
 
     @Throws(IOException::class)
-    fun run(url: String?) {
+    fun run(url: String) {
         val request = Request.Builder()
             .url(url)
             .build()

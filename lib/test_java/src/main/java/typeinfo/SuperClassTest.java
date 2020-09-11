@@ -4,11 +4,11 @@ import java.lang.reflect.Field;
 
 import static net.mindview.util.Print.print;
 
-class A {
+class AA {
     int a;
 }
 
-class B1 extends A {
+class B1 extends AA {
     int b;
 }
 
