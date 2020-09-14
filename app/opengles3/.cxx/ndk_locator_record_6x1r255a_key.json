@@ -1,0 +1,11 @@
+{
+  "ndkVersionFromDsl": "21.3.6528147",
+  "sdkFolder": "/Users/albert/sdk",
+  "sideBySideNdkFolderNames": [
+    "17.2.4988734",
+    "16.1.4479499",
+    "21.3.6528147",
+    "21.0.6113669",
+    "android-ndk-r10e"
+  ]
+}

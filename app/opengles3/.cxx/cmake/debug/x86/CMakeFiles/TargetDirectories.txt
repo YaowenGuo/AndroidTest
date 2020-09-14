@@ -1,0 +1,3 @@
+/Users/albert/project/android/AndroidTest/app/opengles3/.cxx/cmake/debug/x86/CMakeFiles/rebuild_cache.dir
+/Users/albert/project/android/AndroidTest/app/opengles3/.cxx/cmake/debug/x86/CMakeFiles/edit_cache.dir
+/Users/albert/project/android/AndroidTest/app/opengles3/.cxx/cmake/debug/x86/CMakeFiles/gl_es.dir

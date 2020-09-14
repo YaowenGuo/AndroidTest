@@ -1,0 +1,7 @@
+[
+{
+  "directory": "/Users/albert/project/android/AndroidTest/app/opengles3/.cxx/cmake/debug/x86",
+  "command": "/Users/albert/sdk/ndk/21.3.6528147/toolchains/llvm/prebuilt/darwin-x86_64/bin/clang++ --target=i686-none-linux-android21 --gcc-toolchain=/Users/albert/sdk/ndk/21.3.6528147/toolchains/llvm/prebuilt/darwin-x86_64 --sysroot=/Users/albert/sdk/ndk/21.3.6528147/toolchains/llvm/prebuilt/darwin-x86_64/sysroot  -Dgl_es_EXPORTS  -g -DANDROID -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -mstackrealign -D_FORTIFY_SOURCE=2 -Wformat -Werror=format-security   -O0 -fno-limit-debug-info  -fPIC   -o CMakeFiles/gl_es.dir/native_color.cpp.o -c /Users/albert/project/android/AndroidTest/app/opengles3/src/main/cpp/native_color.cpp",
+  "file": "/Users/albert/project/android/AndroidTest/app/opengles3/src/main/cpp/native_color.cpp"
+}
+]

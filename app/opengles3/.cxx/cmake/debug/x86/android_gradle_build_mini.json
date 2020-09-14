@@ -1,0 +1,20 @@
+{
+  "buildFiles": [
+    "/Users/albert/sdk/ndk/21.3.6528147/build/cmake/platforms.cmake",
+    "/Users/albert/project/android/AndroidTest/app/opengles3/src/main/cpp/CMakeLists.txt",
+    "/Users/albert/sdk/ndk/21.3.6528147/build/cmake/android.toolchain.cmake"
+  ],
+  "cleanCommands": [
+    "/Users/albert/sdk/cmake/3.10.2.4988404/bin/ninja -C \"/Users/albert/project/android/AndroidTest/app/opengles3/.cxx/cmake/debug/x86\" clean"
+  ],
+  "buildTargetsCommand": "/Users/albert/sdk/cmake/3.10.2.4988404/bin/ninja  -C \"/Users/albert/project/android/AndroidTest/app/opengles3/.cxx/cmake/debug/x86\" {LIST_OF_TARGETS_TO_BUILD}",
+  "libraries": {
+    "gl_es-Debug-x86": {
+      "artifactName": "gl_es",
+      "buildCommand": "/Users/albert/sdk/cmake/3.10.2.4988404/bin/ninja -C \"/Users/albert/project/android/AndroidTest/app/opengles3/.cxx/cmake/debug/x86\" gl_es",
+      "abi": "x86",
+      "output": "/Users/albert/project/android/AndroidTest/app/opengles3/build/intermediates/cmake/debug/obj/x86/libgl_es.so",
+      "runtimeFiles": []
+    }
+  }
+}

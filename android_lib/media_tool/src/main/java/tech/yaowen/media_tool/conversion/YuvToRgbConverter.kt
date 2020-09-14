@@ -21,12 +21,9 @@ import android.graphics.Bitmap
 import android.graphics.ImageFormat
 import android.graphics.Rect
 import android.media.Image
-import android.renderscript.Allocation
-import android.renderscript.Element
-import android.renderscript.RenderScript
-import android.renderscript.ScriptIntrinsicYuvToRGB
-import android.renderscript.Type
+import android.renderscript.*
 import java.nio.ByteBuffer
+
 
 /**
  * Helper class used to efficiently convert a [Media.Image] object from
@@ -91,6 +88,7 @@ class YuvToRgbConverter(context: Context) {
         val imageCrop = image.cropRect
         val imagePlanes = image.planes
 
+
         imagePlanes.forEachIndexed { planeIndex, plane ->
             // How many values are read in input for each output value written
             // Only the Y plane has a value for every pixel, U and V have half the resolution i.e.
@@ -121,18 +119,18 @@ class YuvToRgbConverter(context: Context) {
             var outputOffset: Int
 
             when (planeIndex) {
-                0 -> {
+                0 -> { // Y
                     outputStride = 1
                     outputOffset = 0
                 }
-                1 -> {
+                1 -> { // U
                     outputStride = 2
-                    // For NV21 format, U is in odd-numbered indices
+                    // For NV21 format, U and V is alternating order and U after V like: V U V U ...
                     outputOffset = pixelCount + 1
                 }
-                2 -> {
+                2 -> { // V
                     outputStride = 2
-                    // For NV21 format, V is in even-numbered indices
+                    // For NV21 format, V is before U。
                     outputOffset = pixelCount
                 }
                 else -> {
@@ -145,15 +143,19 @@ class YuvToRgbConverter(context: Context) {
             val rowStride = plane.rowStride
             val pixelStride = plane.pixelStride
 
+            val bytes = ByteArray(planeBuffer.capacity())
+            planeBuffer.get(bytes)
+
+
             // We have to divide the width and height by two if it's not the Y plane
             val planeCrop = if (planeIndex == 0) {
                 imageCrop
             } else {
                 Rect(
-                    imageCrop.left / 2,
-                    imageCrop.top / 2,
-                    imageCrop.right / 2,
-                    imageCrop.bottom / 2
+                    imageCrop.left shr 1,
+                    imageCrop.top shr 1,
+                    imageCrop.right shr 1,
+                    imageCrop.bottom shr 1
                 )
             }
 
@@ -181,7 +183,8 @@ class YuvToRgbConverter(context: Context) {
             for (row in 0 until planeHeight) {
                 // Move buffer position to the beginning of this row
                 planeBuffer.position(
-                    (row + planeCrop.top) * rowStride + planeCrop.left * pixelStride)
+                    (row + planeCrop.top) * rowStride + planeCrop.left * pixelStride
+                )
 
                 if (pixelStride == 1 && outputStride == 1) {
                     // When there is a single stride value for pixel and output, we can just copy
@@ -190,9 +193,10 @@ class YuvToRgbConverter(context: Context) {
                     outputOffset += rowLength
                 } else {
                     // When either pixel or output have a stride > 1 we must copy pixel by pixel
-                    planeBuffer.get(rowBuffer, 0, rowLength)
+//                    planeBuffer.get(rowBuffer, 0, rowLength)
                     for (col in 0 until planeWidth) {
-                        outputBuffer[outputOffset] = rowBuffer[col * pixelStride]
+//                        outputBuffer[outputOffset] = rowBuffer[col * pixelStride]
+                        outputBuffer[outputOffset] = planeBuffer.get(col * pixelStride)
                         outputOffset += outputStride
                     }
                 }
