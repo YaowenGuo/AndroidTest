@@ -1,3 +1,5 @@
+include ':app:test_rust_jni'
+include ':android_lib:androidRust'
 include ':app:opengles3'
 include ':android_lib:media_tool'
 include ':app:lifecycle'
