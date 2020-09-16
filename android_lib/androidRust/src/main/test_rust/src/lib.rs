@@ -40,3 +40,8 @@ pub unsafe extern fn Java_com_example_logproject_NativeMethodTest_init(env: JNIE
     str.into_inner()
 }*/
 
+pub extern "C" fn ava_tech_yaowen_androidrust_Hello_callNativeFun(env: JNIEnv, _: JObject) -> jstring {
+    let output = env.new_string("Hello ").unwrap();
+    output.into_inner()
+}
+

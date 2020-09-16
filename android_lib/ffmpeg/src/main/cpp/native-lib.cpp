@@ -8,3 +8,4 @@ Java_tech_yaowen_test_MainActivity_stringFromJNI(
     std::string hello = "Hello from C++";
     return env->NewStringUTF(hello.c_str());
 }
+

@@ -12,5 +12,9 @@ class Hello {
      * A native method that is implemented by the 'native-lib' native library,
      * which is packaged with this application.
      */
+    @Suppress("KotlinJniMissingFunction")
     external fun stringFromJNI(str: String): String
+
+
+    external fun callNativeFun(): String
 }
