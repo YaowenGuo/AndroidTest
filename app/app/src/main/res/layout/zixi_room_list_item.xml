@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_marginStart="20dp"
+    android:layout_marginEnd="20dp"
+    android:layout_marginTop="10dp"
+    android:layout_marginBottom="10dp">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:paddingEnd="15dp"
+        android:paddingStart="15dp"
+        android:paddingTop="20dp"
+        android:paddingBottom="20dp">
+
+        <TextView
+            android:id="@+id/zixi_room_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="#FF3C464F"
+            android:textSize="19sp"
+            android:textStyle="bold"
+            android:minHeight="25dp"
+            android:gravity="center_vertical"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="第1自习室" />
+
+        <TextView
+            android:id="@+id/zixi_room_teacher_name"
+            android:layout_width="wrap_content"
+            android:layout_height="25dp"
+            android:textStyle="bold"
+            android:textColor="#FFAEB6C2"
+            android:textSize="14sp"
+            android:gravity="center_vertical"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="第1自习室" />
+
+        <com.joooonho.SelectableRoundedImageView
+            android:id="@+id/zixi_room_teacher_avatar"
+            android:layout_width="25dp"
+            android:layout_height="25dp"
+            android:layout_marginEnd="6dp"
+            app:layout_constraintEnd_toStartOf="@+id/zixi_room_teacher_name"
+            app:layout_constraintTop_toTopOf="parent"
+            app:sriv_border_color="#F5F5F9"
+            app:sriv_border_width="2dp"
+            app:sriv_oval="true"/>
+
+
+
+        <TextView
+            android:id="@+id/zixi_room_empty_seat_num"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/zixi_room_list_item_empty_seat"
+            android:textColor="#FFAEB6C2"
+            android:textSize="12sp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/zixi_room_name"
+            tools:text="空位 2"/>
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/zixi_room_student_list_wrapper"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingStart="10dp"
+            android:paddingEnd="10dp"
+            android:paddingTop="9dp"
+            android:paddingBottom="9dp"
+            android:background="@drawable/zixi_room_students_list_bg"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/zixi_room_empty_seat_num"
+            app:layout_constraintEnd_toEndOf="parent"
+            tools:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+            tools:orientation="horizontal"
+            tools:listitem="@layout/zixi_room_list_item_avatar"
+            tools:itemCount="8"/>
+
+        <TextView
+            android:id="@+id/zixi_room_study_student_num"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/zixi_room_this_on_study_number"
+            android:textColor="#FFAEB6C2"
+            android:textSize="12sp"
+            android:layout_marginEnd="10dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/zixi_room_student_list_wrapper"
+            app:layout_constraintBottom_toBottomOf="@+id/zixi_room_student_list_wrapper"
+            tools:text="16人正在学习"/>
+
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</androidx.cardview.widget.CardView>
+

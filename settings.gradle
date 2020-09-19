@@ -1,3 +1,5 @@
+include ':app:recycler'
+include ':android_lib:webrtc'
 include ':app:test_rust_jni'
 include ':app:opengles3'
 include ':app:lifecycle'

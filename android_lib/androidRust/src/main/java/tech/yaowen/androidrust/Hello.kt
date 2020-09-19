@@ -16,5 +16,6 @@ class Hello {
     external fun stringFromJNI(str: String): String
 
 
+    @Suppress("KotlinJniMissingFunction")
     external fun callNativeFun(): String
 }
