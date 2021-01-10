@@ -39,7 +39,7 @@ dependencies {
     implementation 'com.hhl:gridpagersnaphelper:1.0.0'
 
     // Optional , config indicator
-    implementation 'com.hhl:recyclerviewindicator:1.0.0'
+    implementation deps.recyclerView
 
     implementation project(":android_lib:lib_share")
     implementation "com.blankj:utilcode:$utilcodeVersion"

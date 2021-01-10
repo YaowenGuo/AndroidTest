@@ -22,7 +22,7 @@ pub unsafe extern "C"  fn Java_tech_yaowen_androidrust_Hello_stringFromJNI(env: 
         )
     );
 
-    let output = env.new_string("Hello ".to_owned() + recipient.to_str().unwrap()).unwrap();
+    let output = env.new_string("Hello ".to_owned() + recipient.to_str().unwrap());
     output.into_inner()
 }
 
@@ -40,7 +40,7 @@ pub unsafe extern fn Java_com_example_logproject_NativeMethodTest_init(env: JNIE
     str.into_inner()
 }*/
 
-pub extern "C" fn ava_tech_yaowen_androidrust_Hello_callNativeFun(env: JNIEnv, _: JObject) -> jstring {
+pub extern "C" fn Java_tech_yaowen_androidrust_Hello_callNativeFun(env: JNIEnv, _: JObject) -> jstring {
     let output = env.new_string("Hello ").unwrap();
     output.into_inner()
 }

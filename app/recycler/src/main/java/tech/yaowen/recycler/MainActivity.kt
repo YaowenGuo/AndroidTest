@@ -1,8 +1,12 @@
 package tech.yaowen.recycler
 
+import android.graphics.drawable.Drawable
 import android.os.Bundle
+import android.view.View
+import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.GridLayoutManager
+import androidx.recyclerview.widget.GridPagerLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.blankj.utilcode.util.ScreenUtils
@@ -27,9 +31,9 @@ class MainActivity : AppCompatActivity() {
         secondRV.layoutManager = gridLayoutManager
 
         //attachToRecyclerView
-//        val gridPagerSnapHelper = GridPagerSnapHelper()
-//        gridPagerSnapHelper.setRow(row).setColumn(column)
-//        gridPagerSnapHelper.attachToRecyclerView(secondRV)
+        val gridPagerSnapHelper = GridPagerSnapHelper()
+        gridPagerSnapHelper.setRow(row).setColumn(column)
+        gridPagerSnapHelper.attachToRecyclerView(secondRV)
         val screenWidth: Int = ScreenUtils.getScreenWidth()
         val itemWidth = screenWidth / column
 
@@ -45,5 +49,16 @@ class MainActivity : AppCompatActivity() {
 //            override fun onPageSelected(position: Int) {}
 //            override fun onPageScrollStateChanged(state: Int) {}
 //        })
+    }
+
+    fun clickView(view: View) {
+        view.isSelected = !view.isSelected
+        val drawable = getDrawable(R.drawable.ic_selector)
+        drawable?.setBounds(0, 0, 25, 25)
+        if (view is TextView) {
+            view.setCompoundDrawables(drawable, null, null, null)
+        }
+//        if (view.isSelected) {
+//        }
     }
 }

@@ -1,3 +1,5 @@
+include ':app:rtc_demo'
+include ':android_lib:test_jni'
 include ':app:recycler'
 include ':android_lib:webrtc'
 include ':app:test_rust_jni'
@@ -19,7 +21,6 @@ include ':android_lib:media_tool'
 
 
 include ':lib:test_rust'
-include ':lib:lib_ffmpeg'
 include ':lib:test_reflection'
 include ':lib:test_annotation'
 include ':lib:lib_butter_knife'
@@ -31,3 +32,4 @@ include ':lib:test_retrofit'
 include ':lib:33_lib_processor'
 include ':lib:33_lib_annotations'
 include ':lib:test_java'
+include ':lib:lib_jni'
