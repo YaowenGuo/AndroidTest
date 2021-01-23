@@ -40,24 +40,21 @@ class LocalPeerConnectionActivity : BaseActivity() {
     lateinit var peerConnectionRemote: PeerConnection
     lateinit var peerConnectionLocal: PeerConnection
     val sdpObserver = object : SdpObserver {
-        override fun onSetFailure(p0: String?) {
+        override fun onSetFailure(msg: String?) {
         }
 
         override fun onSetSuccess() {
         }
 
-        override fun onCreateSuccess(p0: SessionDescription?) {
+        override fun onCreateSuccess(sdp: SessionDescription?) {
         }
 
-        override fun onCreateFailure(p0: String?) {
+        override fun onCreateFailure(msg: String?) {
         }
 
     }
 
-    private fun call(
-        videoTrack: VideoTrack
-    ) {
-
+    private fun call(videoTrack: VideoTrack) {
         peerConnectionLocal = RtcEngine.INSTANCE.connection(videoTrack, null, object :
             RtcEngine.DspAndIdeObserver {
             override fun onDspCreate(sdp: SessionDescription) {
@@ -70,10 +67,10 @@ class LocalPeerConnectionActivity : BaseActivity() {
                 peerConnectionRemote.addIceCandidate(iceCandidate)
             }
 
-            override fun onRemoteMediaStream(mediaStream: MediaStream) {
+            override fun onAddMediaStream(mediaStream: MediaStream) {
+                // 接收数据流
                 runOnUiThread {
                     val video = mediaStream.videoTracks[0]
-//                    video.addSink(remoteView)
                     RtcEngine.INSTANCE.displayVideo(
                         video,
                         findViewById(R.id.localView),
@@ -85,10 +82,7 @@ class LocalPeerConnectionActivity : BaseActivity() {
     }
 
 
-    private fun answer(
-        videoTrack: VideoTrack,
-        sdp: SessionDescription
-    ) {
+    private fun answer(videoTrack: VideoTrack, sdp: SessionDescription) {
         peerConnectionRemote = RtcEngine.INSTANCE.connection(videoTrack, sdp, object :
             RtcEngine.DspAndIdeObserver {
             override fun onDspCreate(sdp: SessionDescription) {
@@ -101,10 +95,10 @@ class LocalPeerConnectionActivity : BaseActivity() {
                 peerConnectionLocal.addIceCandidate(iceCandidate)
             }
 
-            override fun onRemoteMediaStream(mediaStream: MediaStream) {
+            override fun onAddMediaStream(mediaStream: MediaStream) {
+                // 接收数据流
                 runOnUiThread {
                     val video = mediaStream.videoTracks[0]
-
                     RtcEngine.INSTANCE.displayVideo(
                         video!!,
                         findViewById(R.id.remoteView),

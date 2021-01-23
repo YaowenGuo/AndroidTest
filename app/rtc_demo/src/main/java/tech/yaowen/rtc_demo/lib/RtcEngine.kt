@@ -148,7 +148,9 @@ enum class RtcEngine {
         sdp: SessionDescription?,
         observer: DspAndIdeObserver
     ): PeerConnection {
+        // server 参数传空列表，将创建本地连接。
         val iceServers: List<PeerConnection.IceServer> = ArrayList()
+        // 创建 PeerConnection 对象。
         val peerConnection = peerConnectionFactory.createPeerConnection(
             iceServers,
             object : PeerConnection.Observer {
@@ -157,16 +159,16 @@ enum class RtcEngine {
                 override fun onIceConnectionReceivingChange(b: Boolean) {}
                 override fun onIceGatheringChange(iceGatheringState: PeerConnection.IceGatheringState) {}
                 override fun onIceCandidate(iceCandidate: IceCandidate) {
-                    observer.onIceCreate(iceCandidate)
+                    observer.onIceCreate(iceCandidate) // 通过 singling 服务器发送 ice。
                 }
 
                 override fun onIceCandidatesRemoved(iceCandidates: Array<IceCandidate>) {}
                 override fun onAddStream(mediaStream: MediaStream) {
-                    observer.onRemoteMediaStream(mediaStream)
+                    observer.onAddMediaStream(mediaStream) // 连接之后收到的数据流。
                 }
 
                 override fun onRemoveStream(mediaStream: MediaStream) {
-                    observer.onRemoteMediaStream(mediaStream)
+                    observer.onRemoveMediaStream(mediaStream)
                 }
                 override fun onDataChannel(dataChannel: DataChannel) {}
                 override fun onRenegotiationNeeded() {}
@@ -177,13 +179,16 @@ enum class RtcEngine {
                 }
             })!!
 
-        val mediaStreamLocal = peerConnectionFactory.createLocalMediaStream(if (sdp == null)  "offerMediaStream" else "answerMediaStream")
-        mediaStreamLocal.addTrack(videoTrack)
-
-        peerConnection.addStream(mediaStreamLocal)
+        // 创建 MediaStream 对象。
+        val mediaStream = peerConnectionFactory.createLocalMediaStream(if (sdp == null)  "offerMediaStream" else "answerMediaStream")
+        mediaStream.addTrack(videoTrack)
+        // 添加 MediaStream.
+        peerConnection.addStream(mediaStream)
+        // 用户创建 Offer 或者 Answer 的回调。
         val sdpObserver = object : SdpObserver {
             override fun onCreateSuccess(sdp: SessionDescription) {
-                // 太蠢了，自己的 description 为什么还要设置一次。
+                // 使用 createOffer 创建的是 offer, 使用 createAnswer 创建的是 answer.
+                // 太蠢了，自己的 description 为什么还要设置一次?
                 peerConnection.setLocalDescription(this, sdp)
                 observer.onDspCreate(sdp)
             }
@@ -193,20 +198,26 @@ enum class RtcEngine {
             override fun onSetFailure(s: String) {}
         }
 
+        // 如果是连接发起者，要创建 offer.
         if (sdp == null) {
             peerConnection.createOffer(sdpObserver, MediaConstraints())
         } else {
+            // 如果是响应者，需要先设置 `offer`, 然后才能根据 `offer` 和本地支持的情况，创建 `answer`。
             peerConnection.setRemoteDescription(sdpObserver, sdp)
+            // 创建 answer。
             peerConnection.createAnswer(sdpObserver, MediaConstraints())
         }
         return peerConnection;
     }
+
 
     interface DspAndIdeObserver {
         fun onDspCreate(sessionDescription: SessionDescription) {};
 
         fun onIceCreate(iceCandidate: IceCandidate)
 
-        fun onRemoteMediaStream(mediaStream: MediaStream) {}
+        fun onAddMediaStream(mediaStream: MediaStream) {}
+
+        fun onRemoveMediaStream(mediaStream: MediaStream) {}
     }
 }
