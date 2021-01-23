@@ -3,11 +3,13 @@ package tech.yaowen.rtc_demo.lib
 import android.content.Context
 import android.hardware.camera2.CameraMetadata
 import org.webrtc.*
+import java.util.ArrayList
 
 
 enum class RtcEngine {
     INSTANCE;
-    var peerConnection: PeerConnectionFactory? = null
+
+    lateinit var peerConnectionFactory: PeerConnectionFactory
 
     class Builder {
         var eglBaseContext: EglBase.Context? = null
@@ -87,7 +89,8 @@ enum class RtcEngine {
         captureThread: String = "CaptureThread"
     ): VideoTrack {
 
-        val videoSource: VideoSource = peerConnectionFactory.createVideoSource(videoCapturer.isScreencast)
+        val videoSource: VideoSource =
+            peerConnectionFactory.createVideoSource(videoCapturer.isScreencast)
         val videoTrack: VideoTrack = peerConnectionFactory.createVideoTrack(id, videoSource)
 
         val surfaceTextureHelper = SurfaceTextureHelper.create(captureThread, eglBaseContext)
@@ -108,7 +111,10 @@ enum class RtcEngine {
     }
 
 
-    public fun createPeerConnection(eglBaseContext: EglBase.Context, applicationContext: Context): PeerConnectionFactory {
+    public fun createPeerConnection(
+        eglBaseContext: EglBase.Context,
+        applicationContext: Context
+    ): PeerConnectionFactory {
         val initializationOptions = PeerConnectionFactory.InitializationOptions
             .builder(applicationContext)
             .createInitializationOptions()
@@ -118,11 +124,12 @@ enum class RtcEngine {
         val defaultVideoEncoderFactory = DefaultVideoEncoderFactory(eglBaseContext, true, true)
         val defaultVideoDecoderFactory = DefaultVideoDecoderFactory(eglBaseContext)
 
-        return PeerConnectionFactory.builder()
+        peerConnectionFactory =  PeerConnectionFactory.builder()
             .setOptions(options)
             .setVideoEncoderFactory(defaultVideoEncoderFactory)
             .setVideoDecoderFactory(defaultVideoDecoderFactory)
             .createPeerConnectionFactory()
+        return peerConnectionFactory
     }
 
     public fun createPeerConnection(applicationContext: Context): PeerConnectionFactory {
@@ -131,70 +138,75 @@ enum class RtcEngine {
             .builder(applicationContext)
             .createInitializationOptions()
         PeerConnectionFactory.initialize(initializationOptions)
-        val peerConnectionFactory = PeerConnectionFactory.builder().createPeerConnectionFactory()
-        return peerConnectionFactory
-
+        peerConnectionFactory = PeerConnectionFactory.builder().createPeerConnectionFactory()
+        return peerConnectionFactory as PeerConnectionFactory
     }
 
 
-    public fun createCamera(
-        applicationContext: Context,
-        peerConnectionFactory: PeerConnectionFactory,
-        videoCapturer: VideoCapturer,
-        displayView: SurfaceViewRenderer
-    ) {
-        val eglBaseContext = EglBase.create().eglBaseContext
+    public fun connection(
+        videoTrack: VideoTrack?,
+        sdp: SessionDescription?,
+        observer: DspAndIdeObserver
+    ): PeerConnection {
+        val iceServers: List<PeerConnection.IceServer> = ArrayList()
+        val peerConnection = peerConnectionFactory.createPeerConnection(
+            iceServers,
+            object : PeerConnection.Observer {
+                override fun onSignalingChange(signalingState: PeerConnection.SignalingState) {}
+                override fun onIceConnectionChange(iceConnectionState: PeerConnection.IceConnectionState) {}
+                override fun onIceConnectionReceivingChange(b: Boolean) {}
+                override fun onIceGatheringChange(iceGatheringState: PeerConnection.IceGatheringState) {}
+                override fun onIceCandidate(iceCandidate: IceCandidate) {
+                    observer.onIceCreate(iceCandidate)
+                }
 
-        val surfaceTextureHelper = SurfaceTextureHelper
-            .create("CaptureThread", eglBaseContext)
+                override fun onIceCandidatesRemoved(iceCandidates: Array<IceCandidate>) {}
+                override fun onAddStream(mediaStream: MediaStream) {
+                    observer.onRemoteMediaStream(mediaStream)
+                }
 
-        // create VideoCapturer
-        val videoSource: VideoSource = peerConnectionFactory
-            .createVideoSource(videoCapturer.isScreencast)
+                override fun onRemoveStream(mediaStream: MediaStream) {
+                    observer.onRemoteMediaStream(mediaStream)
+                }
+                override fun onDataChannel(dataChannel: DataChannel) {}
+                override fun onRenegotiationNeeded() {}
+                override fun onAddTrack(
+                    rtpReceiver: RtpReceiver,
+                    mediaStreams: Array<MediaStream>
+                ) {
+                }
+            })!!
 
-        videoCapturer.initialize(
-            surfaceTextureHelper,
-            applicationContext,
-            videoSource.capturerObserver
-        )
-
-        videoCapturer.startCapture(480, 640, 30)
-
-        // create VideoTrack
-        val videoTrack: VideoTrack = peerConnectionFactory.createVideoTrack("100", videoSource)
-
-
-        // display in localView
-        displayView.setMirror(true)
-        displayView.init(eglBaseContext, null)
-        videoTrack.addSink(displayView);
-
-        val remoteSurfaceTextureHelper =
-            SurfaceTextureHelper.create("RemoteCaptureThread", eglBaseContext)
-
-        // create VideoCapturer
-//        val remoteVideoCapturer: VideoCapturer? = createCameraCapturer(applicationContext)
-//        val remoteVideoSource: VideoSource =
-//            peerConnectionFactory.createVideoSource(remoteVideoCapturer.isScreencast)
-//        remoteVideoCapturer.initialize(
-//            remoteSurfaceTextureHelper,
-//            applicationContext,
-//            remoteVideoSource.getCapturerObserver()
-//        )
-//        remoteVideoCapturer.startCapture(480, 640, 30)
-    }
-
-    public fun call(
-        peerConnectionFactory: PeerConnectionFactory,
-        videoTrack: VideoTrack,
-        remoteVideoTrack: VideoTrack
-    ) {
-        val mediaStreamLocal = peerConnectionFactory.createLocalMediaStream("mediaStreamLocal")
+        val mediaStreamLocal = peerConnectionFactory.createLocalMediaStream(if (sdp == null)  "offerMediaStream" else "answerMediaStream")
         mediaStreamLocal.addTrack(videoTrack)
 
-        val mediaStreamRemote = peerConnectionFactory.createLocalMediaStream("mediaStreamRemote")
-        mediaStreamRemote.addTrack(remoteVideoTrack)
+        peerConnection.addStream(mediaStreamLocal)
+        val sdpObserver = object : SdpObserver {
+            override fun onCreateSuccess(sdp: SessionDescription) {
+                // 太蠢了，自己的 description 为什么还要设置一次。
+                peerConnection.setLocalDescription(this, sdp)
+                observer.onDspCreate(sdp)
+            }
 
-//        call(mediaStreamLocal, mediaStreamRemote)
+            override fun onSetSuccess() {}
+            override fun onCreateFailure(s: String) {}
+            override fun onSetFailure(s: String) {}
+        }
+
+        if (sdp == null) {
+            peerConnection.createOffer(sdpObserver, MediaConstraints())
+        } else {
+            peerConnection.setRemoteDescription(sdpObserver, sdp)
+            peerConnection.createAnswer(sdpObserver, MediaConstraints())
+        }
+        return peerConnection;
+    }
+
+    interface DspAndIdeObserver {
+        fun onDspCreate(sessionDescription: SessionDescription) {};
+
+        fun onIceCreate(iceCandidate: IceCandidate)
+
+        fun onRemoteMediaStream(mediaStream: MediaStream) {}
     }
 }

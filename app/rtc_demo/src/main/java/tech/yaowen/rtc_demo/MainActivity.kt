@@ -31,35 +31,4 @@ class MainActivity : BaseActivity() {
             RtcEngine.INSTANCE.displayVideo(videoTrack, findViewById(R.id.localView), eglBaseContext)
         }
     }
-
-
-    private fun localCapture(videoCapturer: VideoCapturer) {
-        // create PeerConnectionFactory
-        val initializationOptions = InitializationOptions.builder(this).createInitializationOptions()
-        PeerConnectionFactory.initialize(initializationOptions)
-        val peerConnectionFactory = PeerConnectionFactory.builder().createPeerConnectionFactory()
-
-        // create VideoTrack
-        val videoSource: VideoSource = peerConnectionFactory.createVideoSource(videoCapturer.isScreencast)
-        val videoTrack: VideoTrack = peerConnectionFactory.createVideoTrack("101", videoSource)
-
-        // create AudioSource
-        val audioSource: AudioSource = peerConnectionFactory.createAudioSource(MediaConstraints())
-        val audioTrack: AudioTrack = peerConnectionFactory.createAudioTrack("101", audioSource)
-
-        val eglBaseContext = EglBase.create().eglBaseContext
-        val localView: SurfaceViewRenderer = findViewById(R.id.localView)
-        localView.init(eglBaseContext, null)
-        localView.setMirror(true)
-        // display in localView
-        videoTrack.addSink(localView)
-
-        val surfaceTextureHelper = SurfaceTextureHelper.create("CaptureThread", eglBaseContext)
-        videoCapturer.initialize(
-            surfaceTextureHelper,
-            this,
-            videoSource.capturerObserver
-        )
-        videoCapturer.startCapture(480, 640, 30)
-    }
 }
