@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="horizontal"
+    tools:context=".LocalPeerConnectionActivity">
+    <LinearLayout
+        android:id="@+id/sponsor"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:orientation="vertical">
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="@color/colorAccent"
+            android:textSize="20sp"
+            android:gravity="center"
+            android:text="发起端"/>
+        <TextView
+            android:id="@+id/sponsorReceive"
+            android:layout_width="match_parent"
+            android:layout_height="150dp"
+            android:textColor="@color/colorAccent"
+            android:textSize="20sp"
+            android:gravity="center"
+            tools:text="接收到的内容"/>
+
+        <EditText
+            android:id="@+id/sponsorSend"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:minLines="1"
+            android:maxLines="5"
+            android:hint="输入要发送数据"
+            />
+
+    </LinearLayout>
+
+
+    <LinearLayout
+        android:id="@+id/responder"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:orientation="vertical">
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="@color/colorAccent"
+            android:textSize="20sp"
+            android:gravity="center"
+            android:text="响应端"/>
+
+
+        <TextView
+            android:id="@+id/responderReceive"
+            android:layout_width="match_parent"
+            android:layout_height="150dp"
+            android:textColor="@color/colorAccent"
+            android:textSize="20sp"
+            android:gravity="center"
+            tools:text="接收到的内容"/>
+
+        <EditText
+            android:id="@+id/responderSend"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:minLines="1"
+            android:maxLines="5"
+            android:hint="输入要发送数据"
+            />
+
+    </LinearLayout>
+
+</LinearLayout>

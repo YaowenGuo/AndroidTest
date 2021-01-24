@@ -6,7 +6,7 @@ import org.webrtc.*
 import org.webrtc.PeerConnectionFactory.InitializationOptions
 import tech.yaowen.rtc_demo.lib.RtcEngine
 
-class MainActivity : BaseActivity() {
+class VideoCaputreActivity : BaseActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

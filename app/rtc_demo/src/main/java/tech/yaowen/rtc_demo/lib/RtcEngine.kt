@@ -207,7 +207,7 @@ enum class RtcEngine {
             // 创建 answer。
             peerConnection.createAnswer(sdpObserver, MediaConstraints())
         }
-        return peerConnection;
+        return peerConnection
     }
 
 
@@ -219,5 +219,7 @@ enum class RtcEngine {
         fun onAddMediaStream(mediaStream: MediaStream) {}
 
         fun onRemoveMediaStream(mediaStream: MediaStream) {}
+
+        fun onDataChannel(dataChannel: DataChannel) {}
     }
 }
