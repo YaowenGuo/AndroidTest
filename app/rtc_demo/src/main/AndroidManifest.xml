@@ -7,6 +7,7 @@
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
 
+
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
@@ -25,6 +26,11 @@
 
         <!--数据通道-->
         <activity android:name=".RTCDataChannelActivity"
+            android:screenOrientation="behind">
+        </activity>
+
+        <!--对等连接-->
+        <activity android:name=".PeerConnectionActivity"
             android:screenOrientation="behind">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

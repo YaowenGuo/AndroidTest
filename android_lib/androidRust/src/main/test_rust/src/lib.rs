@@ -22,6 +22,8 @@ pub unsafe extern "C"  fn Java_tech_yaowen_androidrust_Hello_stringFromJNI(env: 
         )
     );
 
+
+
     let output = env.new_string("Hello ".to_owned() + recipient.to_str().unwrap());
     output.into_inner()
 }

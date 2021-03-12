@@ -1,6 +1,7 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 
 buildscript {
+    ext.kotlin_version = '1.5.0-M1'
     ext.version = [
             'sdk_version'        : 30,
             'build_tools_version': '30.0.1'
@@ -51,7 +52,8 @@ buildscript {
 
     ext.deps = [
             "recyclerView": 'androidx.recyclerview:recyclerview:1.2.0-alpha05',
-            "webrtc": "org.webrtc:google-webrtc:1.0.32006"
+            "webrtc": "org.webrtc:google-webrtc:1.0.32006",
+            "socket_io": 'io.socket:socket.io-client:2.0.0',
     ]
 
     repositories {
@@ -60,6 +62,7 @@ buildscript {
         maven {
             url "https://plugins.gradle.org/m2/"
         }
+        maven { url 'https://dl.bintray.com/kotlin/kotlin-eap' }
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:4.1.1'

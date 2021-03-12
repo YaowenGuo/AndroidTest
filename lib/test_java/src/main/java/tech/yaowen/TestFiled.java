@@ -1,7 +1,7 @@
 package tech.yaowen;
 
 class A {
-    public String filed = "A";
+    public static String filed = "A";
 
     protected void setFiled(String value) {
         filed = value;
@@ -21,6 +21,10 @@ class A {
         System.out.println("filed value: " + b.getFiled());
         b.setFiled("C");
         System.out.println("filed value: " + b.getFiled());
+
+        final A a = new A();
+        a.filed = "hhh";
+
     }
 
 }

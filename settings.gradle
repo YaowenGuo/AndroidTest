@@ -1,3 +1,4 @@
+include ':app:opengles3_native'
 include ':app:rtc_demo'
 include ':android_lib:test_jni'
 include ':app:recycler'

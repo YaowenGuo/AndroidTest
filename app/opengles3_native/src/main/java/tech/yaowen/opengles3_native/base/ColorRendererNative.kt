@@ -1,15 +1,11 @@
-package tech.yaowen.opengles3.renderer
+package tech.yaowen.opengles3_native.base
 
 import android.opengl.GLSurfaceView
 import javax.microedition.khronos.egl.EGLConfig
 import javax.microedition.khronos.opengles.GL10
 
-class NativeColorRenderer(private val color: Int = 0): GLSurfaceView.Renderer {
-    companion object {
-        init {
-            System.loadLibrary("gl_es")
-        }
-    }
+class ColorRendererNative(private val color: Int = 0): GLSurfaceView.Renderer {
+
     override fun onSurfaceCreated(gl: GL10?, config: EGLConfig?) {
         surfaceCreated(color)
     }

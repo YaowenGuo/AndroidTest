@@ -6,16 +6,16 @@
 #define ANDROIDTEST_NATIVE_COLOR_H
 
 extern "C" JNIEXPORT void JNICALL
-Java_tech_yaowen_opengles3_renderer_NativeColorRenderer_surfaceCreated(
+surfaceCreated(
         JNIEnv *env, jobject thiz, jint color);
 
 extern "C" JNIEXPORT void JNICALL
-Java_tech_yaowen_opengles3_renderer_NativeColorRenderer_surfaceChanged(
+surfaceChanged(
         JNIEnv *env, jobject thiz, jint width, jint height);
 
 
 extern "C" JNIEXPORT void JNICALL
-Java_tech_yaowen_opengles3_renderer_NativeColorRenderer_onDrawFrame(
+onDrawFrame(
         JNIEnv *env, jobject thiz);
 
 #endif //ANDROIDTEST_NATIVE_COLOR_H

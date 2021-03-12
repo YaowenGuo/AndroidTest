@@ -31,6 +31,7 @@ add_library(
         avformat
         SHARED
         IMPORTED)
+
 message(AUTHOR_WARNING "路径${CMAKE_SOURCE_DIR}/${ANDROID_ABI}/libavcodec.so" )
 set_target_properties( # Specifies the target library.
         avformat

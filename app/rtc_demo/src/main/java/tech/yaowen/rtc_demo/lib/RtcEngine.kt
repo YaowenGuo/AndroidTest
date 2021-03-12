@@ -3,7 +3,8 @@ package tech.yaowen.rtc_demo.lib
 import android.content.Context
 import android.hardware.camera2.CameraMetadata
 import org.webrtc.*
-import java.util.ArrayList
+import org.webrtc.PeerConnection.IceServer
+import java.util.*
 
 
 enum class RtcEngine {
@@ -149,7 +150,8 @@ enum class RtcEngine {
         observer: DspAndIdeObserver
     ): PeerConnection {
         // server 参数传空列表，将创建本地连接。
-        val iceServers: List<PeerConnection.IceServer> = ArrayList()
+        val iceServers: MutableList<PeerConnection.IceServer> = ArrayList()
+        iceServers.add(IceServer.builder("stun:stun.l.google.com:19302").createIceServer())
         // 创建 PeerConnection 对象。
         val peerConnection = peerConnectionFactory.createPeerConnection(
             iceServers,

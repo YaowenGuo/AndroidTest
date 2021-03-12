@@ -7,18 +7,34 @@ cmake_minimum_required(VERSION 3.4.1)
 
 
 ##官方标准配置
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -fno-rtti -fno-exceptions -Wall")
+set(${CMAKE_C_FLAGS}, "${CMAKE_C_FLAGS}")
 
-##ANDROID_PLATFORM_LEVEL=18
-add_definitions("-DDYNAMIC_ES3")
+add_library(native_app_glue STATIC
+        ${ANDROID_NDK}/sources/android/native_app_glue/android_native_app_glue.c)
 
-set(OPENGL_LIB GLESv3)
+# now build app's shared lib
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=gnu++11 -Wall -Werror")
+
+
+# Export ANativeActivity_onCreate(),
+# Refer to: https://github.com/android-ndk/ndk/issues/381.
+set(CMAKE_SHARED_LINKER_FLAGS
+        "${CMAKE_SHARED_LINKER_FLAGS} -u ANativeActivity_onCreate")
+
 
 # Creates and names a library, sets it as either STATIC
 # or SHARED, and provides the relative paths to its source code.
 # You can define multiple libraries, and CMake builds them for you.
+
 # Gradle automatically packages shared libraries with your APK.
+
+#找到包含所有的cpp文件
+file(GLOB allCpp
+        src/*.cpp
+        src/*.c
+        src/base/*.cpp
+        )
+
 
 add_library( # Sets the name of the library.
         gl_es
@@ -27,7 +43,16 @@ add_library( # Sets the name of the library.
         SHARED
 
         # Provides a relative path to your source file(s).
-        src/native_color.cpp)
+        ${allCpp})
+
+
+# 引入FFmpeg的头文件
+# 导入头文件仅能是目录，而不能直接指定 .h 文件。
+include_directories(
+        ${ANDROID_NDK}/sources/android/native_app_glue
+        ${CMAKE_SOURCE_DIR}/include
+)
+
 
 # Searches for a specified prebuilt library and stores the path as a
 # variable. Because CMake includes system libraries in the search path by
@@ -50,7 +75,9 @@ target_link_libraries( # Specifies the target library.
         gl_es
         ${OPENGL_LIB}
         android
+        native_app_glue
         EGL
+        GLESv3
         # Links the target library to the log library
         # included in the NDK.
         ${log-lib})
