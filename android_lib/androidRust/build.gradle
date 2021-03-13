@@ -55,6 +55,6 @@ afterEvaluate {
             productFlavor += "${it.name.capitalize()}"
         }
         def buildType = "${variant.buildType.name.capitalize()}"
-        tasks["generate${productFlavor}${buildType}Assets"].dependsOn(tasks["cargoBuild"])
+//        tasks["generate${productFlavor}${buildType}Assets"].dependsOn(tasks["cargoBuild"])
     }
 }
