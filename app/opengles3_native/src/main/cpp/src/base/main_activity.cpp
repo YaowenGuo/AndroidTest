@@ -46,12 +46,12 @@ struct saved_state {
 /**
  * Shared state for our app.
  */
-struct engine {
-    struct android_app* app;
+struct Engine {
+    struct android_app *app;
 
-    ASensorManager* sensorManager;
-    const ASensor* accelerometerSensor;
-    ASensorEventQueue* sensorEventQueue;
+    ASensorManager *sensorManager;
+    const ASensor *accelerometerSensor;
+    ASensorEventQueue *sensorEventQueue;
 
     int animating;
     EGLDisplay display;
@@ -65,7 +65,7 @@ struct engine {
 /**
  * Initialize an EGL context for the current display.
  */
-static int engine_init_display(struct engine* engine) {
+static int engine_init_display(struct Engine *engine) {
     // initialize OpenGL ES and EGL
 
     /*
@@ -75,11 +75,12 @@ static int engine_init_display(struct engine* engine) {
      */
     const EGLint attribs[] = {
             EGL_SURFACE_TYPE, EGL_WINDOW_BIT,
-            EGL_BLUE_SIZE, 8,
-            EGL_GREEN_SIZE, 8,
-            EGL_RED_SIZE, 8,
+            EGL_BLUE_SIZE,    8,
+            EGL_GREEN_SIZE,   8,
+            EGL_RED_SIZE,      8,
             EGL_NONE
     };
+
     EGLint w, h, format;
     EGLint numConfigs;
     EGLConfig config = nullptr;
@@ -93,20 +94,20 @@ static int engine_init_display(struct engine* engine) {
     /* Here, the application chooses the configuration it desires.
      * find the best match if possible, otherwise use the very first one
      */
-    eglChooseConfig(display, attribs, nullptr,0, &numConfigs);
+    eglChooseConfig(display, attribs, nullptr, 0, &numConfigs);
     std::unique_ptr<EGLConfig[]> supportedConfigs(new EGLConfig[numConfigs]);
     assert(supportedConfigs);
     eglChooseConfig(display, attribs, supportedConfigs.get(), numConfigs, &numConfigs);
     assert(numConfigs);
     auto i = 0;
     for (; i < numConfigs; i++) {
-        auto& cfg = supportedConfigs[i];
+        auto &cfg = supportedConfigs[i];
         EGLint r, g, b, d;
-        if (eglGetConfigAttrib(display, cfg, EGL_RED_SIZE, &r)   &&
+        if (eglGetConfigAttrib(display, cfg, EGL_RED_SIZE, &r) &&
             eglGetConfigAttrib(display, cfg, EGL_GREEN_SIZE, &g) &&
-            eglGetConfigAttrib(display, cfg, EGL_BLUE_SIZE, &b)  &&
+            eglGetConfigAttrib(display, cfg, EGL_BLUE_SIZE, &b) &&
             eglGetConfigAttrib(display, cfg, EGL_DEPTH_SIZE, &d) &&
-            r == 8 && g == 8 && b == 8 && d == 0 ) {
+            r == 8 && g == 8 && b == 8 && d == 0) {
 
             config = supportedConfigs[i];
             break;
@@ -161,15 +162,15 @@ static int engine_init_display(struct engine* engine) {
 /**
  * Just the current frame in the display.
  */
-static void engine_draw_frame(struct engine* engine) {
+static void engine_draw_frame(struct Engine *engine) {
     if (engine->display == nullptr) {
         // No display.
         return;
     }
 
     // Just fill the screen with a color.
-    glClearColor(((float)engine->state.x)/engine->width, engine->state.angle,
-                 ((float)engine->state.y)/engine->height, 1);
+    glClearColor(((float) engine->state.x) / engine->width, engine->state.angle,
+                 ((float) engine->state.y) / engine->height, 1);
     glClear(GL_COLOR_BUFFER_BIT);
 
     eglSwapBuffers(engine->display, engine->surface);
@@ -178,7 +179,7 @@ static void engine_draw_frame(struct engine* engine) {
 /**
  * Tear down the EGL context currently associated with the display.
  */
-static void engine_term_display(struct engine* engine) {
+static void engine_term_display(struct Engine *engine) {
     if (engine->display != EGL_NO_DISPLAY) {
         eglMakeCurrent(engine->display, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
         if (engine->context != EGL_NO_CONTEXT) {
@@ -198,8 +199,8 @@ static void engine_term_display(struct engine* engine) {
 /**
  * Process the next input event.
  */
-static int32_t engine_handle_input(struct android_app* app, AInputEvent* event) {
-    auto* engine = (struct engine*)app->userData;
+static int32_t engine_handle_input(struct android_app *app, AInputEvent *event) {
+    auto *engine = (struct Engine *) app->userData;
     if (AInputEvent_getType(event) == AINPUT_EVENT_TYPE_MOTION) {
         engine->animating = 1;
         engine->state.x = AMotionEvent_getX(event, 0);
@@ -212,13 +213,13 @@ static int32_t engine_handle_input(struct android_app* app, AInputEvent* event) 
 /**
  * Process the next main command.
  */
-static void engine_handle_cmd(struct android_app* app, int32_t cmd) {
-    auto* engine = (struct engine*)app->userData;
+static void engine_handle_cmd(struct android_app *app, int32_t cmd) {
+    auto *engine = (struct Engine *) app->userData;
     switch (cmd) {
         case APP_CMD_SAVE_STATE:
             // The system has asked us to save our current state.  Do so.
             engine->app->savedState = malloc(sizeof(struct saved_state));
-            *((struct saved_state*)engine->app->savedState) = engine->state;
+            *((struct saved_state *) engine->app->savedState) = engine->state;
             engine->app->savedStateSize = sizeof(struct saved_state);
             break;
         case APP_CMD_INIT_WINDOW:
@@ -240,7 +241,7 @@ static void engine_handle_cmd(struct android_app* app, int32_t cmd) {
                 // We'd like to get 60 events per second (in us).
                 ASensorEventQueue_setEventRate(engine->sensorEventQueue,
                                                engine->accelerometerSensor,
-                                               (1000L/60)*1000);
+                                               (1000L / 60) * 1000);
             }
             break;
         case APP_CMD_LOST_FOCUS:
@@ -267,28 +268,28 @@ static void engine_handle_cmd(struct android_app* app, int32_t cmd) {
 #include <dlfcn.h>
 #include <esUtil.h>
 
-ASensorManager* AcquireASensorManagerInstance(android_app* app) {
+ASensorManager *AcquireASensorManagerInstance(android_app *app) {
 
-    if(!app)
+    if (!app)
         return nullptr;
 
     typedef ASensorManager *(*PF_GETINSTANCEFORPACKAGE)(const char *name);
-    void* androidHandle = dlopen("libandroid.so", RTLD_NOW);
+    void *androidHandle = dlopen("libandroid.so", RTLD_NOW);
     auto getInstanceForPackageFunc = (PF_GETINSTANCEFORPACKAGE)
             dlsym(androidHandle, "ASensorManager_getInstanceForPackage");
     if (getInstanceForPackageFunc) {
-        JNIEnv* env = nullptr;
+        JNIEnv *env = nullptr;
         app->activity->vm->AttachCurrentThread(&env, nullptr);
 
         jclass android_content_Context = env->GetObjectClass(app->activity->clazz);
         jmethodID midGetPackageName = env->GetMethodID(android_content_Context,
                                                        "getPackageName",
                                                        "()Ljava/lang/String;");
-        auto packageName= (jstring)env->CallObjectMethod(app->activity->clazz,
-                                                         midGetPackageName);
+        auto packageName = (jstring) env->CallObjectMethod(app->activity->clazz,
+                                                           midGetPackageName);
 
         const char *nativePackageName = env->GetStringUTFChars(packageName, nullptr);
-        ASensorManager* mgr = getInstanceForPackageFunc(nativePackageName);
+        ASensorManager *mgr = getInstanceForPackageFunc(nativePackageName);
         env->ReleaseStringUTFChars(packageName, nativePackageName);
         app->activity->vm->DetachCurrentThread();
         if (mgr) {
@@ -313,10 +314,10 @@ ASensorManager* AcquireASensorManagerInstance(android_app* app) {
  * android_native_app_glue.  It runs in its own thread, with its own
  * event loop for receiving input events and doing other things.
  */
-void android_main(struct android_app* state) {
-    struct engine engine{};
+void android_main(struct android_app *state) {
+    struct Engine engine{};
 
-    memset(&engine, 0, sizeof(engine));
+    memset(&engine, 0, sizeof(engine)); // 初始化 0，C 语言没有默认初始化的操作。
     state->userData = &engine;
     state->onAppCmd = engine_handle_cmd;
     state->onInputEvent = engine_handle_input;
@@ -334,7 +335,7 @@ void android_main(struct android_app* state) {
 
     if (state->savedState != nullptr) {
         // We are starting with a previous saved state; restore from it.
-        engine.state = *(struct saved_state*)state->savedState;
+        engine.state = *(struct saved_state *) state->savedState;
     }
 
     // loop waiting for stuff to do.
@@ -343,13 +344,13 @@ void android_main(struct android_app* state) {
         // Read all pending events.
         int ident;
         int events;
-        struct android_poll_source* source;
+        struct android_poll_source *source;
 
         // If not animating, we will block forever waiting for events.
         // If animating, we loop until all events are read, then continue
         // to draw the next frame of animation.
-        while ((ident=ALooper_pollAll(engine.animating ? 0 : -1, nullptr, &events,
-                                      (void**)&source)) >= 0) {
+        while ((ident = ALooper_pollAll(engine.animating ? 0 : -1, nullptr, &events,
+                                        (void **) &source)) >= 0) {
 
             // Process this event.
             if (source != nullptr) {
