@@ -25,47 +25,35 @@
 #include <cassert>
 
 #include <EGL/egl.h>
-#include <GLES/gl.h>
+#include <EGL/eglext.h>
+
+
+#include <GLES3/gl3.h>
 
 #include <android/sensor.h>
 #include <android/log.h>
 #include <android_native_app_glue.h>
+#include <step1_triangle.h>
 
-#define LOGI(...) ((void)__android_log_print(ANDROID_LOG_INFO, "native-activity", __VA_ARGS__))
-#define LOGW(...) ((void)__android_log_print(ANDROID_LOG_WARN, "native-activity", __VA_ARGS__))
+#include "esUtil.h"
 
-/**
- * Our saved state data.
- */
-struct saved_state {
-    float angle;
-    int32_t x;
-    int32_t y;
-};
 
-/**
- * Shared state for our app.
- */
-struct Engine {
-    struct android_app *app;
+GLint getContextRenderableType(EGLDisplay display) {
+    const char *extensions = eglQueryString(display, EGL_EXTENSIONS);
+    GLint renderable;
+    if (extensions != NULL && strstr(extensions, "EGL_KHR_create_context")) {
+        renderable = EGL_OPENGL_ES3_BIT_KHR;
+    } else {
+        renderable = EGL_OPENGL_ES3_BIT;
+    }
+    return renderable;
+}
 
-    ASensorManager *sensorManager;
-    const ASensor *accelerometerSensor;
-    ASensorEventQueue *sensorEventQueue;
-
-    int animating;
-    EGLDisplay display;
-    EGLSurface surface;
-    EGLContext context;
-    int32_t width;
-    int32_t height;
-    struct saved_state state;
-};
 
 /**
  * Initialize an EGL context for the current display.
  */
-static int engine_init_display(struct Engine *engine) {
+int engine_init_display(Engine *engine) {
     // initialize OpenGL ES and EGL
 
     /*
@@ -73,13 +61,16 @@ static int engine_init_display(struct Engine *engine) {
      * Below, we select an EGLConfig with at least 8 bits per color
      * component compatible with on-screen windows
      */
+/*
     const EGLint attribs[] = {
             EGL_SURFACE_TYPE, EGL_WINDOW_BIT,
-            EGL_BLUE_SIZE,    8,
-            EGL_GREEN_SIZE,   8,
-            EGL_RED_SIZE,      8,
+            EGL_BLUE_SIZE, 8,
+            EGL_GREEN_SIZE, 8,
+            EGL_RED_SIZE, 8,
             EGL_NONE
     };
+*/
+
 
     EGLint w, h, format;
     EGLint numConfigs;
@@ -88,6 +79,23 @@ static int engine_init_display(struct Engine *engine) {
     EGLContext context;
 
     EGLDisplay display = eglGetDisplay(EGL_DEFAULT_DISPLAY);
+
+    // extension is not supported
+
+    EGLint attribs[] = {
+            EGL_RED_SIZE, 5,
+            EGL_GREEN_SIZE, 6,
+            EGL_BLUE_SIZE, 5,
+            EGL_ALPHA_SIZE, (ES_WINDOW_RGB & ES_WINDOW_ALPHA) ? 8 : EGL_DONT_CARE,
+            EGL_DEPTH_SIZE, (ES_WINDOW_RGB & ES_WINDOW_DEPTH) ? 8 : EGL_DONT_CARE,
+            EGL_STENCIL_SIZE, (ES_WINDOW_RGB & ES_WINDOW_STENCIL) ? 8 : EGL_DONT_CARE,
+            EGL_SAMPLE_BUFFERS, (ES_WINDOW_RGB & ES_WINDOW_MULTISAMPLE) ? 1 : 0,
+            // if EGL_KHR_create_context extension is supported, then we will use
+            // EGL_OPENGL_ES3_BIT_KHR instead of EGL_OPENGL_ES2_BIT in the attribute list
+            EGL_RENDERABLE_TYPE, getContextRenderableType(engine),
+            EGL_NONE
+    };
+
 
     eglInitialize(display, nullptr, nullptr);
 
@@ -128,6 +136,9 @@ static int engine_init_display(struct Engine *engine) {
      * ANativeWindow buffers to match, using EGL_NATIVE_VISUAL_ID. */
     eglGetConfigAttrib(display, config, EGL_NATIVE_VISUAL_ID, &format);
     surface = eglCreateWindowSurface(display, config, engine->app->window, nullptr);
+
+//    EGLint contextAttribs[] = {EGL_CONTEXT_CLIENT_VERSION, 3, EGL_NONE};
+
     context = eglCreateContext(display, config, nullptr, nullptr);
 
     if (eglMakeCurrent(display, surface, surface, context) == EGL_FALSE) {
@@ -152,34 +163,210 @@ static int engine_init_display(struct Engine *engine) {
         LOGI("OpenGL Info: %s", info);
     }
     // Initialize GL state.
-    glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_FASTEST);
+//    glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_FASTEST);
     glEnable(GL_CULL_FACE);
     glDisable(GL_DEPTH_TEST);
 
     return 0;
 }
 
+
+//////////////////////////////////////////////////////////////////
+//
+//  Public Functions
+//
+//
+
+///
+//  esCreateWindow()
+//
+//      title - name for title bar of window
+//      width - width of window to create
+//      height - height of window to create
+//      flags  - bitwise or of window creation flags
+//          ES_WINDOW_ALPHA       - specifies that the framebuffer should have alpha
+//          ES_WINDOW_DEPTH       - specifies that a depth buffer should be created
+//          ES_WINDOW_STENCIL     - specifies that a stencil buffer should be created
+//          ES_WINDOW_MULTISAMPLE - specifies that a multi-sample buffer should be created
+//
+GLboolean esCreateWindow(Engine *engine, const char *title, GLuint flags) {
+    EGLConfig config;
+    EGLint majorVersion;
+    EGLint minorVersion;
+    EGLint contextAttribs[] = {EGL_CONTEXT_CLIENT_VERSION, 3, EGL_NONE};
+
+    // For Android, get the width/height from the window rather than what the
+    // application requested.
+
+
+    engine->display = eglGetDisplay(EGL_DEFAULT_DISPLAY);
+
+    if (engine->display == EGL_NO_DISPLAY) {
+        return GL_FALSE;
+    }
+
+    // Initialize EGL
+    if (!eglInitialize(engine->display, &majorVersion, &minorVersion)) {
+        return GL_FALSE;
+    }
+
+    {
+        EGLint numConfigs = 0;
+        EGLint attribList[] = {
+                EGL_RED_SIZE, 5,
+                EGL_GREEN_SIZE, 6,
+                EGL_BLUE_SIZE, 5,
+                EGL_ALPHA_SIZE, (flags & ES_WINDOW_ALPHA) ? 8 : EGL_DONT_CARE,
+                EGL_DEPTH_SIZE, (flags & ES_WINDOW_DEPTH) ? 8 : EGL_DONT_CARE,
+                EGL_STENCIL_SIZE, (flags & ES_WINDOW_STENCIL) ? 8 : EGL_DONT_CARE,
+                EGL_SAMPLE_BUFFERS, (flags & ES_WINDOW_MULTISAMPLE) ? 1 : 0,
+                // if EGL_KHR_create_context extension is supported, then we will use
+                // EGL_OPENGL_ES3_BIT_KHR instead of EGL_OPENGL_ES2_BIT in the attribute list
+                EGL_RENDERABLE_TYPE, getContextRenderableType(engine->display),
+                EGL_NONE
+        };
+
+        // Choose config
+        if (!eglChooseConfig(engine->display, attribList, &config, 1, &numConfigs)) {
+            return GL_FALSE;
+        }
+
+        if (numConfigs < 1) {
+            return GL_FALSE;
+        }
+    }
+
+
+    // For Android, need to get the EGL_NATIVE_VISUAL_ID and set it using ANativeWindow_setBuffersGeometry
+    {
+        EGLint format = 0;
+        eglGetConfigAttrib(engine->display, config, EGL_NATIVE_VISUAL_ID, &format);
+        ANativeWindow_setBuffersGeometry(engine->app->window, 0, 0, format);
+    }
+
+    // Create a surface
+    engine->surface = eglCreateWindowSurface(engine->display, config, engine->app->window, NULL);
+
+    if (engine->surface == EGL_NO_SURFACE) {
+        return GL_FALSE;
+    }
+
+    eglQuerySurface(engine->display, engine->surface, EGL_WIDTH, &(engine->width));
+    eglQuerySurface(engine->display, engine->surface, EGL_HEIGHT, &(engine->height));
+
+
+    // Create a GL context
+    engine->context = eglCreateContext(engine->display, config,EGL_NO_CONTEXT, contextAttribs);
+
+    if (engine->context == EGL_NO_CONTEXT) {
+        return GL_FALSE;
+    }
+
+    // Make the context current
+    if (!eglMakeCurrent(engine->display, engine->surface, engine->surface, engine->context)) {
+        return GL_FALSE;
+    }
+    return GL_TRUE;
+}
+
+
+///
+// Initialize the shader and program object
+//
+int init(Engine *esContext) {
+    char vShaderStr[] =
+            "#version 300 es                          \n"
+            "layout(location = 0) in vec4 vPosition;  \n"
+            "void main()                              \n"
+            "{                                        \n"
+            "   gl_Position = vPosition;              \n"
+            "}                                        \n";
+
+    char fShaderStr[] =
+            "#version 300 es                              \n"
+            "precision mediump float;                     \n"
+            "out vec4 fragColor;                          \n"
+            "void main()                                  \n"
+            "{                                            \n"
+            "   fragColor = vec4 ( 1.0, 0.8, 0.0, 1.0 );  \n"
+            "}                                            \n";
+
+    GLuint vertexShader;
+    GLuint fragmentShader;
+    GLuint programObject;
+    GLint linked;
+
+    // Load the vertex/fragment shaders
+    vertexShader = load_shader(GL_VERTEX_SHADER, vShaderStr);
+    fragmentShader = load_shader(GL_FRAGMENT_SHADER, fShaderStr);
+
+    // Create the program object
+    programObject = glCreateProgram();
+
+    if (programObject == 0) {
+        return 0;
+    }
+
+    glAttachShader(programObject, vertexShader);
+    glAttachShader(programObject, fragmentShader);
+
+    // Link the program
+    glLinkProgram(programObject);
+
+    // Check the link status
+    glGetProgramiv(programObject, GL_LINK_STATUS, &linked);
+
+    if (!linked) {
+        GLint infoLen = 0;
+
+        glGetProgramiv(programObject, GL_INFO_LOG_LENGTH, &infoLen);
+
+        if (infoLen > 1) {
+            char *infoLog = static_cast<char *>(malloc(sizeof(char) * infoLen));
+
+            glGetProgramInfoLog(programObject, infoLen, NULL, infoLog);
+            LOGE("Error linking program:\n%s\n", infoLog);
+            free(infoLog);
+        }
+
+        glDeleteProgram(programObject);
+        return FALSE;
+    }
+
+    // Store the program object
+    esContext->programObject = programObject;
+
+    glClearColor(1.0f, 1.0f, 1.0f, 0.0f);
+    return TRUE;
+}
+
+
 /**
  * Just the current frame in the display.
  */
-static void engine_draw_frame(struct Engine *engine) {
+static void engine_draw_frame(Engine *engine) {
     if (engine->display == nullptr) {
         // No display.
         return;
     }
 
     // Just fill the screen with a color.
-    glClearColor(((float) engine->state.x) / engine->width, engine->state.angle,
-                 ((float) engine->state.y) / engine->height, 1);
-    glClear(GL_COLOR_BUFFER_BIT);
+//    glClearColor(((float) engine->state.x) / engine->width, engine->state.angle,
+//                 ((float) engine->state.y) / engine->height, 1);
+//    glClear(GL_COLOR_BUFFER_BIT);
+//
+    draw_triangle(engine);
+//    glClearColor(1.0f, 0, 0, 0.0f);
 
+    // !!!!! Must do after draw
     eglSwapBuffers(engine->display, engine->surface);
+
 }
 
 /**
  * Tear down the EGL context currently associated with the display.
  */
-static void engine_term_display(struct Engine *engine) {
+static void engine_term_display(Engine *engine) {
     if (engine->display != EGL_NO_DISPLAY) {
         eglMakeCurrent(engine->display, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
         if (engine->context != EGL_NO_CONTEXT) {
@@ -200,7 +387,7 @@ static void engine_term_display(struct Engine *engine) {
  * Process the next input event.
  */
 static int32_t engine_handle_input(struct android_app *app, AInputEvent *event) {
-    auto *engine = (struct Engine *) app->userData;
+    auto *engine = (Engine *) app->userData;
     if (AInputEvent_getType(event) == AINPUT_EVENT_TYPE_MOTION) {
         engine->animating = 1;
         engine->state.x = AMotionEvent_getX(event, 0);
@@ -225,7 +412,9 @@ static void engine_handle_cmd(struct android_app *app, int32_t cmd) {
         case APP_CMD_INIT_WINDOW:
             // The window is being shown, get it ready.
             if (engine->app->window != nullptr) {
-                engine_init_display(engine);
+                esCreateWindow(engine, "测试", ES_WINDOW_RGB);
+//                engine_init_display(engine);
+                init(engine);
                 engine_draw_frame(engine);
             }
             break;
@@ -266,7 +455,7 @@ static void engine_handle_cmd(struct android_app *app, int32_t cmd) {
  *    for Android-N and before, when compiling with NDK-r15
  */
 #include <dlfcn.h>
-#include <esUtil.h>
+
 
 ASensorManager *AcquireASensorManagerInstance(android_app *app) {
 
@@ -315,6 +504,7 @@ ASensorManager *AcquireASensorManagerInstance(android_app *app) {
  * event loop for receiving input events and doing other things.
  */
 void android_main(struct android_app *state) {
+
     struct Engine engine{};
 
     memset(&engine, 0, sizeof(engine)); // 初始化 0，C 语言没有默认初始化的操作。
@@ -391,5 +581,3 @@ void android_main(struct android_app *state) {
     }
 }
 //END_INCLUDE(all)
-
-extern int esMain(ESContext *esContext);
