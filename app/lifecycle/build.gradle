@@ -4,7 +4,6 @@ apply plugin: 'kotlin-android-extensions'
 
 android {
     compileSdkVersion rootProject.ext.sdk_version
-    buildToolsVersion rootProject.ext.build_tools_version
 
     defaultConfig {
         applicationId "tech.yaowen.lifecycle"

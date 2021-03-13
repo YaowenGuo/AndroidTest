@@ -5,7 +5,6 @@ apply plugin: "androidx.navigation.safeargs"
 
 android {
     compileSdkVersion rootProject.ext.sdk_version
-    buildToolsVersion rootProject.ext.build_tools_version
 
     defaultConfig {
         applicationId "tech.yaowen.media"
