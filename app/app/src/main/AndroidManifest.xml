@@ -13,23 +13,28 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".lifecycle.ActivityB"
-            android:launchMode="singleTop">
-
-        </activity>
-        <activity
-            android:name=".lifecycle.ActivityA"
-            android:label="@string/title_activity_activity"
-            android:theme="@style/AppTheme.NoActionBar"
-            android:launchMode="singleTask">
+        <activity android:name=".dialog.TestDialogActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".intercept.InterceptActivity">
+        <activity
+            android:name=".lifecycle.ActivityB"
+            android:launchMode="singleTop"></activity>
+        <activity
+            android:name=".lifecycle.ActivityA"
+            android:label="@string/title_activity_activity"
+            android:launchMode="singleTask"
+            android:theme="@style/AppTheme.NoActionBar">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
         </activity>
+        <activity android:name=".intercept.InterceptActivity"></activity>
         <activity android:name=".ui.TouchActivity" />
         <activity android:name=".ui.service.ServiceTestActivity" />
         <activity android:name=".ui.workmanager.JobQueueActivity">

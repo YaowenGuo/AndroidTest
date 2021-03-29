@@ -124,3 +124,50 @@ GLuint load_shader(GLenum type, const char *shaderSrc) {
 
     return shader;
 }
+
+void localGetConfigAttrib(EGLDisplay dpy, EGLConfig config, EGLint attribute, EGLint *value) {
+    if (!eglGetConfigAttrib(dpy, config, attribute, value)) {
+        *value = -1;
+    }
+}
+
+GLuint printEGLConfig(EGLDisplay display) {
+    EGLint numConfigs;
+    LOGE("OPENGL: SUCCESS size: pring");
+    if (eglGetConfigs(display, nullptr, 0, &numConfigs)) {
+        std::unique_ptr<EGLConfig[]> supportedConfigs(new EGLConfig[numConfigs]);
+        assert(supportedConfigs);
+        eglGetConfigs(display, supportedConfigs.get(), numConfigs, &numConfigs);
+        LOGE("OPENGL: SUCCESS size: %d", numConfigs);
+
+        LOGI("|| -------- | ----------- | -------- | ---------- | --------- | ---------- | ---------- |");
+        LOGI("||  Config  | BUFFER_SIZE | RED_SIZE | GREEN_SIZE | BLUE_SIZE | DEPTH_SIZE | -----------|");
+        auto i = 0;
+        for (; i < numConfigs; i++) {
+            auto &cfg = supportedConfigs[i];
+            EGLint id;
+            EGLint bufferSize;
+            EGLint r, g, b, d;
+            localGetConfigAttrib(display, cfg, EGL_CONFIG_ID, &id);
+            localGetConfigAttrib(display, cfg, EGL_BUFFER_SIZE, &bufferSize);
+            localGetConfigAttrib(display, cfg, EGL_RED_SIZE, &r);
+            eglGetConfigAttrib(display, cfg, EGL_GREEN_SIZE, &g);
+            eglGetConfigAttrib(display, cfg, EGL_BLUE_SIZE, &b);
+            eglGetConfigAttrib(display, cfg, EGL_DEPTH_SIZE, &d);
+            LOGI("|| %8d | %16d | %12d | %12d | %12d | %12d ", id, bufferSize, r, g, b, d);
+        }
+        LOGI("|| -------- | ----------- | -------- | ---------- | --------- | ---------- | ---------- |");
+        return EGL_TRUE;
+    } else {
+        EGLint error = eglGetError();
+        if (error == EGL_NOT_INITIALIZED) {
+            LOGE("OPENGL: EGL_NOT_INITIALIZED");
+        } else if (error == EGL_BAD_PARAMETER) {
+            LOGE("OPENGL: EGL_NOT_INITIALIZED");
+        } else {
+            LOGE("OPENGL: get configs error.");
+        }
+        return GL_FALSE;
+    }
+}
+

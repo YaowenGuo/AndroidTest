@@ -21,6 +21,8 @@ public class TestEnqueue {
     void run(String url) throws IOException {
         Request request = new Request.Builder()
                 .url(url)
+                .addHeader("token", "....")
+                .
                 .build();
 
         client.newCall(request)

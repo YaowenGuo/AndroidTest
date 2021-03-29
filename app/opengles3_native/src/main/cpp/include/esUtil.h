@@ -45,7 +45,7 @@
 #include <GLES3/gl3.h>
 #include <EGL/egl.h>
 #include <EGL/eglext.h>
-
+#include <memory>
 
 
 #ifndef OPENGLE_ES_UTILS_H
@@ -116,5 +116,8 @@ typedef struct Engine Engine;
 // compile the shader.
 //
 GLuint load_shader(GLenum type, const char *shaderSrc);
+
+
+GLuint printEGLConfig(EGLDisplay display);
 
 #endif

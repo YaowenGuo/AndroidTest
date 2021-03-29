@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="BottomSheet"></style>
+
+    <style name="BottomSheet.Popup">
+        <item name="android:windowEnterAnimation">@anim/pop_in_bottom_up</item>
+        <item name="android:windowExitAnimation">@anim/pop_out_up_down</item>
+    </style>
+</resources>

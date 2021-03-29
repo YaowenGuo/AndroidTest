@@ -226,6 +226,9 @@ GLboolean esCreateWindow(Engine *engine, const char *title, GLuint flags) {
                 EGL_NONE
         };
 
+        // 打印配置
+        printEGLConfig(engine->display);
+
         // Choose config
         if (!eglChooseConfig(engine->display, attribList, &config, 1, &numConfigs)) {
             return GL_FALSE;
@@ -256,7 +259,7 @@ GLboolean esCreateWindow(Engine *engine, const char *title, GLuint flags) {
 
 
     // Create a GL context
-    engine->context = eglCreateContext(engine->display, config,EGL_NO_CONTEXT, contextAttribs);
+    engine->context = eglCreateContext(engine->display, config, EGL_NO_CONTEXT, contextAttribs);
 
     if (engine->context == EGL_NO_CONTEXT) {
         return GL_FALSE;
@@ -553,9 +556,9 @@ void android_main(struct android_app *state) {
                     ASensorEvent event;
                     while (ASensorEventQueue_getEvents(engine.sensorEventQueue,
                                                        &event, 1) > 0) {
-                        LOGI("accelerometer: x=%f y=%f z=%f",
-                             event.acceleration.x, event.acceleration.y,
-                             event.acceleration.z);
+//                        LOGI("accelerometer: x=%f y=%f z=%f",
+//                             event.acceleration.x, event.acceleration.y,
+//                             event.acceleration.z);
                     }
                 }
             }

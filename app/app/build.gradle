@@ -62,6 +62,7 @@ dependencies {
 //    annotationProcessor project(path: ':lib_butter_knife')
 
     implementation project(':lib:33_lib_annotations')
+    implementation project(':android_lib:lib_share')
     kapt project(':lib:33_lib_processor')
 
     implementation "androidx.lifecycle:lifecycle-process:2.3.0-alpha05"
