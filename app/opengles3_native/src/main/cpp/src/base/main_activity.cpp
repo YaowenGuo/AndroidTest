@@ -193,7 +193,10 @@ GLboolean esCreateWindow(Engine *engine, const char *title, GLuint flags) {
     EGLConfig config;
     EGLint majorVersion;
     EGLint minorVersion;
-    EGLint contextAttribs[] = {EGL_CONTEXT_CLIENT_VERSION, 3, EGL_NONE};
+    EGLint contextAttribs[] = {
+            EGL_CONTEXT_CLIENT_VERSION, 3,
+            EGL_NONE
+    };
 
     // For Android, get the width/height from the window rather than what the
     // application requested.

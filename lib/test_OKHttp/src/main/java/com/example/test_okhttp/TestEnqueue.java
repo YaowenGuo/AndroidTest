@@ -22,7 +22,6 @@ public class TestEnqueue {
         Request request = new Request.Builder()
                 .url(url)
                 .addHeader("token", "....")
-                .
                 .build();
 
         client.newCall(request)
