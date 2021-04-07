@@ -49,7 +49,7 @@ class SignalingServiceActivity : AppCompatActivity(), SignalingClient.Callback {
         Log.e("webrtc_albert", "bye $msg")
     }
 
-    override fun onSelfJoined() {
+    override fun onJoinedRoom() {
         Log.e("webrtc_albert", "self joined")
     }
 
