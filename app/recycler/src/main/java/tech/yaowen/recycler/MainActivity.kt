@@ -11,7 +11,6 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.blankj.utilcode.util.ScreenUtils
 import com.hhl.gridpagersnaphelper.GridPagerSnapHelper
-import com.hhl.recyclerviewindicator.OnPageChangeListener
 
 class MainActivity : AppCompatActivity() {
 

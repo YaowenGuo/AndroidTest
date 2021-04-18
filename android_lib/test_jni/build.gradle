@@ -1,38 +1,26 @@
-apply plugin: 'com.android.library'
-apply plugin: 'kotlin-android'
-apply plugin: 'kotlin-android-extensions'
+apply from:"../android_lib_basic.gradle"
 
 android {
-    compileSdkVersion rootProject.ext.sdk_version
-
     defaultConfig {
-        minSdkVersion rootProject.ext.min_sdk_version
-        targetSdkVersion rootProject.ext.sdk_version
-        versionCode rootProject.ext.app_version
-        versionName "$version_name"
+        /*ndk {
+            moduleName "ffmpeg"  // 指定连接时 c 动态链接库的名字
+            // 指定链接哪些架构的库，会根据用于不同架构的apk链接不同的类型
+            abiFilters 'armeabi-v7a','arm64-v8a', 'x86', 'x86_64'
+        }
+        sourceSets.main {
+            jni.srcDirs = []
+            // 指定so库的位置，用于生成apk时链接时进apk，这里指定了两个。
+            jniLibs.srcDirs = ['src/main/jniLibs', 'src/main/libs']
 
-        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
-        consumerProguardFiles "consumer-rules.pro"
+        }*/
 
-
-    }
-
-    sourceSets {
-        main {
-//            manifest.srcFile 'src/main/AndroidManifest.xml'
-//            java.srcDir 'src'
-//            res.srcDir 'res'
-//            assets.srcDir 'assets'
-
-//            jniLibs.srcDir 'src/main/libs'
-//            jni.srcDirs = []           //disable automatic ndk-build call
-            jni.srcDirs = ['src/main/cpp']
-
-//            jniLibs.srcDirs = ['libs']
+        externalNativeBuild() {
+            cmake {
+                abiFilters 'armeabi-v7a', 'arm64-v8a', 'x86', 'x86_64' //指定编译为 armeabi-v7a
+            }
         }
     }
 
-    ndkVersion '21.3.6528147'
     externalNativeBuild {
         cmake {
             path "src/main/cpp/CMakeLists.txt"
@@ -40,10 +28,9 @@ android {
         }
     }
 
-    buildTypes {
-        release {
-            minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+    sourceSets {
+        main {
+            jni.srcDirs = ['src/main/cpp']
         }
     }
 }

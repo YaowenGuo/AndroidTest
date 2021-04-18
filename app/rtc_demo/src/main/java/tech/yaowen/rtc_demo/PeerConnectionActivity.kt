@@ -22,7 +22,6 @@ class PeerConnectionActivity : BaseActivity(), SignalingClient.Callback {
     val eglBaseContext = EglBase.create().eglBaseContext
     var videoTrack: VideoTrack? = null
     private var joined = false
-    private var room_name: String = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -35,8 +34,7 @@ class PeerConnectionActivity : BaseActivity(), SignalingClient.Callback {
 
     private fun joinRoom() {
         JoinRoomDialog(this, JoinRoomDialog.OnSubmitListener {
-            room_name = it
-            SignalingClient.get(this)
+            SignalingClient[this]
                 .setCallback(this)
                 .join(it)
 
@@ -134,7 +132,7 @@ class PeerConnectionActivity : BaseActivity(), SignalingClient.Callback {
 
             override fun onIceCreate(iceCandidate: IceCandidate) {
                 // 通过 Singling 服务器发送 ice。对方接收到后设置。
-                peerConnection.addIceCandidate(iceCandidate)
+                SignalingClient[this@PeerConnectionActivity].sendIceCandidate(iceCandidate);
             }
 
             override fun onAddMediaStream(mediaStream: MediaStream) {

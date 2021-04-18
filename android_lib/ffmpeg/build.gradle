@@ -1,19 +1,7 @@
-apply plugin: 'com.android.library'
-apply plugin: 'kotlin-android'
-apply plugin: 'kotlin-android-extensions'
+apply from:"../android_lib_basic.gradle"
 
 android {
-    compileSdkVersion rootProject.ext.sdk_version
-
     defaultConfig {
-        minSdkVersion rootProject.ext.min_sdk_version
-        targetSdkVersion rootProject.ext.sdk_version
-        versionCode rootProject.ext.app_version
-        versionName "$version_name"
-
-        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
-        consumerProguardFiles "consumer-rules.pro"
-
         /*ndk {
             moduleName "ffmpeg"  // 指定连接时 c 动态链接库的名字
             // 指定链接哪些架构的库，会根据用于不同架构的apk链接不同的类型
@@ -33,21 +21,12 @@ android {
         }
     }
 
-    buildTypes {
-        release {
-            minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-        }
-    }
-//    ndkVersion '21.3.6528147'
     externalNativeBuild {
         cmake {
             path "src/main/cpp/CMakeLists.txt"
             version "3.10.2"
         }
     }
-
-
 }
 
 dependencies {
