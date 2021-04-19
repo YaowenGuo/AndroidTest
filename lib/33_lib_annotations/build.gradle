@@ -1,8 +1,1 @@
-apply plugin: 'java-library'
-
-dependencies {
-    implementation fileTree(dir: 'libs', include: ['*.jar'])
-}
-
-sourceCompatibility = "7"
-targetCompatibility = "7"
+apply from:"../java_lib_basic.gradle"

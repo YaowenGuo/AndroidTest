@@ -1,9 +1,7 @@
-apply plugin: 'java-library'
-apply plugin: 'kotlin'
+apply from:"../java_lib_basic.gradle"
+
 
 dependencies {
-    implementation fileTree(dir: 'libs', include: ['*.jar'])
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
     implementation 'com.squareup.retrofit2:retrofit:2.9.0'
     implementation "com.squareup.okhttp3:okhttp:$okhttp_version"
     implementation "io.reactivex.rxjava3:rxkotlin:3.0.0"
@@ -18,6 +16,3 @@ compileKotlin {
         jvmTarget = "1.8"
     }
 }
-
-sourceCompatibility = "8"
-targetCompatibility = "8"
