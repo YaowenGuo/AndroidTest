@@ -4,6 +4,9 @@ android {
     defaultConfig {
         applicationId "tech.yaowen.customview"
     }
+    dataBinding {
+        enabled = true
+    }
 }
 
 dependencies {

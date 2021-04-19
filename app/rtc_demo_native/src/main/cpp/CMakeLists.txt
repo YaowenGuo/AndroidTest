@@ -5,6 +5,7 @@
 
 cmake_minimum_required(VERSION 3.4.1)
 
+project("rtc_demo")
 
 ##官方标准配置
 set(${CMAKE_C_FLAGS}, "${CMAKE_C_FLAGS}")
@@ -45,12 +46,14 @@ add_library( # Sets the name of the library.
         # Provides a relative path to your source file(s).
         ${allCpp})
 
+#target_include_directories(webrtc_lib PUBLIC "../../../../../lib/webrtc/")
 
 # 引入FFmpeg的头文件
 # 导入头文件仅能是目录，而不能直接指定 .h 文件。
 include_directories(
         ${ANDROID_NDK}/sources/android/native_app_glue
         ${CMAKE_SOURCE_DIR}/include
+        "../../../../../lib/webrtc/"
 )
 
 

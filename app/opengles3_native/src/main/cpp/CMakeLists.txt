@@ -4,7 +4,11 @@
 # Sets the minimum version of CMake required to build the native library.
 
 cmake_minimum_required(VERSION 3.4.1)
+# specify the C++ standard
+set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD_REQUIRED True)
 
+project("gl_test")
 
 ##官方标准配置
 set(${CMAKE_C_FLAGS}, "${CMAKE_C_FLAGS}")
@@ -37,7 +41,7 @@ file(GLOB allCpp
 
 
 add_library( # Sets the name of the library.
-        gl_es
+        gl_test
 
         # Sets the library as a shared library.
         SHARED
@@ -48,10 +52,12 @@ add_library( # Sets the name of the library.
 
 # 引入FFmpeg的头文件
 # 导入头文件仅能是目录，而不能直接指定 .h 文件。
-include_directories(
+target_include_directories(gl_test PUBLIC
         ${ANDROID_NDK}/sources/android/native_app_glue
+        )
+target_include_directories(gl_test PUBLIC
         ${CMAKE_SOURCE_DIR}/include
-)
+        )
 
 
 # Searches for a specified prebuilt library and stores the path as a
@@ -72,7 +78,7 @@ find_library( # Sets the name of the path variable.
 # build script, prebuilt third-party libraries, or system libraries.
 
 target_link_libraries( # Specifies the target library.
-        gl_es
+        gl_test
         ${OPENGL_LIB}
         android
         native_app_glue
