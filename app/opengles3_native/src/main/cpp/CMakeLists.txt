@@ -34,11 +34,12 @@ set(CMAKE_SHARED_LINKER_FLAGS
 
 #找到包含所有的cpp文件
 file(GLOB allCpp
-        src/*.cpp
-        src/*.c
-        src/base/*.cpp
+        base/*.cpp
+        main/*.cpp
         )
 
+add_subdirectory(step2)
+list(APPEND EXTRA_LIBS triangle)
 
 add_library( # Sets the name of the library.
         gl_test
@@ -54,8 +55,6 @@ add_library( # Sets the name of the library.
 # 导入头文件仅能是目录，而不能直接指定 .h 文件。
 target_include_directories(gl_test PUBLIC
         ${ANDROID_NDK}/sources/android/native_app_glue
-        )
-target_include_directories(gl_test PUBLIC
         ${CMAKE_SOURCE_DIR}/include
         )
 
@@ -79,6 +78,7 @@ find_library( # Sets the name of the path variable.
 
 target_link_libraries( # Specifies the target library.
         gl_test
+        PUBLIC
         ${OPENGL_LIB}
         android
         native_app_glue
@@ -86,4 +86,5 @@ target_link_libraries( # Specifies the target library.
         GLESv3
         # Links the target library to the log library
         # included in the NDK.
-        ${log-lib})
+        ${log-lib}
+        ${EXTRA_LIBS})

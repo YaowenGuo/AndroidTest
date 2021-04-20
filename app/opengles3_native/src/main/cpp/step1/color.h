@@ -2,8 +2,8 @@
 // Created by Albert on 2020/9/14.
 //
 
-#ifndef ANDROIDTEST_NATIVE_COLOR_H
-#define ANDROIDTEST_NATIVE_COLOR_H
+#ifndef ANDROIDTEST_COLOR_H
+#define ANDROIDTEST_COLOR_H
 
 extern "C" JNIEXPORT void JNICALL
 surfaceCreated(
@@ -18,4 +18,4 @@ extern "C" JNIEXPORT void JNICALL
 onDrawFrame(
         JNIEnv *env, jobject thiz);
 
-#endif //ANDROIDTEST_NATIVE_COLOR_H
+#endif //ANDROIDTEST_COLOR_H

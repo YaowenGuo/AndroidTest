@@ -1,4 +1,4 @@
-#include "esUtil.h"
+#include "../base/esUtil.h"
 
 #ifndef _STEP1_TRIANGLE_H_
 #define _STEP1_TRIANGLE_H_

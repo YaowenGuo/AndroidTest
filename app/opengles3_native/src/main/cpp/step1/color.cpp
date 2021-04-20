@@ -6,7 +6,7 @@
 #include <EGL/egl.h>
 #include <GLES3/gl3.h>
 
-#include "../include/native_color.h"
+#include "color.h"
 
 
 /**

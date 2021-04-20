@@ -31,9 +31,8 @@ set(CMAKE_SHARED_LINKER_FLAGS
 
 #找到包含所有的cpp文件
 file(GLOB allCpp
-        src/*.cpp
-        src/*.c
-        src/base/*.cpp
+        base/*.cpp
+        main/*.cpp
         )
 
 
@@ -50,10 +49,10 @@ add_library( # Sets the name of the library.
 
 # 引入FFmpeg的头文件
 # 导入头文件仅能是目录，而不能直接指定 .h 文件。
-include_directories(
+target_include_directories(BEFORE
         ${ANDROID_NDK}/sources/android/native_app_glue
         ${CMAKE_SOURCE_DIR}/include
-        "../../../../../lib/webrtc/"
+        ${CMAKE_CURRENT_SOURCE_DIR}/../../../../../lib/webrtc/
 )
 
 
