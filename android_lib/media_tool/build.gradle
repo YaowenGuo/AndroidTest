@@ -1,25 +1,15 @@
 apply from:"../android_lib_basic.gradle"
 
 dependencies {
-    implementation fileTree(dir: "libs", include: ["*.jar"])
-    implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
-    implementation "androidx.core:core-ktx:$core_ktx_version"
-    implementation "androidx.appcompat:appcompat:$appcompat_version"
     // EXIF Interface
-    implementation "androidx.exifinterface:exifinterface:$exifinterface_version"
-    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutine_version"
+    implementation deps.exifinterface
+    implementation deps.kotlinx_coroutines
 
-    implementation "androidx.camera:camera-camera2:$camerax_version"
+    implementation deps.camera2
     // If you want to additionally use the CameraX Lifecycle library
-    implementation "androidx.camera:camera-lifecycle:$camerax_version"
+    implementation deps.camera_lifecycle
     // If you want to additionally use the CameraX View class
-    implementation "androidx.camera:camera-view:$camerax_view_version"
+    implementation deps.camera_view
     // If you want to additionally use the CameraX Extensions library
-    implementation "androidx.camera:camera-extensions:$camerax_view_version"
-
-
-    testImplementation "junit:junit:$junit_version"
-    androidTestImplementation "androidx.test.ext:junit:$ext_junit_version"
-    androidTestImplementation "androidx.test.espresso:espresso-core:$espresso_core_version"
-
+    implementation deps.camera_extensions
 }

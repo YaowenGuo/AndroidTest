@@ -1,5 +1,5 @@
 apply from:"../java_lib_basic.gradle"
 
 dependencies {
-    implementation "com.squareup.okhttp3:okhttp:$okhttp_version"
+    implementation deps.okhttp
 }

@@ -3,5 +3,5 @@ apply from:"../java_lib_basic.gradle"
 
 dependencies {
     implementation project(':lib:33_lib_annotations')
-    implementation 'com.squareup:javapoet:1.11.1'
+    implementation deps.javapoet
 }

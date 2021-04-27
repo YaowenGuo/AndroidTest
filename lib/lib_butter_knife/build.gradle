@@ -2,6 +2,6 @@ apply from:"../java_lib_basic.gradle"
 
 
 dependencies {
-    implementation 'com.squareup:javapoet:1.12.1'
+    implementation deps.javapoet
     implementation project(path: ':lib:test_annotation')
 }

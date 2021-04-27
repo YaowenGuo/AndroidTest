@@ -8,16 +8,16 @@ android {
 
 dependencies {
     implementation fileTree(dir: "libs", include: ["*.jar"])
-    implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
-    implementation "androidx.core:core-ktx:$core_ktx_version"
-    implementation "androidx.appcompat:appcompat:$appcompat_version"
-    testImplementation "junit:junit:$junit_version"
-    androidTestImplementation "androidx.test.ext:junit:$ext_junit_version"
-    androidTestImplementation "androidx.test.espresso:espresso-core:$espresso_core_version"
+    implementation deps.appcompat
+    implementation deps.constraintlayout
+    implementation deps.kotlin_std
+    implementation deps.core_ktx
+    implementation deps.viewmodel_ktx
+    implementation deps.exoplayer
 
+    testImplementation deps.junit
+    androidTestImplementation deps.ext_junit
+    androidTestImplementation deps.espresso
 
-    implementation "androidx.constraintlayout:constraintlayout:$constraintlayout_version"
     implementation project(":android_lib:ffmpeg")
-    implementation "com.google.android.exoplayer:exoplayer:$exoplayer_version"
-    implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycle_version"
 }
