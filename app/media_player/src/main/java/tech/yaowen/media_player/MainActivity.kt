@@ -8,7 +8,6 @@ import com.google.android.exoplayer2.source.MediaSource
 import com.google.android.exoplayer2.source.MediaSourceFactory
 import com.google.android.exoplayer2.source.ProgressiveMediaSource
 import com.google.android.exoplayer2.source.dash.DashMediaSource
-import kotlinx.android.synthetic.main.activity_main.view.*
 import tech.yaowen.ffmpeg.libavutil.AVUtil
 import tech.yaowen.media_player.databinding.ActivityMainBinding
 

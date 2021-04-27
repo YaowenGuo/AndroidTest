@@ -70,7 +70,6 @@ allprojects {
     repositories {
         mavenLocal()
         google()
-        jcenter()
         maven {
             url "https://plugins.gradle.org/m2/"
         }

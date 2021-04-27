@@ -27,9 +27,6 @@ import androidx.core.view.isVisible
 import androidx.databinding.DataBindingUtil
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.hencoder.a33_lib_annotations.BindView
-import kotlinx.android.synthetic.main.activity_main.*
-import kotlinx.android.synthetic.main.app_bar_main.*
-import kotlinx.android.synthetic.main.content_main.*
 import tech.yaowen.customview.databinding.ActivityMainBinding
 import tech.yaowen.customview.dialog.TransparentBgDialog
 import tech.yaowen.customview.ui.TouchActivity
@@ -39,6 +36,7 @@ import tech.yaowen.customview.ui.TouchActivity
 
 class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
     private lateinit var rocketAnimation: AnimationDrawable
+    lateinit var binding: ActivityMainBinding
 
     @JvmField
     @BindView(R.id.textView)
@@ -46,10 +44,11 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val binding = DataBindingUtil.setContentView<ActivityMainBinding>(this, R.layout.activity_main)
+        binding = ActivityMainBinding.inflate(layoutInflater);
+        setContentView(binding.root)
 //        setSupportActionBar(toolbar)
 
-        fab.setOnClickListener { view ->
+        binding.main.fab.setOnClickListener { view ->
 //            Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
 //                .setAction("Action", null).show()
             val intent = Intent(this@MainActivity, TouchActivity::class.java)
@@ -57,12 +56,12 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         }
 
         val toggle = ActionBarDrawerToggle(
-            this, drawer_layout, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close
+            this, binding.drawerLayout, binding.main.toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close
         )
-        drawer_layout.addDrawerListener(toggle)
+        binding.drawerLayout.addDrawerListener(toggle)
         toggle.syncState()
 //        main.findViewById<>()
-        nav_view.setNavigationItemSelectedListener(this)
+        binding.navView.setNavigationItemSelectedListener(this)
 
 
 
@@ -73,7 +72,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 //            .start()
 
 
-        val objAnim = ObjectAnimator.ofFloat(imageAnim, "x", 100.dpToPx())
+        val objAnim = ObjectAnimator.ofFloat(binding.main.content.imageAnim, "x", 100.dpToPx())
 
         objAnim.startDelay = 1000
         objAnim.reverse()
@@ -93,11 +92,11 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         val layoutAnim = LayoutTransition()
 //        layoutAnim.setAnimator()
 
-        visibleBtn.setOnClickListener {
-            if (imageAnim.isVisible) {
-                imageAnim.visibility = View.GONE
+        binding.main.content.visibleBtn.setOnClickListener {
+            if (binding.main.content.imageAnim.isVisible) {
+                binding.main.content.imageAnim.visibility = View.GONE
             } else {
-                imageAnim.visibility = View.VISIBLE
+                binding.main.content.imageAnim.visibility = View.VISIBLE
             }
         }
 
@@ -105,15 +104,15 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         val holder2 = PropertyValuesHolder.ofFloat("scaleY", 1f)
         val holder3 = PropertyValuesHolder.ofFloat("alpha", 1f)
 
-        val animator = ObjectAnimator.ofPropertyValuesHolder(visibleBtn, holder1, holder2, holder3)
+        val animator = ObjectAnimator.ofPropertyValuesHolder(binding.main.content.visibleBtn, holder1, holder2, holder3)
         animator.start()
 
 
     }
 
     override fun onBackPressed() {
-        if (drawer_layout.isDrawerOpen(GravityCompat.START)) {
-            drawer_layout.closeDrawer(GravityCompat.START)
+        if (binding.drawerLayout.isDrawerOpen(GravityCompat.START)) {
+            binding.drawerLayout.closeDrawer(GravityCompat.START)
         } else {
             super.onBackPressed()
         }
@@ -158,7 +157,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             }
         }
 
-        drawer_layout.closeDrawer(GravityCompat.START)
+        binding.drawerLayout.closeDrawer(GravityCompat.START)
         return true
     }
 }

@@ -33,6 +33,7 @@ set(CMAKE_SHARED_LINKER_FLAGS
 file(GLOB allCpp
         base/*.cpp
         main/*.cpp
+        peer/*.cpp
         )
 
 
@@ -45,16 +46,18 @@ add_library( # Sets the name of the library.
         # Provides a relative path to your source file(s).
         ${allCpp})
 
-#target_include_directories(webrtc_lib PUBLIC "../../../../../lib/webrtc/")
+
+include_directories(
+        "../../../../../lib/webrtc/third_party/abseil-cpp"
+        "../../../../../lib/webrtc"
+)
 
 # 引入FFmpeg的头文件
 # 导入头文件仅能是目录，而不能直接指定 .h 文件。
-target_include_directories(BEFORE
+target_include_directories(webrtc PUBLIC
         ${ANDROID_NDK}/sources/android/native_app_glue
         ${CMAKE_SOURCE_DIR}/include
-        ${CMAKE_CURRENT_SOURCE_DIR}/../../../../../lib/webrtc/
 )
-
 
 # Searches for a specified prebuilt library and stores the path as a
 # variable. Because CMake includes system libraries in the search path by
