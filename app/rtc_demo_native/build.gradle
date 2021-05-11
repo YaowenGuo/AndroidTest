@@ -3,8 +3,9 @@ apply from:"../app_basic.gradle"
 android {
     defaultConfig {
         applicationId "tech.yaowen.rtc_demo_native"
+        //camera2ndk only can be use above android api 24
+        minSdkVersion 24
     }
-    ndkVersion '21.3.6528147'
     externalNativeBuild {
         cmake {
             path "src/main/cpp/CMakeLists.txt"

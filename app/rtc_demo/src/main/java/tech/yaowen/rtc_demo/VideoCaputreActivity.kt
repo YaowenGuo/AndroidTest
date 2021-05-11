@@ -22,7 +22,7 @@ class VideoCaputreActivity : BaseActivity() {
         val videoCapturer = RtcEngine.INSTANCE.createCameraCapturer(this, CameraMetadata.LENS_FACING_FRONT)
         videoCapturer?.let {
             val captureId = "1"
-            // Must use save eglContext
+            // Must use same eglContext
             val eglBaseContext = EglBase.create().eglBaseContext
 
             val peerConnection = RtcEngine.INSTANCE.createPeerConnection(this)

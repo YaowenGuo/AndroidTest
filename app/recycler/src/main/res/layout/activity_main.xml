@@ -35,7 +35,6 @@
         android:textSize="13sp"
         android:gravity="center_vertical"
         tools:selected="true"
-        app:layout_constraintTop_toBottomOf="@+id/zixi_study_time_target_picker"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"

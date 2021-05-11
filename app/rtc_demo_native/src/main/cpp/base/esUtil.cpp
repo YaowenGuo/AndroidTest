@@ -136,7 +136,7 @@ GLuint printEGLConfig(EGLDisplay display) {
     LOGE("OPENGL: SUCCESS size: pring");
     if (eglGetConfigs(display, nullptr, 0, &numConfigs)) {
         std::unique_ptr<EGLConfig[]> supportedConfigs(new EGLConfig[numConfigs]);
-        assert(supportedConfigs);
+//        assert(supportedConfigs);
         eglGetConfigs(display, supportedConfigs.get(), numConfigs, &numConfigs);
         LOGE("OPENGL: SUCCESS size: %d", numConfigs);
 
