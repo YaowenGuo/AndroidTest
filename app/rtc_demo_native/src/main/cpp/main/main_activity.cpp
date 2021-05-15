@@ -34,6 +34,7 @@
 #include <android/log.h>
 #include <android_native_app_glue.h>
 #include "../base/esUtil.h"
+#include "../base/env.h"
 
 
 GLint getContextRenderableType(EGLDisplay display) {
@@ -349,21 +350,39 @@ int init(Engine *esContext) {
  * Just the current frame in the display.
  */
 static void engine_draw_frame(Engine *engine) {
-    if (engine->display == nullptr) {
-        // No display.
-        return;
-    }
+//    if (engine->display == nullptr) {
+//        // No display.
+//        return;
+//    }
 
     // Just fill the screen with a color.
 //    glClearColor(((float) engine->state.x) / engine->width, engine->state.angle,
 //                 ((float) engine->state.y) / engine->height, 1);
 //    glClear(GL_COLOR_BUFFER_BIT);
-//
+
 //    glClearColor(1.0f, 0, 0, 0.0f);
 
     // !!!!! Must do after draw
-    eglSwapBuffers(engine->display, engine->surface);
+//    eglSwapBuffers(engine->display, engine->surface);
 
+    if (rtc_demo::camera == nullptr) return;
+    AImage* image = rtc_demo::camera->nextImage();
+    if (!image) {
+        return;
+    }
+
+//    ANativeWindow_acquire(rtc_demo::app->window);
+
+    ANativeWindow_Buffer buf;
+    if (ANativeWindow_lock(rtc_demo::app->window, &buf, nullptr) < 0) {
+        rtc_demo::camera->deleteImage(image);
+        return;
+    }
+
+    rtc_demo::camera->displayImage(image, &buf);
+    rtc_demo::camera->deleteImage(image);
+    ANativeWindow_unlockAndPost(rtc_demo::app->window);
+    ANativeWindow_release(rtc_demo::app->window);
 }
 
 /**
@@ -415,10 +434,10 @@ static void engine_handle_cmd(struct android_app *app, int32_t cmd) {
         case APP_CMD_INIT_WINDOW:
             // The window is being shown, get it ready.
             if (engine->app->window != nullptr) {
-                esCreateWindow(engine, "测试", ES_WINDOW_RGB);
-//                engine_init_display(engine);
-                init(engine);
-                engine_draw_frame(engine);
+//                esCreateWindow(engine, "测试", ES_WINDOW_RGB);
+////                engine_init_display(engine);
+//                init(engine);
+//                engine_draw_frame(engine);
             }
             break;
         case APP_CMD_TERM_WINDOW:
@@ -501,34 +520,37 @@ ASensorManager *AcquireASensorManagerInstance(android_app *app) {
 }
 
 
+void initApp(struct android_app *app, void* data) {
+    app->userData = data;
+    app->onAppCmd = engine_handle_cmd;
+    app->onInputEvent = engine_handle_input;
+}
+
+
 /**
  * This is the main entry point of a native application that is using
  * android_native_app_glue.  It runs in its own thread, with its own
  * event loop for receiving input events and doing other things.
  */
-void android_main(struct android_app *state) {
-
-    struct Engine engine{};
-
+void android_main(struct android_app *app) {
+    rtc_demo::app = app;
+    Engine engine{};
     memset(&engine, 0, sizeof(engine)); // 初始化 0，C 语言没有默认初始化的操作。
-    state->userData = &engine;
-    state->onAppCmd = engine_handle_cmd;
-    state->onInputEvent = engine_handle_input;
-    engine.app = state;
-
+    engine.app = app;
+    initApp(app, &engine);
     // Prepare to monitor accelerometer
-    engine.sensorManager = AcquireASensorManagerInstance(state);
+    engine.sensorManager = AcquireASensorManagerInstance(app);
     engine.accelerometerSensor = ASensorManager_getDefaultSensor(
             engine.sensorManager,
             ASENSOR_TYPE_ACCELEROMETER);
     engine.sensorEventQueue = ASensorManager_createEventQueue(
             engine.sensorManager,
-            state->looper, LOOPER_ID_USER,
+            app->looper, LOOPER_ID_USER,
             nullptr, nullptr);
 
-    if (state->savedState != nullptr) {
-        // We are starting with a previous saved state; restore from it.
-        engine.state = *(struct saved_state *) state->savedState;
+    if (app->savedState != nullptr) {
+        // We are starting with a previous saved app; restore from it.
+        engine.state = *(struct saved_state *) app->savedState;
     }
 
     // loop waiting for stuff to do.
@@ -547,7 +569,7 @@ void android_main(struct android_app *state) {
 
             // Process this event.
             if (source != nullptr) {
-                source->process(state, source);
+                source->process(app, source);
             }
 
             // If a sensor has data, process it now.
@@ -564,23 +586,24 @@ void android_main(struct android_app *state) {
             }
 
             // Check if we are exiting.
-            if (state->destroyRequested != 0) {
+            if (app->destroyRequested != 0) {
                 engine_term_display(&engine);
                 return;
             }
         }
 
-        if (engine.animating) {
-            // Done with events; draw next animation frame.
-            engine.state.angle += .01f;
-            if (engine.state.angle > 1) {
-                engine.state.angle = 0;
-            }
+//        if (engine.animating) {
+//            // Done with events; draw next animation frame.
+//            engine.app.angle += .01f;
+//            if (engine.app.angle > 1) {
+//                engine.app.angle = 0;
+//            }
+//
+//            // Drawing is throttled to the screen update rate, so there
+//            // is no need to do timing here.
+//        }
+        engine_draw_frame(&engine);
 
-            // Drawing is throttled to the screen update rate, so there
-            // is no need to do timing here.
-            engine_draw_frame(&engine);
-        }
     }
 }
 //END_INCLUDE(all)

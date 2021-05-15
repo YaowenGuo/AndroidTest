@@ -9,14 +9,14 @@ set(CMAKE_CXX_STANDARD 17)
 project("rtc_demo")
 
 ##官方标准配置
-set(${CMAKE_C_FLAGS}, "${CMAKE_C_FLAGS}")
+#set(${CMAKE_C_FLAGS}, "${CMAKE_C_FLAGS}")
 
 add_library(native_app_glue STATIC
         ${ANDROID_NDK}/sources/android/native_app_glue/android_native_app_glue.c)
 
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fpic")
+#set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fpic")
 # now build app's shared lib
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fpic  -Wall -Werror -v -DANDROID_STL=c++_shared")
+#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fpic  -Wall -v")
 
 add_definitions("-DWEBRTC_POSIX")
 
@@ -37,8 +37,9 @@ set(CMAKE_SHARED_LINKER_FLAGS
 file(GLOB allCpp
         base/*.cpp
         main/*.cpp
-        peer/my_rtc_engine.cpp
+        peer/*.cpp
         capture/*.cpp
+        permissition/*.cpp
         )
 
 

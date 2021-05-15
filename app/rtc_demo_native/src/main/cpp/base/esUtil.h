@@ -46,7 +46,7 @@
 #include <EGL/egl.h>
 #include <EGL/eglext.h>
 #include <memory>
-
+#include <android/log.h>
 
 #ifndef OPENGLE_ES_UTILS_H
 #define OPENGLE_ES_UTILS_H
@@ -77,6 +77,26 @@
 #define LOGI(...) ((void)__android_log_print(ANDROID_LOG_INFO, "native-activity", __VA_ARGS__))
 #define LOGW(...) ((void)__android_log_print(ANDROID_LOG_WARN, "native-activity", __VA_ARGS__))
 #define LOGE(...) ((void)__android_log_print(ANDROID_LOG_ERROR, "native-activity", __VA_ARGS__))
+
+#ifndef MAX
+#define MAX(a, b)           \
+  ({                        \
+    __typeof__(a) _a = (a); \
+    __typeof__(b) _b = (b); \
+    _a > _b ? _a : _b;      \
+  })
+#define MIN(a, b)           \
+  ({                        \
+    __typeof__(a) _a = (a); \
+    __typeof__(b) _b = (b); \
+    _a < _b ? _a : _b;      \
+  })
+#endif
+
+// This value is 2 ^ 18 - 1, and is used to clamp the RGB values before their
+// ranges
+// are normalized to eight bits.
+static const int kMaxChannelValue = 262143;
 
 /**
  * Our saved state data.
@@ -109,7 +129,6 @@ struct Engine {
 };
 
 typedef struct Engine Engine;
-
 
 ///
 // Create a shader object, load the shader source, and

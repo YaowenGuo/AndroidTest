@@ -18,8 +18,6 @@ android {
 
 dependencies {
     implementation deps.appcompat
-    implementation deps.kotlin_std
-    implementation deps.core_ktx
     implementation deps.material
 
     testImplementation deps.junit

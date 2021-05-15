@@ -133,12 +133,11 @@ void localGetConfigAttrib(EGLDisplay dpy, EGLConfig config, EGLint attribute, EG
 
 GLuint printEGLConfig(EGLDisplay display) {
     EGLint numConfigs;
-    LOGE("OPENGL: SUCCESS size: pring");
     if (eglGetConfigs(display, nullptr, 0, &numConfigs)) {
         std::unique_ptr<EGLConfig[]> supportedConfigs(new EGLConfig[numConfigs]);
 //        assert(supportedConfigs);
         eglGetConfigs(display, supportedConfigs.get(), numConfigs, &numConfigs);
-        LOGE("OPENGL: SUCCESS size: %d", numConfigs);
+        LOGE("OPENGL: config size: %d", numConfigs);
 
         LOGI("|| -------- | ----------- | -------- | ---------- | --------- | ---------- | ---------- |");
         LOGI("||  Config  | BUFFER_SIZE | RED_SIZE | GREEN_SIZE | BLUE_SIZE | DEPTH_SIZE | -----------|");
@@ -170,4 +169,3 @@ GLuint printEGLConfig(EGLDisplay display) {
         return GL_FALSE;
     }
 }
-
