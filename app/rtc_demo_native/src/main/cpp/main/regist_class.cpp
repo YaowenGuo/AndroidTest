@@ -46,4 +46,3 @@ jint JNI_OnLoad(JavaVM *jvm, void *reserved) {
     jniRegisterNativeMethods(env, liveClassName, mapMethods, NELEM(mapMethods));
     return JNI_VERSION;
 }
-

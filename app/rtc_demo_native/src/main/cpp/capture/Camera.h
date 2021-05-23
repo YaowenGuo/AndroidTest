@@ -42,6 +42,8 @@ public:
     void PresentImage180(ANativeWindow_Buffer* buf, AImage* image);
     void PresentImage270(ANativeWindow_Buffer* buf, AImage* image);
     void CreateSession(ANativeWindow* previewWindow, int32_t imageRotation);
+    void OnSessionState(ACameraCaptureSession *ses, int state);
+
 private:
     ACameraDevice_stateCallbacks* initCallback();
 
@@ -50,11 +52,14 @@ private:
     android_app *_app;
     AImageReader *_imageReader = nullptr;
     const char * _cameraId = nullptr;
-    ACameraCaptureSession* captureSession_;
-    ACaptureSessionOutputContainer* outputContainer_;
+    ACameraCaptureSession* captureSession_ = nullptr;
+    ACaptureSessionOutputContainer* outputContainer_ = nullptr;
     int32_t sensitivity_;
     int64_t exposureTime_;
 
+    ACameraCaptureSession_stateCallbacks *GetSessionListener();
+
+    void StartPreview(bool start, ACaptureRequest** request);
 };
 
 

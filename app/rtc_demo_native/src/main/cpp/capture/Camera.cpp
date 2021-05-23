@@ -39,14 +39,15 @@ Camera::Camera(android_app *app, acamera_metadata_enum_acamera_lens_facing findF
     ACameraManager_getCameraIdList(_cameraManager, &cameraIds);
 
     const char *id = nullptr;
+    ACameraMetadata *metadataObj = nullptr;
     for (int i = 0; i < cameraIds->numCameras; ++i) {
         id = cameraIds->cameraIds[i];
-        ACameraMetadata *metadataObj;
         ACameraManager_getCameraCharacteristics(_cameraManager, id, &metadataObj);
 
         int32_t count = 0;
         const uint32_t *tags = nullptr;
         ACameraMetadata_getAllTags(metadataObj, &count, &tags);
+
         for (int tagIdx = 0; tagIdx < count; ++tagIdx) {
             // We are interested in entry that describes the facing of camera
             if (ACAMERA_LENS_FACING == tags[tagIdx]) {
@@ -70,6 +71,9 @@ Camera::Camera(android_app *app, acamera_metadata_enum_acamera_lens_facing findF
 
         int64_t minExposure = entry.data.i64[0];
         int64_t maxExposure = entry.data.i64[1];
+
+        ACameraMetadata_getConstEntry(metadataObj, ACAMERA_SENSOR_INFO_EXPOSURE_TIME_RANGE, &entry);
+
 
         // ISO range 感光度范围
         ACameraMetadata_getConstEntry(metadataObj, ACAMERA_SENSOR_INFO_SENSITIVITY_RANGE, &entry);
@@ -105,11 +109,13 @@ Camera::Camera(android_app *app, acamera_metadata_enum_acamera_lens_facing findF
         ACameraManager_openCamera(_cameraManager, id, initCallback(), &_cameraDevice);
     }
 
-    CreateSession(app->window, 0);
     if (_cameraDevice != nullptr) {
         _imageReader = createYuvReader();
 //        _imageReader = createJpegReader();
     }
+
+    CreateSession(app->window, 0);
+
 
     ACameraManager_deleteCameraIdList(cameraIds);
     _cameraId = id;
@@ -403,14 +409,47 @@ AImageReader *Camera::createJpegReader() {
     return reader;
 }
 
+// CaptureSession state callbacks
+void OnSessionClosed(void* ctx, ACameraCaptureSession* ses) {
+    LOGW("session %p closed", ses);
+    reinterpret_cast<Camera*>(ctx)->OnSessionState(ses, 0);
+}
+void OnSessionReady(void* ctx, ACameraCaptureSession* ses) {
+    LOGW("session %p ready", ses);
+    reinterpret_cast<Camera*>(ctx)->OnSessionState(ses, 1);
+}
+void OnSessionActive(void* ctx, ACameraCaptureSession* ses) {
+    LOGW("session %p active", ses);
+    reinterpret_cast<Camera*>(ctx)->OnSessionState(ses, 2);
+}
+
+/**
+ * Handles capture session state changes.
+ *   Update into internal session state.
+ */
+void Camera::OnSessionState(ACameraCaptureSession* ses,
+                               int state) {
+    if (!ses || ses != captureSession_) {
+        LOGW("CaptureSession is %s", (ses ? "NOT our session" : "NULL"));
+        return;
+    }
+}
+
+ACameraCaptureSession_stateCallbacks* Camera::GetSessionListener() {
+    static ACameraCaptureSession_stateCallbacks sessionListener = {
+            .context = this,
+            .onClosed = ::OnSessionClosed,
+            .onReady = ::OnSessionReady,
+            .onActive = ::OnSessionActive,
+    };
+    return &sessionListener;
+}
+
 void Camera::CreateSession(ANativeWindow* previewWindow, int32_t imageRotation) {
     // Create output from this app's ANativeWindow, and add into output container
-    ACaptureSessionOutput* sessionOutput_;
-    ACameraOutputTarget* target_;
-    ACaptureRequest* request_;
-    ACameraDevice_request_template template_;
-    int sessionSequenceId_;
-    template_ = TEMPLATE_PREVIEW;
+    ACaptureSessionOutput* sessionOutput_ = nullptr;
+    ACameraOutputTarget* target_ = nullptr;
+    ACaptureRequest* request_ = nullptr;
 
     ACaptureSessionOutputContainer_create(&outputContainer_);
     // 锁定屏幕防止被其它程序刷新导致图像混乱。
@@ -418,11 +457,11 @@ void Camera::CreateSession(ANativeWindow* previewWindow, int32_t imageRotation) 
     ACaptureSessionOutput_create(previewWindow, &sessionOutput_);
     ACaptureSessionOutputContainer_add(outputContainer_, sessionOutput_);
     ACameraOutputTarget_create(previewWindow, &target_);
-    ACameraDevice_createCaptureRequest(_cameraDevice, template_, &request_);
+    ACameraDevice_createCaptureRequest(_cameraDevice, TEMPLATE_PREVIEW, &request_);
     ACaptureRequest_addTarget(request_, target_);
 
     // Create a capture session for the given preview request
-    ACameraDevice_createCaptureSession(_cameraDevice, outputContainer_, nullptr, &captureSession_);
+    ACameraDevice_createCaptureSession(_cameraDevice, outputContainer_, GetSessionListener(), &captureSession_);
 
 
     /*
@@ -436,4 +475,15 @@ void Camera::CreateSession(ANativeWindow* previewWindow, int32_t imageRotation) 
     ACaptureRequest_setEntry_i32(request_,
                               ACAMERA_SENSOR_SENSITIVITY, 1, &sensitivity_);
     ACaptureRequest_setEntry_i64(request_,ACAMERA_SENSOR_EXPOSURE_TIME, 1, &exposureTime_);
+    StartPreview(true, &request_);
 }
+
+
+void Camera::StartPreview(bool start, ACaptureRequest** request) {
+    if (start) {
+        ACameraCaptureSession_setRepeatingRequest(captureSession_, nullptr, 1, request, nullptr);
+    } else {
+        ACameraCaptureSession_stopRepeating(captureSession_);
+    }
+}
+

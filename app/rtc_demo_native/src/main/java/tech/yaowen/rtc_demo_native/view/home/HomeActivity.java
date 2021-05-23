@@ -21,7 +21,7 @@ public class HomeActivity extends NativeActivity {
     protected void onResume() {
         super.onResume();
         getWindow().getDecorView().post(() -> {
-//            requestCamera();
+            requestCamera();
         });
     }
 

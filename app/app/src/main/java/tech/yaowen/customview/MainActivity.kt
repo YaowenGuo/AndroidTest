@@ -24,7 +24,6 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.isVisible
-import androidx.databinding.DataBindingUtil
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.hencoder.a33_lib_annotations.BindView
 import tech.yaowen.customview.databinding.ActivityMainBinding
