@@ -4,11 +4,11 @@ android {
     defaultConfig {
         applicationId "tech.yaowen.customview"
     }
-    dataBinding {
-        enabled = true
-    }
     kotlinOptions {
         jvmTarget = 1.8
+    }
+    buildFeatures {
+        dataBinding true
     }
 }
 

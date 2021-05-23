@@ -1,6 +1,8 @@
 package tech.yaowen.rtc_demo.lib
 
 import android.content.Context
+import android.hardware.camera2.CameraCharacteristics
+import android.hardware.camera2.CameraManager
 import android.hardware.camera2.CameraMetadata
 import org.webrtc.*
 import org.webrtc.PeerConnection.IceServer
@@ -36,36 +38,17 @@ enum class RtcEngine {
     ): VideoCapturer? {
         val enumerator = Camera2Enumerator(context)
         val deviceNames = enumerator.deviceNames
-
-        var videoCapturer: VideoCapturer? = null
+        val cameraManager = context.getSystemService("camera") as CameraManager
+        var cameraName: String? = null
         for (deviceName in deviceNames) {
-            when (lensFacing) {
-                CameraMetadata.LENS_FACING_FRONT -> {
-                    if (enumerator.isFrontFacing(deviceName)) {
-                        videoCapturer = enumerator.createCapturer(deviceName, null)
-                    }
-                }
-                CameraMetadata.LENS_FACING_BACK -> {
-                    if (enumerator.isBackFacing(deviceName)) {
-                        videoCapturer = enumerator.createCapturer(deviceName, null)
-                    }
-                }
-
-                CameraMetadata.LENS_FACING_EXTERNAL -> {
-                    if (!enumerator.isFrontFacing(deviceName) && !enumerator.isBackFacing(deviceName)) {
-                        videoCapturer = enumerator.createCapturer(deviceName, null)
-                    }
-                }
-                else -> {
-                    videoCapturer = enumerator.createCapturer(deviceName, null)
-                }
-            }
-
-            if (videoCapturer != null) {
-                break
+            if (lensFacing == cameraManager.getCameraCharacteristics(deviceName).get(CameraCharacteristics.LENS_FACING)) {
+                cameraName = deviceName
             }
         }
-        return videoCapturer
+
+        return cameraName?.let {
+            enumerator.createCapturer(it, null)
+        }
     }
 
     public fun displayVideo(

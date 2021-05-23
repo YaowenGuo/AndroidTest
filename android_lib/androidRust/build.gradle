@@ -7,8 +7,6 @@ android {
     defaultConfig {
         minSdkVersion rootProject.ext.min_sdk_version
         targetSdkVersion rootProject.ext.sdk_version
-        versionCode rootProject.ext.app_version
-        versionName "$version_name"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles "consumer-rules.pro"

@@ -16,21 +16,28 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+        <!-- 对等连接 -->
         <activity android:name=".PeerConnectionActivity">
+        </activity>
+        <!-- 捕获视频 -->
+        <activity android:name=".VideoCaputreActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <!-- 捕获视频 -->
-        <activity android:name=".VideoCaputreActivity"></activity> <!-- 本地连接 -->
+        <!-- 本地连接 -->
         <activity
             android:name=".LocalPeerConnectionActivity"
-            android:screenOrientation="behind"></activity> <!-- 数据通道 -->
+            android:screenOrientation="behind">
+        </activity>
+        <!-- 数据通道 -->
         <activity
             android:name=".RTCDataChannelActivity"
-            android:screenOrientation="behind"></activity> <!-- 对等连接 -->
+            android:screenOrientation="behind">
+        </activity>
+        <!-- 信令服务 -->
         <activity
             android:name=".SignalingServiceActivity"
             android:screenOrientation="behind">
