@@ -1,3 +1,4 @@
+
 apply plugin: 'kotlin-android'
 apply plugin: "androidx.navigation.safeargs"
 apply plugin: 'kotlin-kapt'
@@ -35,8 +36,4 @@ android {
     buildFeatures {
         viewBinding true
     }
-}
-
-kapt {
-    generateStubs = true
 }

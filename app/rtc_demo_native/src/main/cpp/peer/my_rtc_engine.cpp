@@ -8,10 +8,10 @@
 #include <system_wrappers/include/field_trial.h>
 #include <absl/flags/flag.h>
 #include <rtc_base/physical_socket_server.h>
-#include <audio_codecs/builtin_audio_encoder_factory.h>
-#include <audio_codecs/builtin_audio_decoder_factory.h>
-#include <video_codecs/builtin_video_encoder_factory.h>
-#include <video_codecs/builtin_video_decoder_factory.h>
+#include <api/audio_codecs/builtin_audio_encoder_factory.h>
+#include <api/audio_codecs/builtin_audio_decoder_factory.h>
+#include <api/video_codecs/builtin_video_encoder_factory.h>
+#include <api/video_codecs/builtin_video_decoder_factory.h>
 
 #define _LIBCPP_NAMESPACE _LIBCPP_CONCAT(__,_LIBCPP_ABI_VERSION)
 
@@ -40,6 +40,7 @@ void init() {
 }
 
 void createEngine(JavaVM *jvm) {
+     webrtc::JVM::Initialize(jvm, nullptr);
     /**
      * 2. 创建 PeerConnectionFactory, 因为 Webrtc 可以同时进行多个连接，以创建多个 PeerConnection (PC).
      */
@@ -59,17 +60,17 @@ void createEngine(JavaVM *jvm) {
      */
     webrtc::PeerConnectionInterface::RTCConfiguration config;
     config.sdp_semantics = webrtc::SdpSemantics::kUnifiedPlan;
-    config.enable_dtls_srtp = dtls;
+    config.enable_dtls_srtp = true;
     webrtc::PeerConnectionInterface::IceServer server;
     server.uri = "stun:stun.l.google.com:19302";
     config.servers.push_back(server);
 
-    rtc::scoped_refptr<webrtc::PeerConnectionInterface> peer_connection_ =
-            peer_connection_factory_->CreatePeerConnection(
-                    config,
-                    nullptr,
-                    nullptr
-                    connectionObserver);
+//    rtc::scoped_refptr<webrtc::PeerConnectionInterface> peer_connection_ =
+//            peer_connection_factory_->CreatePeerConnection(
+//                    config,
+//                    nullptr,
+//                    nullptr
+//                    E);
 
 
 

@@ -92,12 +92,16 @@ find_library(media-lib mediandk)
 add_library(webrtc STATIC IMPORTED)
 set_target_properties(webrtc PROPERTIES IMPORTED_LOCATION
         ${CMAKE_SOURCE_DIR}/lib/${ANDROID_ABI}/libwebrtc.a)
+
+
 include_directories(
-        "../../../../../lib/webrtc/third_party/abseil-cpp"
-        "../../../../../lib/webrtc/"
-        "../../../../../lib/webrtc/api/"
+        "../../../../../lib/webrtc"
 )
 
+# Process Abseil's CMake build system
+add_subdirectory(../../../../../lib/webrtc/third_party/abseil-cpp
+        abseil-cpp
+        EXCLUDE_FROM_ALL)
 
 # Specifies libraries CMake should link to your target library. You
 # can link multiple libraries, such as libraries you define in this
@@ -112,6 +116,7 @@ target_link_libraries( # Specifies the target library.
         GLESv3
         OpenSLES
 #        ${CMAKE_SOURCE_DIR}/lib/${ANDROID_ABI}/libjingle_peerconnection_so.so
+        absl::flags
         ${camera-lib}
         ${media-lib}
         ${log-lib})
