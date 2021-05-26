@@ -8,6 +8,7 @@
 
 #include <api/peer_connection_interface.h>
 #include <pc/video_track_source.h>
+#include <third_party/jsoncpp/source/include/json/value.h>
 
 ABSL_FLAG(
         std::string,
@@ -23,6 +24,11 @@ const char kAudioLabel[] = "audio_label";
 const char kVideoLabel[] = "video_label";
 const char kStreamId[] = "stream_id";
 
+// Names used for a IceCandidate JSON object.
+const char kCandidateSdpMidName[] = "sdpMid";
+const char kCandidateSdpMlineIndexName[] = "sdpMLineIndex";
+const char kCandidateSdpName[] = "candidate";
+
 using namespace webrtc;
 
 class Live : public PeerConnectionObserver, public CreateSessionDescriptionObserver, public SetLocalDescriptionObserverInterface,
@@ -32,6 +38,8 @@ public:
     void createEngine(JavaVM *jvm);
     void AddTracks();
     void connectToPeer(SessionDescriptionInterface* desc);
+    void setRemoteDescription(SessionDescriptionInterface *desc);
+    void addIce(const Json::Value jmessage);
 
     //「***************** CreateSessionDescriptionObserver *******************
     void OnSuccess(SessionDescriptionInterface* desc) override;
@@ -104,7 +112,7 @@ public:
             PeerConnectionInterface::IceGatheringState new_state) override {}
 
     // A new ICE candidate has been gathered.
-    void OnIceCandidate(const IceCandidateInterface *candidate) override {}
+    void OnIceCandidate(const IceCandidateInterface *candidate) override;
 
     // Gathering of an ICE candidate failed.
     // See https://w3c.github.io/webrtc-pc/#event-icecandidateerror

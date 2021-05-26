@@ -20,7 +20,6 @@ add_library(native_app_glue STATIC
 
 add_definitions("-DWEBRTC_POSIX")
 
-
 # Export ANativeActivity_onCreate(),
 # Refer to: https://github.com/android-ndk/ndk/issues/381.
 set(CMAKE_SHARED_LINKER_FLAGS
@@ -97,12 +96,16 @@ set_target_properties(webrtc PROPERTIES IMPORTED_LOCATION
 
 include_directories(
         "../../../../../lib/webrtc"
+        "../../../../../lib/webrtc/third_party/jsoncpp/source/include"
 )
 
 # Process Abseil's CMake build system
 add_subdirectory(../../../../../lib/webrtc/third_party/abseil-cpp
         abseil-cpp
         EXCLUDE_FROM_ALL)
+
+
+
 
 # Specifies libraries CMake should link to your target library. You
 # can link multiple libraries, such as libraries you define in this
