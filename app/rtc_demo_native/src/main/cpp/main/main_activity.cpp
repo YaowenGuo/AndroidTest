@@ -435,7 +435,7 @@ static void engine_handle_cmd(struct android_app *app, int32_t cmd) {
             // The window is being shown, get it ready.
             if (engine->app->window != nullptr) {
 //                esCreateWindow(engine, "测试", ES_WINDOW_RGB);
-////                engine_init_display(engine);
+//                engine_init_display(engine);
 //                init(engine);
 //                engine_draw_frame(engine);
             }
@@ -578,9 +578,6 @@ void android_main(struct android_app *app) {
                     ASensorEvent event;
                     while (ASensorEventQueue_getEvents(engine.sensorEventQueue,
                                                        &event, 1) > 0) {
-//                        LOGI("accelerometer: x=%f y=%f z=%f",
-//                             event.acceleration.x, event.acceleration.y,
-//                             event.acceleration.z);
                     }
                 }
             }

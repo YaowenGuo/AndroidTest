@@ -40,6 +40,7 @@ file(GLOB allCpp
         peer/*.cpp
         capture/*.cpp
         permissition/*.cpp
+        ../../../../../lib/webrtc/pc/video_track_source.cc
         )
 
 

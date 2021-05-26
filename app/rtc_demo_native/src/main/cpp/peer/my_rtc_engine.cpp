@@ -12,20 +12,16 @@
 #include <api/audio_codecs/builtin_audio_decoder_factory.h>
 #include <api/video_codecs/builtin_video_encoder_factory.h>
 #include <api/video_codecs/builtin_video_decoder_factory.h>
+#include "my_rtc_engine.h"
+#include "vcm_capturer.h"
+#include <api/video_codecs/builtin_video_decoder_factory.h>
+
+#include <modules/video_capture/video_capture_factory.h>
 
 #define _LIBCPP_NAMESPACE _LIBCPP_CONCAT(__,_LIBCPP_ABI_VERSION)
 
-ABSL_FLAG(
-        std::string,
-        force_fieldtrials,
-        "",
-        "Field trials control experimental features. This flag specifies the field "
-        "trials in effect. E.g. running with "
-        "--force_fieldtrials=WebRTC-FooFeature/Enabled/ "
-        "will assign the group Enabled to field trial WebRTC-FooFeature. Multiple "
-        "trials are separated by \"/\"");
 
-void init() {
+Live::Live() {
     /**
      * 1. 初始化
      */
@@ -39,12 +35,12 @@ void init() {
 
 }
 
-void createEngine(JavaVM *jvm) {
-     webrtc::JVM::Initialize(jvm, nullptr);
+void Live::createEngine(JavaVM *jvm) {
+    webrtc::JVM::Initialize(jvm, nullptr);
     /**
      * 2. 创建 PeerConnectionFactory, 因为 Webrtc 可以同时进行多个连接，以创建多个 PeerConnection (PC).
      */
-    rtc::scoped_refptr<webrtc::PeerConnectionFactoryInterface> peer_connection_factory_ = webrtc::CreatePeerConnectionFactory(
+    peer_connection_factory_ = webrtc::CreatePeerConnectionFactory(
             nullptr /* network_thread */, nullptr /* worker_thread */,
             nullptr /* signaling_thread */, nullptr /* default_adm */,
             webrtc::CreateBuiltinAudioEncoderFactory(),
@@ -65,13 +61,159 @@ void createEngine(JavaVM *jvm) {
     server.uri = "stun:stun.l.google.com:19302";
     config.servers.push_back(server);
 
-//    rtc::scoped_refptr<webrtc::PeerConnectionInterface> peer_connection_ =
-//            peer_connection_factory_->CreatePeerConnection(
-//                    config,
-//                    nullptr,
-//                    nullptr
-//                    E);
+    peer_connection_ = peer_connection_factory_->CreatePeerConnection(
+            config,
+            nullptr,
+            nullptr,
+            this
+    );
+}
 
 
+/*
+class CapturerTrackSource : public VideoTrackSourceInterface {
+public:
+    static rtc::scoped_refptr<CapturerTrackSource> Create() {
+        const size_t kWidth = 640;
+        const size_t kHeight = 480;
+        const size_t kFps = 30;
+        std::unique_ptr<rtc_demo::VcmCapturer> capturer;
+        std::unique_ptr<webrtc::VideoCaptureModule::DeviceInfo> info(
+                VideoCaptureFactory::CreateDeviceInfo());
+        if (!info) {
+            return nullptr;
+        }
+        int num_devices = info->NumberOfDevices();
+        for (int i = 0; i < num_devices; ++i) {
+            capturer = absl::WrapUnique(rtc_demo::VcmCapturer::Create(kWidth, kHeight, kFps, i));
+            if (capturer) {
+                return new rtc::RefCountedObject<CapturerTrackSource>(
+                        std::move(capturer));
+            }
+        }
+
+        return nullptr;
+    }
+
+protected:
+    explicit CapturerTrackSource(
+            std::unique_ptr<rtc_demo::VcmCapturer> capturer)
+            : VideoTrackSource(*/
+/*remote=*//*
+false), capturer_(std::move(capturer)) {}
+
+private:
+    rtc::VideoSourceInterface<webrtc::VideoFrame>* source() override {
+        return capturer_.get();
+    }
+    std::unique_ptr<rtc_demo::VcmCapturer> capturer_;
+};
+*/
+
+
+class CapturerTrackSource : public webrtc::VideoTrackSource {
+public:
+    static rtc::scoped_refptr<CapturerTrackSource> Create() {
+        const size_t kWidth = 640;
+        const size_t kHeight = 480;
+        const size_t kFps = 30;
+        std::unique_ptr<rtc_demo::VcmCapturer> capturer;
+        std::unique_ptr<webrtc::VideoCaptureModule::DeviceInfo> info(
+                webrtc::VideoCaptureFactory::CreateDeviceInfo());
+        if (!info) {
+            return nullptr;
+        }
+        int num_devices = info->NumberOfDevices();
+        for (int i = 0; i < num_devices; ++i) {
+            capturer = absl::WrapUnique(
+                    rtc_demo::VcmCapturer::Create(kWidth, kHeight, kFps, i));
+            if (capturer) {
+                return new rtc::RefCountedObject<CapturerTrackSource>(
+                        std::move(capturer));
+            }
+        }
+
+        return nullptr;
+    }
+
+protected:
+    explicit CapturerTrackSource(
+            std::unique_ptr<rtc_demo::VcmCapturer> capturer)
+            : VideoTrackSource(/*remote=*/false), capturer_(std::move(capturer)) {}
+
+private:
+    rtc::VideoSourceInterface<webrtc::VideoFrame> *source() override {
+        return capturer_.get();
+    }
+
+    std::unique_ptr<rtc_demo::VcmCapturer> capturer_;
+};
+
+
+void Live::AddTracks() {
+    if (!peer_connection_->GetSenders().empty()) {
+        return;  // Already added tracks.
+    }
+
+    rtc::scoped_refptr<webrtc::AudioTrackInterface> audio_track(
+            peer_connection_factory_->CreateAudioTrack(
+                    kAudioLabel, peer_connection_factory_->CreateAudioSource(
+                            cricket::AudioOptions())));
+    auto result_or_error = peer_connection_->AddTrack(audio_track, {kStreamId});
+    if (!result_or_error.ok()) {
+        RTC_LOG(LS_ERROR) << "Failed to add audio track to PeerConnection: "
+                          << result_or_error.error().message();
+    }
+
+    rtc::scoped_refptr<VideoTrackSourceInterface> video_device = CapturerTrackSource::Create();
+    if (video_device) {
+        rtc::scoped_refptr<webrtc::VideoTrackInterface> video_track_(
+                peer_connection_factory_->CreateVideoTrack(kVideoLabel, video_device));
+//        main_wnd_->StartLocalRenderer(video_track_);
+
+        result_or_error = peer_connection_->AddTrack(video_track_, {kStreamId});
+        if (!result_or_error.ok()) {
+            RTC_LOG(LS_ERROR) << "Failed to add video track to PeerConnection: "
+                              << result_or_error.error().message();
+        }
+    } else {
+        RTC_LOG(LS_ERROR) << "OpenVideoCaptureDevice failed";
+    }
+
+//    main_wnd_->SwitchToStreamingUI();
+}
+
+void Live::connectToPeer(SessionDescriptionInterface *desc) {
+    if (desc == nullptr) {
+        peer_connection_->CreateOffer(this,
+                                      webrtc::PeerConnectionInterface::RTCOfferAnswerOptions());
+    } else {
+        peer_connection_->SetRemoteDescription(std::unique_ptr<SessionDescriptionInterface>(desc), this);
+        peer_connection_->CreateAnswer(this, webrtc::PeerConnectionInterface::RTCOfferAnswerOptions());
+    }
+}
+
+//「***************** CreateSessionDescriptionObserver *******************
+void Live::OnSuccess(SessionDescriptionInterface *desc) {
+    peer_connection_->SetLocalDescription(std::unique_ptr<SessionDescriptionInterface>(desc), this);
+}
+
+
+void Live::OnFailure(RTCError error) {
 
 }
+// L***************** CreateSessionDescriptionObserver *******************
+
+
+//「***************** SetLocalDescriptionObserverInterface *******************
+void Live::OnSetLocalDescriptionComplete(RTCError error) {
+
+}
+// L***************** SetLocalDescriptionObserverInterface *******************
+
+
+//「***************** SetRemoteDescriptionObserverInterface *******************
+void Live::OnSetRemoteDescriptionComplete(RTCError error) {
+
+}
+// L***************** SetRemoteDescriptionObserverInterface *******************
