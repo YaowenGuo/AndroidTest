@@ -40,6 +40,7 @@ file(GLOB allCpp
         capture/*.cpp
         permissition/*.cpp
         ../../../../../lib/webrtc/pc/video_track_source.cc
+#        json/jsoncpp.cpp
         )
 
 
@@ -53,11 +54,12 @@ add_library( # Sets the name of the library.
         ${allCpp})
 
 
-# 引入FFmpeg的头文件
+
 # 导入头文件仅能是目录，而不能直接指定 .h 文件。
 target_include_directories(rtc_demo PUBLIC
         ${ANDROID_NDK}/sources/android/native_app_glue
         ${CMAKE_SOURCE_DIR}/include
+#        ${CMAKE_SOURCE_DIR}/json/json
         )
 
 # Searches for a specified prebuilt library and stores the path as a
@@ -103,6 +105,7 @@ include_directories(
 add_subdirectory(../../../../../lib/webrtc/third_party/abseil-cpp
         abseil-cpp
         EXCLUDE_FROM_ALL)
+
 
 
 

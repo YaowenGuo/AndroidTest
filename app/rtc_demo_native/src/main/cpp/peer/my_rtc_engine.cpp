@@ -164,14 +164,14 @@ void Live::addIce(const Json::Value jmessage) {
     int sdp_mlineindex = 0;
     std::string sdp;
     // TODO get Why can't use rtc_base content.
-//    if (!rtc::GetStringFromJsonObject(jmessage, kCandidateSdpMidName,
-//                                      &sdp_mid) ||
-//        !rtc::GetIntFromJsonObject(jmessage, kCandidateSdpMlineIndexName,
-//                                   &sdp_mlineindex) ||
-//        !rtc::GetStringFromJsonObject(jmessage, kCandidateSdpName, &sdp)) {
-//        RTC_LOG(WARNING) << "Can't parse received message.";
-//        return;
-//    }
+    if (!rtc::GetStringFromJsonObject(jmessage, kCandidateSdpMidName,
+                                      &sdp_mid) ||
+        !rtc::GetIntFromJsonObject(jmessage, kCandidateSdpMlineIndexName,
+                                   &sdp_mlineindex) ||
+        !rtc::GetStringFromJsonObject(jmessage, kCandidateSdpName, &sdp)) {
+        RTC_LOG(WARNING) << "Can't parse received message.";
+        return;
+    }
     webrtc::SdpParseError error;
     std::unique_ptr<webrtc::IceCandidateInterface> candidate(
             webrtc::CreateIceCandidate(sdp_mid, sdp_mlineindex, sdp, &error));
