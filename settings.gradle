@@ -12,7 +12,6 @@ include ':app:media'
 include ':app:media_player'
 include ':app:test_glide'
 
-include ':android_lib:test_jni'
 include ':android_lib:media_tool'
 include ':android_lib:androidRust'
 include ':android_lib:ffmpeg'

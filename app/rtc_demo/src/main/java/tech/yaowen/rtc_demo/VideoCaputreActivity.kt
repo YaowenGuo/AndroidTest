@@ -25,9 +25,9 @@ class VideoCaputreActivity : BaseActivity() {
             // Must use same eglContext
             val eglBaseContext = EglBase.create().eglBaseContext
 
-            val peerConnection = RtcEngine.INSTANCE.createPeerConnection(this)
-            val videoTrack = RtcEngine.INSTANCE.createVideoTrack(peerConnection, captureId, it, this, eglBaseContext)
-            val audeoTrack = RtcEngine.INSTANCE.createAudioTrack(peerConnection, captureId)
+            val peerConnectionFactory = RtcEngine.INSTANCE.createPeerConnectionFactory(this)
+            val videoTrack = RtcEngine.INSTANCE.createVideoTrack(peerConnectionFactory, captureId, it, this, eglBaseContext)
+            val audeoTrack = RtcEngine.INSTANCE.createAudioTrack(peerConnectionFactory, captureId)
             RtcEngine.INSTANCE.displayVideo(videoTrack, findViewById(R.id.localView), eglBaseContext)
         }
     }

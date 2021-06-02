@@ -5,13 +5,6 @@ android {
         applicationId "tech.yaowen.rtc_demo_native"
         //camera2ndk only can be use above android api 24
         minSdkVersion 24
-        multiDexEnabled true
-
-        externalNativeBuild {
-            cmake {
-                arguments '-DANDROID_STL=c++_static'
-            }
-        }
     }
     externalNativeBuild {
         cmake {
@@ -25,6 +18,7 @@ dependencies {
     implementation fileTree(dir: "libs", include: ["*.jar"])
     implementation deps.appcompat
     implementation deps.material
+    implementation deps.webrtc
 
     testImplementation deps.junit
     androidTestImplementation deps.ext_junit

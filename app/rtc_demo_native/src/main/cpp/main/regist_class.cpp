@@ -13,7 +13,7 @@
 #define JNI_VERSION JNI_VERSION_1_6
 
 static JNINativeMethod mapMethods[] = {
-        {"permissionResult", "(Z)V", reinterpret_cast<void *>(Permission::PermissionResult)}
+        {"permissionResult", "(ZLandroid/content/Context;)V", reinterpret_cast<void *>(Permission::PermissionResult)}
 };
 
 int jniRegisterNativeMethods(JNIEnv *env, const char *className,

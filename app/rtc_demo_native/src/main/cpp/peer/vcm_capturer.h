@@ -38,17 +38,20 @@ namespace rtc_demo {
 
         virtual ~VcmCapturer();
 
-        void OnFrame(const VideoFrame &frame) override;
 
+        // 「------------------  VideoSourceInterface --------------------
         void AddOrUpdateSink(rtc::VideoSinkInterface<VideoFrame> *sink,
                              const rtc::VideoSinkWants &wants) override;
 
         void RemoveSink(rtc::VideoSinkInterface<VideoFrame> *sink) override;
+        // L-----------------  VideoSourceInterface --------------------
 
-//        void SetFramePreprocessor(std::unique_ptr<FramePreprocessor> preprocessor) {
-//            MutexLock lock(&lock_);
-//            preprocessor_ = std::move(preprocessor);
-//        }
+
+        //「------------------  VideoSinkInterface --------------------
+        void OnFrame(const VideoFrame &frame) override;
+
+//        void OnDiscardedFrame() {}
+        // L------------------  VideoSinkInterface --------------------
 
     private:
         VcmCapturer();

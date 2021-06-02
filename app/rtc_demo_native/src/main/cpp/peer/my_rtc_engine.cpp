@@ -14,6 +14,8 @@
 #include <api/video_codecs/builtin_video_decoder_factory.h>
 #include "my_rtc_engine.h"
 #include "vcm_capturer.h"
+#include "../base/esUtil.h"
+#include "android_video_track_source.h"
 #include <api/video_codecs/builtin_video_decoder_factory.h>
 
 #include <modules/video_capture/video_capture_factory.h>
@@ -22,23 +24,35 @@
 
 #define _LIBCPP_NAMESPACE _LIBCPP_CONCAT(__,_LIBCPP_ABI_VERSION)
 
-
-Live::Live() {
+Live::Live(JNIEnv *jni, jobject context) {
     /**
      * 1. 初始化
      */
+    // JNIEnv* env; (initialized somewhere else)
+    JavaVM* jvm = nullptr;
+    jni->GetJavaVM(&jvm);
+
+    webrtc::JVM::Initialize(jvm, context);
     // InitFieldTrialsFromString stores the char*, so the char array must
     // outlive the application.
-    const std::string field_trials = absl::GetFlag(FLAGS_force_fieldtrials);
+    const std::string field_trials /*absl::GetFlag(FLAGS_force_fieldtrials)*/;
     webrtc::field_trial::InitFieldTrialsFromString(field_trials.c_str());
-    rtc::PhysicalSocketServer socket = rtc::PhysicalSocketServer();
-    rtc::AutoSocketServerThread thread(&socket);
+//    rtc::PhysicalSocketServer socket = rtc::PhysicalSocketServer();
+//    rtc::AutoSocketServerThread thread(&socket);
     rtc::InitializeSSL();
 
+    network_thread = rtc::Thread::CreateWithSocketServer();
+    network_thread->SetName("network_thread", nullptr);
+    RTC_CHECK(network_thread->Start()) << "Failed to start thread";
+
+    worker_thread = rtc::Thread::Create();
+    worker_thread->SetName("worker_thread", nullptr);
+    RTC_CHECK(worker_thread->Start()) << "Failed to start thread";
+
+    signaling_thread = rtc::Thread::Create();
 }
 
-void Live::createEngine(JavaVM *jvm) {
-    webrtc::JVM::Initialize(jvm, nullptr);
+void Live::createEngine() {
     /**
      * 2. 创建 PeerConnectionFactory, 因为 Webrtc 可以同时进行多个连接，以创建多个 PeerConnection (PC).
      */
@@ -59,9 +73,9 @@ void Live::createEngine(JavaVM *jvm) {
     webrtc::PeerConnectionInterface::RTCConfiguration config;
     config.sdp_semantics = webrtc::SdpSemantics::kUnifiedPlan;
     config.enable_dtls_srtp = true;
-    webrtc::PeerConnectionInterface::IceServer server;
-    server.uri = "stun:stun.l.google.com:19302";
-    config.servers.push_back(server);
+//    webrtc::PeerConnectionInterface::IceServer server;
+//    server.uri = "stun:stun.l.google.com:19302";
+//    config.servers.push_back(server);
 
     peer_connection_ = peer_connection_factory_->CreatePeerConnection(
             config,
@@ -111,36 +125,43 @@ private:
 };
 
 
-void Live::AddTracks() {
+void Live::AddTracks(JNIEnv* jni) {
     if (!peer_connection_->GetSenders().empty()) {
         return;  // Already added tracks.
     }
-
-    rtc::scoped_refptr<webrtc::AudioTrackInterface> audio_track(
+    rtc::scoped_refptr<AudioSourceInterface> audioSource =
+            peer_connection_factory_->CreateAudioSource(cricket::AudioOptions());
+    rtc::scoped_refptr<webrtc::AudioTrackInterface> audio_track =
             peer_connection_factory_->CreateAudioTrack(
-                    kAudioLabel, peer_connection_factory_->CreateAudioSource(
-                            cricket::AudioOptions())));
+                    kAudioLabel,
+                    audioSource
+            );
+
     auto result_or_error = peer_connection_->AddTrack(audio_track, {kStreamId});
     if (!result_or_error.ok()) {
         RTC_LOG(LS_ERROR) << "Failed to add audio track to PeerConnection: "
                           << result_or_error.error().message();
     }
+//
+//    rtc::scoped_refptr<VideoTrackSourceInterface> video_device =
+//            CapturerTrackSource::Create();
 
-    rtc::scoped_refptr<VideoTrackSourceInterface> video_device = CapturerTrackSource::Create();
-    if (video_device) {
-        rtc::scoped_refptr<webrtc::VideoTrackInterface> video_track_(
-                peer_connection_factory_->CreateVideoTrack(kVideoLabel, video_device));
-//        main_wnd_->StartLocalRenderer(video_track_);
 
-        result_or_error = peer_connection_->AddTrack(video_track_, {kStreamId});
-        if (!result_or_error.ok()) {
-            RTC_LOG(LS_ERROR) << "Failed to add video track to PeerConnection: "
-                              << result_or_error.error().message();
-        }
-    } else {
-        RTC_LOG(LS_ERROR) << "OpenVideoCaptureDevice failed";
+    rtc::scoped_refptr<rtc_demo::AndroidVideoTrackSource> video_device = new rtc::RefCountedObject<rtc_demo::AndroidVideoTrackSource>(
+            signaling_thread.get(), jni, false, false);
+//    video_device->AddOrUpdateSink(this, rtc::VideoSinkWants());
+
+    // Start local render
+    // main_wnd_->StartLocalRenderer(video_track_);
+    rtc::scoped_refptr<webrtc::VideoTrackInterface> video_track =
+            peer_connection_factory_->CreateVideoTrack(kVideoLabel, video_device);
+
+    result_or_error = peer_connection_->AddTrack(video_track, {kStreamId});
+    if (!result_or_error.ok()) {
+        RTC_LOG(LS_ERROR) << "Failed to add video track to PeerConnection: "
+                          << result_or_error.error().message();
     }
-
+//    AddOrUpdateSink(this, rtc::VideoSinkWants()
 //    main_wnd_->SwitchToStreamingUI();
 }
 
@@ -150,12 +171,14 @@ void Live::connectToPeer(SessionDescriptionInterface *desc) {
                                       webrtc::PeerConnectionInterface::RTCOfferAnswerOptions());
     } else {
         setRemoteDescription(desc);
-        peer_connection_->CreateAnswer(this, webrtc::PeerConnectionInterface::RTCOfferAnswerOptions());
+        peer_connection_->CreateAnswer(this,
+                                       webrtc::PeerConnectionInterface::RTCOfferAnswerOptions());
     }
 }
 
 void Live::setRemoteDescription(SessionDescriptionInterface *desc) {
-    peer_connection_->SetRemoteDescription(std::unique_ptr<SessionDescriptionInterface>(desc), this);
+    peer_connection_->SetRemoteDescription(std::unique_ptr<SessionDescriptionInterface>(desc),
+                                           this);
 
 }
 
@@ -163,7 +186,6 @@ void Live::addIce(const Json::Value jmessage) {
     std::string sdp_mid;
     int sdp_mlineindex = 0;
     std::string sdp;
-    // TODO get Why can't use rtc_base content.
     if (!rtc::GetStringFromJsonObject(jmessage, kCandidateSdpMidName,
                                       &sdp_mid) ||
         !rtc::GetIntFromJsonObject(jmessage, kCandidateSdpMlineIndexName,
@@ -219,3 +241,14 @@ void Live::OnSetRemoteDescriptionComplete(RTCError error) {
 
 }
 // L***************** SetRemoteDescriptionObserverInterface *******************
+
+
+//「***************** VideoSinkInterface *******************
+void Live::OnFrame(const VideoFrame& frame) {
+    // TODO render frame.
+}
+
+void Live::OnDiscardedFrame() {
+
+}
+// L***************** VideoSinkInterface *******************

@@ -2,6 +2,7 @@ package tech.yaowen.rtc_demo_native.view.home;
 
 import android.Manifest;
 import android.app.NativeActivity;
+import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 
@@ -20,9 +21,7 @@ public class HomeActivity extends NativeActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        getWindow().getDecorView().post(() -> {
-            requestCamera();
-        });
+        getWindow().getDecorView().post(this::requestCamera);
     }
 
     void requestCamera() {
@@ -41,7 +40,7 @@ public class HomeActivity extends NativeActivity {
         if (needRequire) {
             ActivityCompat.requestPermissions(this, accessPermissions, PERMISSION_REQUEST_CODE_CAMERA);
         } else {
-            permissionResult(true);
+            permissionResult(true, this);
         }
     }
 
@@ -54,10 +53,10 @@ public class HomeActivity extends NativeActivity {
         }
 
         permissionResult(grantResults[0] == PackageManager.PERMISSION_GRANTED &&
-                grantResults[1] == PackageManager.PERMISSION_GRANTED);
+                grantResults[1] == PackageManager.PERMISSION_GRANTED, this);
     }
 
-    native static void permissionResult(boolean granted);
+    native static void permissionResult(boolean granted, Context context);
     static {
         System.loadLibrary("rtc_demo");
     }

@@ -17,5 +17,5 @@ dependencies {
     testImplementation deps.junit
     androidTestImplementation deps.ext_junit
     androidTestImplementation deps.espresso
-    annotationProcessor deps.lifecycle_compiler
+    kapt deps.lifecycle_compiler
 }

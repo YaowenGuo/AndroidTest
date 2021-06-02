@@ -1,14 +1,13 @@
-apply plugin: 'java-library'
+import org.gradle.internal.jvm.Jvm
+
+apply plugin: 'java'
+apply plugin: 'application'
+apply plugin: 'cpp'
 apply plugin: 'c'
 
-dependencies {
-    implementation fileTree(dir: 'libs', include: ['*.jar'])
-}
-
 test {
-    systemProperty "java.library.path", file("${buildDir}/libs/hello/shared").absolutePath
+    systemProperty "java.library.path", file("${buildDir}/libs/cpp/shared/").absolutePath
 }
-
 
 model {
     platforms {
@@ -18,13 +17,25 @@ model {
     }
 
     components {
-        hello(NativeLibrarySpec) {
+        // cpp is the directory name. the name of lib is decide by the dir name.
+        cpp(NativeLibrarySpec) {
+            sources {
+                cpp {
+                    source {
+                        srcDir "src/main/cpp"
+                        include "**/*.cpp"
+                    }
+                    exportedHeaders {
+                        srcDirs "src/main/cpp/include", "src/main/cpp/lib/include"
+                    }
+                }
+            }
             binaries.all {
                 if (targetPlatform.operatingSystem.macOsX) {
-                    cCompiler.args '-I', "${org.gradle.internal.jvm.Jvm.current().javaHome}/include"
-                    cCompiler.args '-I', "${org.gradle.internal.jvm.Jvm.current().javaHome}/include/darwin"
-                    cCompiler.args '-mmacosx-version-min=10.4'
-                    linker.args '-mmacosx-version-min=10.4'
+                    cppCompiler.args '-I', "${org.gradle.internal.jvm.Jvm.current().javaHome}/include"
+                    cppCompiler.args '-I', "${org.gradle.internal.jvm.Jvm.current().javaHome}/include/darwin"
+                    cppCompiler.args '-mmacosx-version-min=10.9'
+                    linker.args '-mmacosx-version-min=10.9'
                 } else if (targetPlatform.operatingSystem.linux) {
                     cCompiler.args '-I', "${org.gradle.internal.jvm.Jvm.current().javaHome}/include"
                     cCompiler.args '-I', "${org.gradle.internal.jvm.Jvm.current().javaHome}/include/linux"
@@ -42,5 +53,10 @@ model {
     }
 }
 
+dependencies {
+    testImplementation deps.junit
+}
+
+test.dependsOn  'cppSharedLibrary'
 sourceCompatibility = "1.8"
 targetCompatibility = "1.8"

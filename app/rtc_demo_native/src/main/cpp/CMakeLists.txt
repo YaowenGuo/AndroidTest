@@ -40,6 +40,7 @@ file(GLOB allCpp
         capture/*.cpp
         permissition/*.cpp
         ../../../../../lib/webrtc/pc/video_track_source.cc
+        ../../../../../lib/webrtc/media/base/adapted_video_track_source.cc
 #        json/jsoncpp.cpp
         )
 
@@ -108,6 +109,9 @@ add_subdirectory(../../../../../lib/webrtc/third_party/abseil-cpp
 
 
 
+add_subdirectory(../../../../../lib/socket.io-client-cpp
+        sioclient
+        EXCLUDE_FROM_ALL)
 
 
 # Specifies libraries CMake should link to your target library. You
@@ -124,6 +128,7 @@ target_link_libraries( # Specifies the target library.
         OpenSLES
 #        ${CMAKE_SOURCE_DIR}/lib/${ANDROID_ABI}/libjingle_peerconnection_so.so
         absl::flags
+        sioclient
         ${camera-lib}
         ${media-lib}
         ${log-lib})

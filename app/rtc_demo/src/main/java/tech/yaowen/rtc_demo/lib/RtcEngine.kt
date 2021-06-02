@@ -17,7 +17,7 @@ enum class RtcEngine {
     class Builder {
         var eglBaseContext: EglBase.Context? = null
         var facing: Int = 0
-        var threadName: String = "WebRTC"
+        var threadName: String = "rtc_demo"
         fun build(): RtcEngine {
             if (eglBaseContext == null) {
                 eglBaseContext = EglBase.create().eglBaseContext
@@ -38,7 +38,7 @@ enum class RtcEngine {
     ): VideoCapturer? {
         val enumerator = Camera2Enumerator(context)
         val deviceNames = enumerator.deviceNames
-        val cameraManager = context.getSystemService("camera") as CameraManager
+        val cameraManager = context.getSystemService(Context.CAMERA_SERVICE) as CameraManager
         var cameraName: String? = null
         for (deviceName in deviceNames) {
             if (lensFacing == cameraManager.getCameraCharacteristics(deviceName).get(CameraCharacteristics.LENS_FACING)) {
@@ -116,7 +116,7 @@ enum class RtcEngine {
         return peerConnectionFactory
     }
 
-    public fun createPeerConnection(applicationContext: Context): PeerConnectionFactory {
+    public fun createPeerConnectionFactory(applicationContext: Context): PeerConnectionFactory {
         // create PeerConnectionFactory
         val initializationOptions = PeerConnectionFactory.InitializationOptions
             .builder(applicationContext)

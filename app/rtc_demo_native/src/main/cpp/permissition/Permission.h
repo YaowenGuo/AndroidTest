@@ -6,11 +6,13 @@
 #define ANDROIDTEST_PERMISSION_H
 
 
+#include <jni.h>
+
 class Permission {
     static void RequestCameraPermission();
 
 public:
-    static void PermissionResult(bool);
+    static void PermissionResult(JNIEnv *jni, jobject j_live, bool granted, jobject context);
 };
 
 

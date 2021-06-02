@@ -6,37 +6,27 @@
 #include "../base/esUtil.h"
 #include "../base/env.h"
 #include "../capture/Camera.h"
+#include "../peer/my_rtc_engine.h"
 
 /**
  * Initiate a Camera Run-time usage request to Java side implementation
  *  [ The request result will be passed back in function
  *    notifyCameraPermission()]
  */
-//static void Permission::RequestCameraPermission() {
-//    if (!app_) return;
-//
-//    JNIEnv* env;
-//    ANativeActivity* activity = app_->activity;
-//    activity->vm->GetEnv((void**)&env, JNI_VERSION_1_6);
-//
-//    activity->vm->AttachCurrentThread(&env, NULL);
-//
-//    jobject activityObj = env->NewGlobalRef(activity->clazz);
-//    jclass clz = env->GetObjectClass(activityObj);
-//    env->CallVoidMethod(activityObj,
-//                        env->GetMethodID(clz, "requestCamera", "()V"));
-//    env->DeleteGlobalRef(activityObj);
-//
-//    activity->vm->DetachCurrentThread();
-//}
 
-
-void Permission::PermissionResult(bool granted) {
+void Permission::PermissionResult(JNIEnv *jni, jobject j_live, bool granted, jobject context) {
     LOGI("PermissionResult %d", granted);
     if (rtc_demo::app == nullptr) {
         LOGE("App app is not initialized");
-    } {
-        rtc_demo::camera = new Camera(rtc_demo::app, ACAMERA_LENS_FACING_BACK);
     }
+
+//        rtc_demo::camera = new Camera(rtc_demo::app, ACAMERA_LENS_FACING_BACK);
+        Live live(jni, context); // init;
+        live.createEngine(); // PeerConnectionFactory + PeerConnection.
+        live.AddTracks(jni); // add audio and video track.
+//    live.connectToPeer(nullptr); // create offer or answer.
+//    live.addIce(Json::CharReaderBuilder().build()); // create or add ice.
+
+
 
 }
