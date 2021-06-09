@@ -23,7 +23,6 @@ namespace rtc_demo {
 
     AndroidVideoTrackSource::AndroidVideoTrackSource(
             rtc::Thread *signaling_thread,
-            JNIEnv *jni,
             bool is_screencast,
             bool align_timestamps
     ) : AdaptedVideoTrackSource(kRequiredResolutionAlignment),
@@ -69,7 +68,30 @@ namespace rtc_demo {
     }
 
 
-    void AndroidVideoTrackSource::OnFrameCaptured(long timestamp_ns, AImage *image) {
+    void AndroidVideoTrackSource::OnFrameCaptured(AImage *image) {
+        rtc::scoped_refptr<VideoFrameBuffer> buffer = rtc::scoped_refptr<VideoFrameBuffer>();
+//        AndroidVideoBuffer::Create(env, j_video_frame_buffer);
+        const VideoRotation rotation = kVideoRotation_0;
+        int format = 0;
+        AImage_getFormat(image, &format);
+        uint8_t *videoFrameBuffer = nullptr;
 
+        if (format == AIMAGE_FORMAT_YUV_420_888) {
+            int64_t timestamp_ns = 0;
+            AImage_getTimestamp(image, &timestamp_ns);
+
+            OnFrame(VideoFrame::Builder()
+                            .set_video_frame_buffer(buffer)
+                            .set_rotation(rotation)
+                            .set_timestamp_us(timestamp_ns / rtc::kNumNanosecsPerMicrosec)
+                            .build());
+        }
+
+
+        // AdaptedVideoTrackSource handles applying rotation for I420 frames.
+        if (apply_rotation() && rotation != kVideoRotation_0) {
+        }
+
+//            buffer = buffer->ToI420();
     }
 }  // namespace webrtc

@@ -2,6 +2,7 @@
 // Created by Albert on 2021/5/15.
 //
 
+#include <rtc_base/ref_counted_object.h>
 #include "Camera.h"
 
 static inline uint32_t YUV2RGB(int nY, int nU, int nV) {
@@ -85,19 +86,6 @@ Camera::Camera(android_app *app, acamera_metadata_enum_acamera_lens_facing findF
         ACameraMetadata_getConstEntry(metadataObj, ACAMERA_SCALER_AVAILABLE_STREAM_CONFIGURATIONS,
                                       &entry);
 
-        for (int streamIndex = 0; streamIndex < entry.count; streamIndex += 4) {
-            // We are only interested in output streams, so skip input stream
-            int32_t input = entry.data.i32[streamIndex + 3];
-            if (input)
-                continue;
-
-            int32_t format = entry.data.i32[streamIndex + 0];
-            if (format == AIMAGE_FORMAT_JPEG) {
-                int32_t width = entry.data.i32[streamIndex + 1];
-                int32_t height = entry.data.i32[streamIndex + 2];
-            }
-        }
-
         ACameraMetadata_getConstEntry(metadataObj, ACAMERA_SENSOR_ORIENTATION, &entry);
         int32_t orientation = entry.data.i32[0];
 
@@ -119,6 +107,7 @@ Camera::Camera(android_app *app, acamera_metadata_enum_acamera_lens_facing findF
 
     ACameraManager_deleteCameraIdList(cameraIds);
     _cameraId = id;
+    videoSource = new rtc::RefCountedObject<rtc_demo::AndroidVideoTrackSource>(nullptr, false, false);
 }
 
 Camera::~Camera() {
@@ -378,7 +367,7 @@ AImageReader *Camera::createYuvReader() {
             &_imageReader
     );
 
-    AImageReader_ImageListener listener{
+    AImageReader_ImageListener listener {
             .context = this,
             .onImageAvailable = imageCallback,
     };

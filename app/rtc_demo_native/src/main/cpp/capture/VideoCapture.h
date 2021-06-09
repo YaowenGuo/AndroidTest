@@ -7,7 +7,7 @@
 
 
 class VideoCapture {
-    On
+
 };
 
 

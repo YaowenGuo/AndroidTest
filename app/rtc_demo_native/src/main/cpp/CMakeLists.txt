@@ -37,9 +37,11 @@ file(GLOB allCpp
         base/*.cpp
         main/*.cpp
         peer/*.cpp
+        peer/android_video_frame_buffer.cpp
         capture/*.cpp
         permissition/*.cpp
         ../../../../../lib/webrtc/pc/video_track_source.cc
+        ../../../../../lib/webrtc/api/video/video_frame_buffer.cc
         ../../../../../lib/webrtc/media/base/adapted_video_track_source.cc
 #        json/jsoncpp.cpp
         )
@@ -60,6 +62,7 @@ add_library( # Sets the name of the library.
 target_include_directories(rtc_demo PUBLIC
         ${ANDROID_NDK}/sources/android/native_app_glue
         ${CMAKE_SOURCE_DIR}/include
+        ${CMAKE_SOURCE_DIR}/peer/android_video_frame_buffer.h
 #        ${CMAKE_SOURCE_DIR}/json/json
         )
 
@@ -128,7 +131,7 @@ target_link_libraries( # Specifies the target library.
         OpenSLES
 #        ${CMAKE_SOURCE_DIR}/lib/${ANDROID_ABI}/libjingle_peerconnection_so.so
         absl::flags
-        sioclient
+#        sioclient
         ${camera-lib}
         ${media-lib}
         ${log-lib})

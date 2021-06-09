@@ -14,18 +14,13 @@
 #include <jni.h>
 #include <media/NdkImage.h>
 
-#include "common_video/libyuv/include/webrtc_libyuv.h"
 #include "media/base/adapted_video_track_source.h"
-#include "rtc_base/checks.h"
 #include "rtc_base/thread.h"
 #include "rtc_base/timestamp_aligner.h"
-#include "sdk/android/src/jni/video_frame.h"
 
 #include "api/scoped_refptr.h"
 #include "modules/video_capture/video_capture.h"
 #include "test/test_video_capturer.h"
-
-using namespace webrtc;
 
 namespace rtc_demo {
 
@@ -37,7 +32,6 @@ namespace rtc_demo {
     class AndroidVideoTrackSource : public rtc::AdaptedVideoTrackSource {
     public:
         AndroidVideoTrackSource(rtc::Thread *signaling_thread,
-                                JNIEnv *jni,
                                 bool is_screencast,
                                 bool align_timestamps);
 
@@ -57,7 +51,7 @@ namespace rtc_demo {
         // L------------------
 
         // Add image when captured.
-        void OnFrameCaptured(long timestamp_ns, AImage *image);
+        void OnFrameCaptured(AImage *image);
         void SetState(bool is_live);
 
     private:

@@ -65,7 +65,9 @@ public:
 
     //「***************** SetRemoteDescriptionObserverInterface *******************
     void AddRef() const override {};
-    rtc::RefCountReleaseStatus Release() const override {};
+    rtc::RefCountReleaseStatus Release() const override {
+        return rtc::RefCountReleaseStatus::kDroppedLastRef;
+    };
     // L***************** SetRemoteDescriptionObserverInterface *******************
 
     //「***************** VideoSinkInterface *******************

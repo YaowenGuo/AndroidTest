@@ -16,6 +16,7 @@
 #include <android/native_window.h>
 #include <android_native_app_glue.h>
 #include <functional>
+#include "../peer/android_video_track_source.h"
 
 #define MAX_BUF_COUNT 4
 
@@ -60,6 +61,7 @@ private:
     ACameraCaptureSession_stateCallbacks *GetSessionListener();
 
     void StartPreview(bool start, ACaptureRequest** request);
+    webrtc::VideoTrackSourceInterface *videoSource;
 };
 
 
