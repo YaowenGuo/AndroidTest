@@ -24,11 +24,6 @@
 
 namespace rtc_demo {
 
-// This class needs to be used in conjunction with the Java corresponding class
-// NativeAndroidVideoTrackSource. This class is thred safe and methods can be
-// called from any thread, but if frames A, B, ..., are sent to adaptFrame(),
-// the adapted frames adaptedA, adaptedB, ..., needs to be passed in the same
-// order to onFrameCaptured().
     class AndroidVideoTrackSource : public rtc::AdaptedVideoTrackSource {
     public:
         AndroidVideoTrackSource(rtc::Thread *signaling_thread,

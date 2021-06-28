@@ -107,7 +107,6 @@ Camera::Camera(android_app *app, acamera_metadata_enum_acamera_lens_facing findF
 
     ACameraManager_deleteCameraIdList(cameraIds);
     _cameraId = id;
-    videoSource = new rtc::RefCountedObject<rtc_demo::AndroidVideoTrackSource>(nullptr, false, false);
 }
 
 Camera::~Camera() {
@@ -136,18 +135,17 @@ void Camera::imageCallback(void *context, AImageReader *reader) {
     // Check status here ...
 
     // Try to process data without blocking the callback
-//    std::thread processor([=]() {
+    std::thread processor([=]() {
 //        uint8_t *data = nullptr;
 //        int len = 0;
 //        AImage_getPlaneData(image, 0, &data, &len);
 
-    // Process data here
-    // ...
+        videoSource->OnFrameCaptured(image);
 
-//        AImage_delete(image);
+        AImage_delete(image);
 
-//    });
-//    processor.detach();
+    });
+    processor.detach();
 }
 
 AImage *Camera::nextImage() {
@@ -360,6 +358,7 @@ void Camera::PresentImage270(ANativeWindow_Buffer *buf, AImage *image) {
 
 
 AImageReader *Camera::createYuvReader() {
+    videoSource = new rtc::RefCountedObject<rtc_demo::AndroidVideoTrackSource>(nullptr, false, false);
     AImageReader_new(
             640, 480,
             MAX_BUF_COUNT,

@@ -5,6 +5,24 @@ android {
         applicationId "tech.yaowen.rtc_demo_native"
         //camera2ndk only can be use above android api 24
         minSdkVersion 24
+        externalNativeBuild {
+
+            // For ndk-build, instead use the ndkBuild block.
+            cmake {
+                // https://developer.android.com/studio/projects/gradle-external-native-builds
+                // Passes optional arguments to CMake.
+                //arguments "-DANDROID_ARM_NEON=TRUE", "-DANDROID_TOOLCHAIN=clang"
+
+                // either -DCMAKE_FIND_DEBUG_MODE=true or --debug-find to your CMake command.
+                arguments "--debug-find"
+
+                // Sets a flag to enable format macro constants for the C compiler.
+                // cFlags "-D__STDC_FORMAT_MACROS"
+
+                // Sets optional flags for the C++ compiler.
+                // cppFlags "-fexceptions", "-frtti"
+            }
+        }
     }
     externalNativeBuild {
         cmake {

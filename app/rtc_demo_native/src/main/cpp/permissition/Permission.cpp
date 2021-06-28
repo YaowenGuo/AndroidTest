@@ -20,7 +20,7 @@ void Permission::PermissionResult(JNIEnv *jni, jobject j_live, bool granted, job
         LOGE("App app is not initialized");
     }
 
-//        rtc_demo::camera = new Camera(rtc_demo::app, ACAMERA_LENS_FACING_BACK);
+        rtc_demo::camera = new Camera(rtc_demo::app, ACAMERA_LENS_FACING_BACK);
         Live live(jni, context); // init;
         live.createEngine(); // PeerConnectionFactory + PeerConnection.
         live.AddTracks(jni); // add audio and video track.

@@ -10,4 +10,4 @@ edition = "2018"
 jni = { version = "0.17.0", default-features = false }
 gl = "0.14.0"
 [lib]
-crate_type = ["cdylib"]
+crate_type = ["staticlib", "dylib"]

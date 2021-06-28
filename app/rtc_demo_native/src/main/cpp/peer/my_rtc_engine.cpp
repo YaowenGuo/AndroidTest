@@ -149,7 +149,6 @@ void Live::AddTracks(JNIEnv* jni) {
 
     rtc::scoped_refptr<rtc_demo::AndroidVideoTrackSource> video_device = new rtc::RefCountedObject<rtc_demo::AndroidVideoTrackSource>(
             signaling_thread.get(), false, false);
-//    video_device->AddOrUpdateSink(this, rtc::VideoSinkWants());
 
     // Start local render
     // main_wnd_->StartLocalRenderer(video_track_);

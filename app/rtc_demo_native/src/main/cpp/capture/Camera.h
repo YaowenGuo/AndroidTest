@@ -61,7 +61,7 @@ private:
     ACameraCaptureSession_stateCallbacks *GetSessionListener();
 
     void StartPreview(bool start, ACaptureRequest** request);
-    webrtc::VideoTrackSourceInterface *videoSource;
+    static webrtc::VideoTrackSourceInterface *videoSource;
 };
 
 
