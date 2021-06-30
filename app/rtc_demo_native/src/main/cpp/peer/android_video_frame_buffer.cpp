@@ -87,19 +87,19 @@ namespace rtc_demo {
     }  // namespace
 
 
-    rtc::scoped_refptr<AndroidVideoBuffer> AndroidVideoBuffer::Create(AImage *image) {
-        return rtc::make_ref_counted<AndroidVideoBuffer>(image);
+    rtc::scoped_refptr<AndroidVideoFrameBuffer> AndroidVideoFrameBuffer::Create(AImage *image) {
+        return rtc::make_ref_counted<AndroidVideoFrameBuffer>(image);
     }
 
 
-    AndroidVideoBuffer::AndroidVideoBuffer(AImage *image) : image_(image){
+    AndroidVideoFrameBuffer::AndroidVideoFrameBuffer(AImage *image) : image_(image){
         AImage_getWidth(image, &width_);
         AImage_getHeight(image, &height_);
     }
 
-    AndroidVideoBuffer::~AndroidVideoBuffer() = default;
+    AndroidVideoFrameBuffer::~AndroidVideoFrameBuffer() = default;
 
-    rtc::scoped_refptr<webrtc::VideoFrameBuffer> AndroidVideoBuffer::CropAndScale(
+    rtc::scoped_refptr<webrtc::VideoFrameBuffer> AndroidVideoFrameBuffer::CropAndScale(
             int crop_x,
             int crop_y,
             int crop_width,
@@ -109,19 +109,19 @@ namespace rtc_demo {
         return nullptr;
     }
 
-    AndroidVideoBuffer::Type AndroidVideoBuffer::type() const {
+    AndroidVideoFrameBuffer::Type AndroidVideoFrameBuffer::type() const {
         return Type::kNative;
     }
 
-    int AndroidVideoBuffer::width() const {
+    int AndroidVideoFrameBuffer::width() const {
         return width_;
     }
 
-    int AndroidVideoBuffer::height() const {
+    int AndroidVideoFrameBuffer::height() const {
         return height_;
     }
 
-    rtc::scoped_refptr<webrtc::I420BufferInterface> AndroidVideoBuffer::ToI420() {
+    rtc::scoped_refptr<webrtc::I420BufferInterface> AndroidVideoFrameBuffer::ToI420() {
         // We don't need to retain the buffer because toI420 returns a new object that
         // we are assumed to take the ownership of.
         return rtc::make_ref_counted<AndroidVideoI420Buffer>(width_, height_, image_);

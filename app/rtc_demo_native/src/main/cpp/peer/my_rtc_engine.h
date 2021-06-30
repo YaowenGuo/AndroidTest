@@ -9,6 +9,8 @@
 #include <api/peer_connection_interface.h>
 #include <pc/video_track_source.h>
 #include <third_party/jsoncpp/source/include/json/value.h>
+#include <jni.h>
+#include "android_video_track_source.h"
 
 // InitFieldTrialsFromString stores the char*, so the char array must outlive
 // the application.
@@ -42,7 +44,7 @@ class Live : public PeerConnectionObserver, public CreateSessionDescriptionObser
 public:
     Live(JNIEnv *jni, jobject context);
     void createEngine();
-    void AddTracks(JNIEnv* jni);
+    rtc::scoped_refptr<rtc_demo::AndroidVideoTrackSource> AddTracks(JNIEnv* jni);
     void connectToPeer(SessionDescriptionInterface* desc);
     void setRemoteDescription(SessionDescriptionInterface *desc);
     void addIce(const Json::Value jmessage);

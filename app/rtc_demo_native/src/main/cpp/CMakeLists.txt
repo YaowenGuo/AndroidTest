@@ -35,15 +35,16 @@ set(CMAKE_SHARED_LINKER_FLAGS
 #找到包含所有的cpp文件
 file(GLOB allCpp
         base/*.cpp
+        camera/*.cpp
+        utils/*.cpp
         main/*.cpp
         peer/*.cpp
         peer/android_video_frame_buffer.cpp
-        capture/*.cpp
-        permissition/*.cpp
+#        permissition/*.cpp
+
         ../../../../../lib/webrtc/pc/video_track_source.cc
         ../../../../../lib/webrtc/api/video/video_frame_buffer.cc
         ../../../../../lib/webrtc/media/base/adapted_video_track_source.cc
-#        json/jsoncpp.cpp
         )
 
 

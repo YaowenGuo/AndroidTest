@@ -85,7 +85,7 @@
 
   <target name="ContainerMethodDifferences">
     <java
-     classname="net.mindview.util.ContainerMethodDifferences"
+     classname="net.mindview.utils.ContainerMethodDifferences"
      classpath="${java.class.path};${basedir};${basedir}/.."
      dir="../net/mindview/util/"
      failonerror="true"
@@ -94,7 +94,7 @@
 
   <target name="CountingIntegerList">
     <java
-     classname="net.mindview.util.CountingIntegerList"
+     classname="net.mindview.utils.CountingIntegerList"
      classpath="${java.class.path};${basedir};${basedir}/.."
      dir="../net/mindview/util/"
      failonerror="true"
@@ -103,7 +103,7 @@
 
   <target name="CountingMapData">
     <java
-     classname="net.mindview.util.CountingMapData"
+     classname="net.mindview.utils.CountingMapData"
      classpath="${java.class.path};${basedir};${basedir}/.."
      dir="../net/mindview/util/"
      failonerror="true"
@@ -112,7 +112,7 @@
 
   <target name="Countries">
     <java
-     classname="net.mindview.util.Countries"
+     classname="net.mindview.utils.Countries"
      classpath="${java.class.path};${basedir};${basedir}/.."
      dir="../net/mindview/util/"
      failonerror="true"
@@ -121,7 +121,7 @@
 
   <target name="Directory">
     <java
-     classname="net.mindview.util.Directory"
+     classname="net.mindview.utils.Directory"
      classpath="${java.class.path};${basedir};${basedir}/.."
      dir="../net/mindview/util/"
      failonerror="true"
@@ -130,7 +130,7 @@
 
   <target name="Hex">
     <java
-     classname="net.mindview.util.Hex"
+     classname="net.mindview.utils.Hex"
      classpath="${java.class.path};${basedir};${basedir}/.."
      dir="../net/mindview/util/"
      failonerror="true"
@@ -139,7 +139,7 @@
 
   <target name="New">
     <java
-     classname="net.mindview.util.New"
+     classname="net.mindview.utils.New"
      classpath="${java.class.path};${basedir};${basedir}/.."
      dir="../net/mindview/util/"
      failonerror="true"
@@ -148,7 +148,7 @@
 
   <target name="ProcessFiles">
     <java
-     classname="net.mindview.util.ProcessFiles"
+     classname="net.mindview.utils.ProcessFiles"
      classpath="${java.class.path};${basedir};${basedir}/.."
      dir="../net/mindview/util/"
      failonerror="true"
@@ -157,7 +157,7 @@
 
   <target name="TextFile">
     <java
-     classname="net.mindview.util.TextFile"
+     classname="net.mindview.utils.TextFile"
      classpath="${java.class.path};${basedir};${basedir}/.."
      dir="../net/mindview/util/"
      failonerror="true"

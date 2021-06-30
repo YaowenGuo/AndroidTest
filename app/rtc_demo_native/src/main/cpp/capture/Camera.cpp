@@ -5,6 +5,9 @@
 #include <rtc_base/ref_counted_object.h>
 #include "Camera.h"
 
+
+rtc::RefCountedObject<rtc_demo::AndroidVideoTrackSource> *Camera::videoSource;
+
 static inline uint32_t YUV2RGB(int nY, int nU, int nV) {
     nY -= 16;
     nU -= 128;
@@ -17,9 +20,9 @@ static inline uint32_t YUV2RGB(int nY, int nU, int nV) {
     // nG = (int)(1.164 * nY - 0.813 * nV - 0.391 * nU);
     // nB = (int)(1.164 * nY + 2.018 * nU);
 
-    int nR = (int)(1192 * nY + 1634 * nV);
-    int nG = (int)(1192 * nY - 833 * nV - 400 * nU);
-    int nB = (int)(1192 * nY + 2066 * nU);
+    int nR = (int) (1192 * nY + 1634 * nV);
+    int nG = (int) (1192 * nY - 833 * nV - 400 * nU);
+    int nB = (int) (1192 * nY + 2066 * nU);
 
     nR = MIN(kMaxChannelValue, MAX(0, nR));
     nG = MIN(kMaxChannelValue, MAX(0, nG));
@@ -135,7 +138,7 @@ void Camera::imageCallback(void *context, AImageReader *reader) {
     // Check status here ...
 
     // Try to process data without blocking the callback
-    std::thread processor([=]() {
+//    std::thread processor([=]() {
 //        uint8_t *data = nullptr;
 //        int len = 0;
 //        AImage_getPlaneData(image, 0, &data, &len);
@@ -144,8 +147,8 @@ void Camera::imageCallback(void *context, AImageReader *reader) {
 
         AImage_delete(image);
 
-    });
-    processor.detach();
+//    });
+//    processor.detach();
 }
 
 AImage *Camera::nextImage() {
@@ -358,7 +361,8 @@ void Camera::PresentImage270(ANativeWindow_Buffer *buf, AImage *image) {
 
 
 AImageReader *Camera::createYuvReader() {
-    videoSource = new rtc::RefCountedObject<rtc_demo::AndroidVideoTrackSource>(nullptr, false, false);
+    videoSource = new rtc::RefCountedObject<rtc_demo::AndroidVideoTrackSource>(nullptr, false,
+                                                                               false);
     AImageReader_new(
             640, 480,
             MAX_BUF_COUNT,
@@ -366,7 +370,7 @@ AImageReader *Camera::createYuvReader() {
             &_imageReader
     );
 
-    AImageReader_ImageListener listener {
+    AImageReader_ImageListener listener{
             .context = this,
             .onImageAvailable = imageCallback,
     };
@@ -398,32 +402,34 @@ AImageReader *Camera::createJpegReader() {
 }
 
 // CaptureSession state callbacks
-void OnSessionClosed(void* ctx, ACameraCaptureSession* ses) {
+void OnSessionClosed(void *ctx, ACameraCaptureSession *ses) {
     LOGW("session %p closed", ses);
-    reinterpret_cast<Camera*>(ctx)->OnSessionState(ses, 0);
+    reinterpret_cast<Camera *>(ctx)->OnSessionState(ses, 0);
 }
-void OnSessionReady(void* ctx, ACameraCaptureSession* ses) {
+
+void OnSessionReady(void *ctx, ACameraCaptureSession *ses) {
     LOGW("session %p ready", ses);
-    reinterpret_cast<Camera*>(ctx)->OnSessionState(ses, 1);
+    reinterpret_cast<Camera *>(ctx)->OnSessionState(ses, 1);
 }
-void OnSessionActive(void* ctx, ACameraCaptureSession* ses) {
+
+void OnSessionActive(void *ctx, ACameraCaptureSession *ses) {
     LOGW("session %p active", ses);
-    reinterpret_cast<Camera*>(ctx)->OnSessionState(ses, 2);
+    reinterpret_cast<Camera *>(ctx)->OnSessionState(ses, 2);
 }
 
 /**
  * Handles capture session state changes.
  *   Update into internal session state.
  */
-void Camera::OnSessionState(ACameraCaptureSession* ses,
-                               int state) {
+void Camera::OnSessionState(ACameraCaptureSession *ses,
+                            int state) {
     if (!ses || ses != captureSession_) {
         LOGW("CaptureSession is %s", (ses ? "NOT our session" : "NULL"));
         return;
     }
 }
 
-ACameraCaptureSession_stateCallbacks* Camera::GetSessionListener() {
+ACameraCaptureSession_stateCallbacks *Camera::GetSessionListener() {
     static ACameraCaptureSession_stateCallbacks sessionListener = {
             .context = this,
             .onClosed = ::OnSessionClosed,
@@ -433,11 +439,11 @@ ACameraCaptureSession_stateCallbacks* Camera::GetSessionListener() {
     return &sessionListener;
 }
 
-void Camera::CreateSession(ANativeWindow* previewWindow, int32_t imageRotation) {
+void Camera::CreateSession(ANativeWindow *previewWindow, int32_t imageRotation) {
     // Create output from this app's ANativeWindow, and add into output container
-    ACaptureSessionOutput* sessionOutput_ = nullptr;
-    ACameraOutputTarget* target_ = nullptr;
-    ACaptureRequest* request_ = nullptr;
+    ACaptureSessionOutput *sessionOutput_ = nullptr;
+    ACameraOutputTarget *target_ = nullptr;
+    ACaptureRequest *request_ = nullptr;
 
     ACaptureSessionOutputContainer_create(&outputContainer_);
     // 锁定屏幕防止被其它程序刷新导致图像混乱。
@@ -449,7 +455,8 @@ void Camera::CreateSession(ANativeWindow* previewWindow, int32_t imageRotation) 
     ACaptureRequest_addTarget(request_, target_);
 
     // Create a capture session for the given preview request
-    ACameraDevice_createCaptureSession(_cameraDevice, outputContainer_, GetSessionListener(), &captureSession_);
+    ACameraDevice_createCaptureSession(_cameraDevice, outputContainer_, GetSessionListener(),
+                                       &captureSession_);
 
 
     /*
@@ -459,15 +466,15 @@ void Camera::CreateSession(ANativeWindow* previewWindow, int32_t imageRotation) 
      * (auto control has better effect than author's manual control)
      */
     uint8_t aeModeOff = ACAMERA_CONTROL_AE_MODE_OFF;
-    ACaptureRequest_setEntry_u8(request_,ACAMERA_CONTROL_AE_MODE, 1, &aeModeOff);
+    ACaptureRequest_setEntry_u8(request_, ACAMERA_CONTROL_AE_MODE, 1, &aeModeOff);
     ACaptureRequest_setEntry_i32(request_,
-                              ACAMERA_SENSOR_SENSITIVITY, 1, &sensitivity_);
-    ACaptureRequest_setEntry_i64(request_,ACAMERA_SENSOR_EXPOSURE_TIME, 1, &exposureTime_);
+                                 ACAMERA_SENSOR_SENSITIVITY, 1, &sensitivity_);
+    ACaptureRequest_setEntry_i64(request_, ACAMERA_SENSOR_EXPOSURE_TIME, 1, &exposureTime_);
     StartPreview(true, &request_);
 }
 
 
-void Camera::StartPreview(bool start, ACaptureRequest** request) {
+void Camera::StartPreview(bool start, ACaptureRequest **request) {
     if (start) {
         ACameraCaptureSession_setRepeatingRequest(captureSession_, nullptr, 1, request, nullptr);
     } else {

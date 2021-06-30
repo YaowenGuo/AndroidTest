@@ -20,12 +20,12 @@
 
 namespace rtc_demo {
 
-    class AndroidVideoBuffer : public webrtc::VideoFrameBuffer {
+    class AndroidVideoFrameBuffer : public webrtc::VideoFrameBuffer {
     public:
         // Creates a native VideoFrameBuffer from a Java VideoFrame.Buffer.
-        static rtc::scoped_refptr <AndroidVideoBuffer> Create(AImage *);
+        static rtc::scoped_refptr <AndroidVideoFrameBuffer> Create(AImage *);
 
-        ~AndroidVideoBuffer() override;
+        ~AndroidVideoFrameBuffer() override;
 
         // Crops a region defined by |crop_x|, |crop_y|, |crop_width| and
         // |crop_height|. Scales it to size |scale_width| x |scale_height|.
@@ -40,7 +40,7 @@ namespace rtc_demo {
     protected:
         // Should not be called directly. Adopts the Java VideoFrame.Buffer. Use
         // Create() or Adopt() instead for clarity.
-        AndroidVideoBuffer(AImage *);
+        AndroidVideoFrameBuffer(AImage *);
 
     private:
         Type type() const override;

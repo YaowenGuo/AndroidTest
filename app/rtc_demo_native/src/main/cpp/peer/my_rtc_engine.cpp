@@ -125,9 +125,9 @@ private:
 };
 
 
-void Live::AddTracks(JNIEnv* jni) {
+rtc::scoped_refptr<rtc_demo::AndroidVideoTrackSource> Live::AddTracks(JNIEnv* jni) {
     if (!peer_connection_->GetSenders().empty()) {
-        return;  // Already added tracks.
+        return nullptr;  // Already added tracks.
     }
     rtc::scoped_refptr<AudioSourceInterface> audioSource =
             peer_connection_factory_->CreateAudioSource(cricket::AudioOptions());
@@ -142,11 +142,10 @@ void Live::AddTracks(JNIEnv* jni) {
         RTC_LOG(LS_ERROR) << "Failed to add audio track to PeerConnection: "
                           << result_or_error.error().message();
     }
+
 //
 //    rtc::scoped_refptr<VideoTrackSourceInterface> video_device =
 //            CapturerTrackSource::Create();
-
-
     rtc::scoped_refptr<rtc_demo::AndroidVideoTrackSource> video_device = new rtc::RefCountedObject<rtc_demo::AndroidVideoTrackSource>(
             signaling_thread.get(), false, false);
 
@@ -160,6 +159,7 @@ void Live::AddTracks(JNIEnv* jni) {
         RTC_LOG(LS_ERROR) << "Failed to add video track to PeerConnection: "
                           << result_or_error.error().message();
     }
+    return video_device;
 //    AddOrUpdateSink(this, rtc::VideoSinkWants()
 //    main_wnd_->SwitchToStreamingUI();
 }

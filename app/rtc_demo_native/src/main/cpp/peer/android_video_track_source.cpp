@@ -9,7 +9,7 @@
  */
 
 #include "android_video_track_source.h"
-
+#include "android_video_frame_buffer.h"
 
 #include <utility>
 
@@ -69,30 +69,25 @@ namespace rtc_demo {
 
 
     void AndroidVideoTrackSource::OnFrameCaptured(AImage *image) {
-        rtc::scoped_refptr<VideoFrameBuffer> buffer = rtc::scoped_refptr<VideoFrameBuffer>();
-//        AndroidVideoBuffer::Create(env, j_video_frame_buffer);
+        rtc::scoped_refptr<VideoFrameBuffer> buffer = AndroidVideoFrameBuffer::Create(image);
         const VideoRotation rotation = kVideoRotation_0;
         int format = 0;
         AImage_getFormat(image, &format);
-        uint8_t *videoFrameBuffer = nullptr;
 
         if (format == AIMAGE_FORMAT_YUV_420_888) {
+            // AdaptedVideoTrackSource handles applying rotation for I420 frames.
+            if (apply_rotation() && rotation != kVideoRotation_0) {
+            }
+
             int64_t timestamp_ns = 0;
             AImage_getTimestamp(image, &timestamp_ns);
 
+            // notify sink video is update.
             OnFrame(VideoFrame::Builder()
                             .set_video_frame_buffer(buffer)
                             .set_rotation(rotation)
                             .set_timestamp_us(timestamp_ns / rtc::kNumNanosecsPerMicrosec)
                             .build());
         }
-
-
-        // AdaptedVideoTrackSource handles applying rotation for I420 frames.
-        if (apply_rotation() && rotation != kVideoRotation_0) {
-        }
-
-//            buffer = buffer->ToI420();
-        // TODO call live n
     }
 }  // namespace webrtc

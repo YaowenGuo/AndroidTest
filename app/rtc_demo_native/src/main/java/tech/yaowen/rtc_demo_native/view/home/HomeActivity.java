@@ -25,14 +25,14 @@ public class HomeActivity extends NativeActivity {
     }
 
     void requestCamera() {
-        String[] accessPermissions = new String[] {
+        String[] accessPermissions = new String[]{
                 Manifest.permission.CAMERA,
                 Manifest.permission.WRITE_EXTERNAL_STORAGE
         };
-        boolean needRequire  = false;
-        for(String access : accessPermissions) {
+        boolean needRequire = false;
+        for (String access : accessPermissions) {
             int curPermission = ActivityCompat.checkSelfPermission(this, access);
-            if(curPermission != PackageManager.PERMISSION_GRANTED) {
+            if (curPermission != PackageManager.PERMISSION_GRANTED) {
                 needRequire = true;
                 break;
             }
@@ -57,6 +57,7 @@ public class HomeActivity extends NativeActivity {
     }
 
     native static void permissionResult(boolean granted, Context context);
+
     static {
         System.loadLibrary("rtc_demo");
     }
