@@ -3,8 +3,6 @@ apply from:"../app_basic.gradle"
 android {
     defaultConfig {
         applicationId "tech.yaowen.rtc_demo_native"
-        minSdkVersion  24
-        targetSdkVersion 30
         //camera2ndk only can be use above android api 24
         minSdkVersion 24
 
@@ -26,6 +24,7 @@ android {
 
                 // Sets optional flags for the C++ compiler.
                 // cppFlags "-fexceptions", "-frtti"
+                cppFlags '-fno-rtti'
             }
         }
         multiDexKeepProguard file('proguard-rules.pro')

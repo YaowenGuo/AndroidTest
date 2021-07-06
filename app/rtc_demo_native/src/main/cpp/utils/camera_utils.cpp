@@ -33,7 +33,7 @@ const char* GetPairStr(T key, std::vector<std::pair<T, const char*>>& store) {
       return it->second;
     }
   }
-  LOGW("(%#08x) : UNKNOWN_TAG for %s", key, typeid(store[0].first).name());
+//  LOGW("(%#08x) : UNKNOWN_TAG for %s", key, typeid(store[0].first).name());
   return UKNOWN_TAG;
 }
 

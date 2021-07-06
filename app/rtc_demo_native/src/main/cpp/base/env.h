@@ -5,7 +5,7 @@
 #ifndef ANDROIDTEST_ENV_H
 #define ANDROIDTEST_ENV_H
 
-#include "../capture/Camera.h"
+#include "capture/Camera.h"
 
 namespace rtc_demo {
     extern android_app *app;

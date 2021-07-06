@@ -20,7 +20,7 @@
 
 #include <cstdio>
 #include "camera_engine.h"
-#include "../utils/native_debug.h"
+#include "utils/native_debug.h"
 
 /**
  * constructor and destructor for main application class
