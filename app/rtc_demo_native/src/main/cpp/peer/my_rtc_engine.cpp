@@ -14,7 +14,7 @@
 #include <api/video_codecs/builtin_video_decoder_factory.h>
 #include "my_rtc_engine.h"
 #include "vcm_capturer.h"
-#include "../base/esUtil.h"
+#include "base/esUtil.h"
 #include "android_video_track_source.h"
 #include <api/video_codecs/builtin_video_decoder_factory.h>
 

@@ -20,8 +20,8 @@
 #include <dirent.h>
 #include <ctime>
 #include "image_reader.h"
-#include "../utils/native_debug.h"
-#include "../peer/my_rtc_engine.h"
+#include "utils/native_debug.h"
+#include "peer/my_rtc_engine.h"
 
 /*
  * For JPEG capture, captured files are saved under

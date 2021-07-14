@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.4.1)
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 14)
 
 project("rtc_demo")
 add_definitions("-DWEBRTC_POSIX")
@@ -14,17 +14,18 @@ add_library(
 set(CMAKE_SHARED_LINKER_FLAGS
         "${CMAKE_SHARED_LINKER_FLAGS} -u ANativeActivity_onCreate")
 
+file(GLOB_RECURSE RTC_DEMO_SOURCES ${CMAKE_CURRENT_SOURCE_DIR} *.cpp)
+#file(
+#        GLOB allCpp
+#        base/*.cpp
+#        camera/*.cpp
+#        utils/*.cpp
+#        main/*.cpp
+#        peer/*.cpp
+#        testthread/
+#)
 
-file(
-        GLOB allCpp
-        base/*.cpp
-        camera/*.cpp
-        utils/*.cpp
-        main/*.cpp
-        peer/*.cpp
-        peer/android_video_frame_buffer.cpp
-)
-add_library(rtc_demo SHARED ${allCpp})
+add_library(rtc_demo SHARED ${RTC_DEMO_SOURCES})
 
 add_library(webrtc STATIC IMPORTED)
 set_target_properties(

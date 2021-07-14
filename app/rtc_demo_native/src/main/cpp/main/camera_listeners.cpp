@@ -19,9 +19,9 @@
 #include <thread>
 
 #include <camera/NdkCameraManager.h>
-#include "../camera/camera_manager.h"
-#include "../utils/native_debug.h"
-#include "../utils/camera_utils.h"
+#include "camera/camera_manager.h"
+#include "utils/native_debug.h"
+#include "utils/camera_utils.h"
 
 /*
  * Camera Manager Listener object

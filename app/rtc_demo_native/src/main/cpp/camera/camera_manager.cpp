@@ -19,8 +19,8 @@
 #include <cinttypes>
 #include <camera/NdkCameraManager.h>
 #include "camera_manager.h"
-#include "../utils/native_debug.h"
-#include "../utils/camera_utils.h"
+#include "utils/native_debug.h"
+#include "utils/camera_utils.h"
 
 /**
  * Range of Camera Exposure Time:

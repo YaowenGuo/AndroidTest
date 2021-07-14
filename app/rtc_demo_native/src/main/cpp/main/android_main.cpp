@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-#include "../camera/camera_engine.h"
-#include "../utils/native_debug.h"
-
+#include "camera/camera_engine.h"
+#include "utils/native_debug.h"
+#include "testthread/test_thread.h"
 /*
  * SampleEngine global object
  */
@@ -57,6 +57,7 @@ static void ProcessAndroidCmd(struct android_app* app, int32_t cmd) {
 }
 
 extern "C" void android_main(struct android_app* state) {
+  test_thread();
   CameraEngine engine(state);
   pEngineObj = &engine;
 

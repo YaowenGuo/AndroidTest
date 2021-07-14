@@ -20,7 +20,7 @@
 #include <cinttypes>
 #include <media/NdkImage.h>
 #include <camera/NdkCameraManager.h>
-#include "../utils/native_debug.h"
+#include "utils/native_debug.h"
 #include "camera_utils.h"
 
 #define UKNOWN_TAG "UNKNOW_TAG"

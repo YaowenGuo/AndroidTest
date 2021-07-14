@@ -14,10 +14,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-#include "../camera/camera_engine.h"
-#include "../utils/native_debug.h"
 #include <modules/utility/include/helpers_android.h>
+#include "camera/camera_engine.h"
+#include "utils/native_debug.h"
+
 /**
  * Retrieve current rotation from Java side
  *

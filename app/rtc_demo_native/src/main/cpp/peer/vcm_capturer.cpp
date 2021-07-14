@@ -13,9 +13,9 @@
 
 #include <memory>
 
-#include "modules/video_capture/video_capture_factory.h"
-#include "rtc_base/checks.h"
-#include "rtc_base/logging.h"
+#include <modules/video_capture/video_capture_factory.h>
+#include <rtc_base/checks.h>
+#include <rtc_base/logging.h>
 #include "vcm_capturer.h"
 
 namespace rtc_demo {
