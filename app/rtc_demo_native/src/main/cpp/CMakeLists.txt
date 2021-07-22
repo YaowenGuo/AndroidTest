@@ -15,15 +15,6 @@ set(CMAKE_SHARED_LINKER_FLAGS
         "${CMAKE_SHARED_LINKER_FLAGS} -u ANativeActivity_onCreate")
 
 file(GLOB_RECURSE RTC_DEMO_SOURCES ${CMAKE_CURRENT_SOURCE_DIR} *.cpp)
-#file(
-#        GLOB allCpp
-#        base/*.cpp
-#        camera/*.cpp
-#        utils/*.cpp
-#        main/*.cpp
-#        peer/*.cpp
-#        testthread/
-#)
 
 add_library(rtc_demo SHARED ${RTC_DEMO_SOURCES})
 
@@ -32,22 +23,10 @@ set_target_properties(
         webrtc PROPERTIES
         IMPORTED_LOCATION ${CMAKE_CURRENT_SOURCE_DIR}/lib/${ANDROID_ABI}/libwebrtc.a
 )
-# not working for static library.
-#SET_TARGET_PROPERTIES(
-#        webrtc PROPERTIES
-#        COMPILE_FLAGS "-fdebug-prefix-map=../..=${CMAKE_CURRENT_SOURCE_DIR}/../../../../../lib/webrtc"
-#)
-
 
 # 导入头文件仅能是目录，而不能直接指定 .h 文件。
-#target_include_directories(
-#        rtc_demo PUBLIC
-#        ${ANDROID_NDK}/sources/android/native_app_glue
-#        ${CMAKE_CURRENT_SOURCE_DIR}
-#)
-
-include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 include_directories(
+        ${CMAKE_CURRENT_SOURCE_DIR}
         ${ANDROID_NDK}/sources/android/native_app_glue
         "../../../../../lib/webrtc"
         "../../../../../lib/webrtc/third_party/jsoncpp/source/include"

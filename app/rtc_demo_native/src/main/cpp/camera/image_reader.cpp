@@ -22,6 +22,7 @@
 #include "image_reader.h"
 #include "utils/native_debug.h"
 #include "peer/my_rtc_engine.h"
+#include "peer/android_video_track_source.h"
 
 /*
  * For JPEG capture, captured files are saved under
@@ -55,15 +56,16 @@ void OnImageCallback(void *ctx, AImageReader *reader) {
 /**
  * Constructor
  */
-ImageReader::ImageReader(ImageFormat *res, enum AIMAGE_FORMATS format)
-        : presentRotation_(0), reader_(nullptr) {
+ImageReader::ImageReader(ImageFormat *res, enum AIMAGE_FORMATS format,  rtc::scoped_refptr<rtc_demo::AndroidVideoTrackSource> video_source)
+        : presentRotation_(0), reader_(nullptr), video_source_(video_source) {
     callback_ = nullptr;
     callbackCtx_ = nullptr;
     media_status_t status = AImageReader_new(res->width, res->height, format,
                                              MAX_BUF_COUNT, &reader_);
     ASSERT(reader_ && status == AMEDIA_OK, "Failed to create AImageReader");
     AImageReader_ImageListener listener{
-            .context = this, .onImageAvailable = OnImageCallback,
+            .context = this,
+            .onImageAvailable = OnImageCallback,
     };
     AImageReader_setImageListener(reader_, &listener);
 }
@@ -92,6 +94,13 @@ void ImageReader::ImageCallback(AImageReader *reader) {
         // Create a thread and write out the jpeg files
         std::thread writeFileHandler(&ImageReader::WriteFile, this, image);
         writeFileHandler.detach();
+    } else if (video_source_) {
+        AImage *image = nullptr;
+        media_status_t status = AImageReader_acquireNextImage(reader_, &image);
+        if (status != AMEDIA_OK) return;
+        LOGD("RTC yaowen: %s", "ImageCallback");
+        ASSERT(status == AMEDIA_OK && image, "Image is not available");
+        video_source_->OnFrameCaptured(image, presentRotation_);
     }
 }
 

@@ -108,7 +108,8 @@ namespace rtc_demo {
     }
 
     AndroidVideoFrameBuffer::Type AndroidVideoFrameBuffer::type() const {
-        return Type::kNative;
+//        return Type::kNative;
+        return Type::kI420;
     }
 
     int AndroidVideoFrameBuffer::width() const {

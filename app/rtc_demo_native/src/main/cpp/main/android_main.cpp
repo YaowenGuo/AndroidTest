@@ -21,7 +21,7 @@
  * SampleEngine global object
  */
 static CameraEngine* pEngineObj = nullptr;
-CameraEngine* GetAppEngine(void) {
+CameraEngine* GetAppEngine() {
   ASSERT(pEngineObj, "AppEngine has not initialized");
   return pEngineObj;
 }
@@ -32,10 +32,10 @@ CameraEngine* GetAppEngine(void) {
  *   INIT_WINDOW/TERM_WINDOW command, ignoring other event.
  */
 static void ProcessAndroidCmd(struct android_app* app, int32_t cmd) {
-  CameraEngine* engine = reinterpret_cast<CameraEngine*>(app->userData);
+  auto* engine = reinterpret_cast<CameraEngine*>(app->userData);
   switch (cmd) {
     case APP_CMD_INIT_WINDOW:
-      if (engine->AndroidApp()->window != NULL) {
+      if (engine->AndroidApp()->window != nullptr) {
         engine->SaveNativeWinRes(ANativeWindow_getWidth(app->window),
                                  ANativeWindow_getHeight(app->window),
                                  ANativeWindow_getFormat(app->window));
@@ -52,34 +52,35 @@ static void ProcessAndroidCmd(struct android_app* app, int32_t cmd) {
       engine->OnAppConfigChange();
       break;
     case APP_CMD_LOST_FOCUS:
+    default:
       break;
   }
 }
 
 extern "C" void android_main(struct android_app* state) {
   test_thread();
-  CameraEngine engine(state);
-  pEngineObj = &engine;
+//  CameraEngine engine(state);
+  pEngineObj = new CameraEngine(state);
 
-  state->userData = reinterpret_cast<void*>(&engine);
+  state->userData = reinterpret_cast<void*>(pEngineObj);
   state->onAppCmd = ProcessAndroidCmd;
 
   // loop waiting for stuff to do.
-  while (1) {
+  while (true) {
     // Read all pending events.
     int events;
     struct android_poll_source* source;
 
-    while (ALooper_pollAll(0, NULL, &events, (void**)&source) >= 0) {
+    while (ALooper_pollAll(0, nullptr, &events, (void**)&source) >= 0) {
       // Process this event.
-      if (source != NULL) {
+      if (source != nullptr) {
         source->process(state, source);
       }
 
       // Check if we are exiting.
       if (state->destroyRequested != 0) {
         LOGI("CameraEngine thread destroy requested!");
-        engine.DeleteCamera();
+        pEngineObj->DeleteCamera();
         pEngineObj = nullptr;
         return;
       }
@@ -93,7 +94,7 @@ extern "C" void android_main(struct android_app* state) {
  *   Request camera persmission from Java side
  *   Create camera object if camera has been granted
  */
-void CameraEngine::OnAppInitWindow(void) {
+void CameraEngine::OnAppInitWindow() {
   if (!cameraGranted_) {
     // Not permitted to use camera yet, ask(again) and defer other events
     RequestCameraPermission();
@@ -115,7 +116,7 @@ void CameraEngine::OnAppInitWindow(void) {
 /**
  * Handle APP_CMD_TEMR_WINDOW
  */
-void CameraEngine::OnAppTermWindow(void) {
+void CameraEngine::OnAppTermWindow() {
   cameraReady_ = false;
   DeleteCamera();
 }
@@ -123,7 +124,7 @@ void CameraEngine::OnAppTermWindow(void) {
 /**
  * Handle APP_CMD_CONFIG_CHANGED
  */
-void CameraEngine::OnAppConfigChange(void) {
+void CameraEngine::OnAppConfigChange() {
   int newRotation = GetDisplayRotation();
 
   if (newRotation != rotation_) {
@@ -138,7 +139,7 @@ void CameraEngine::OnAppConfigChange(void) {
  * Retrieve saved native window width.
  * @return width of native window
  */
-int32_t CameraEngine::GetSavedNativeWinWidth(void) {
+int32_t CameraEngine::GetSavedNativeWinWidth() const {
   return savedNativeWinRes_.width;
 }
 
@@ -146,7 +147,7 @@ int32_t CameraEngine::GetSavedNativeWinWidth(void) {
  * Retrieve saved native window height.
  * @return height of native window
  */
-int32_t CameraEngine::GetSavedNativeWinHeight(void) {
+int32_t CameraEngine::GetSavedNativeWinHeight() const {
   return savedNativeWinRes_.height;
 }
 
@@ -154,7 +155,7 @@ int32_t CameraEngine::GetSavedNativeWinHeight(void) {
  * Retrieve saved native window format
  * @return format of native window
  */
-int32_t CameraEngine::GetSavedNativeWinFormat(void) {
+int32_t CameraEngine::GetSavedNativeWinFormat() const {
   return savedNativeWinRes_.format;
 }
 

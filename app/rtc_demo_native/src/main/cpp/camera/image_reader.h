@@ -19,7 +19,9 @@
 
 #include <media/NdkImageReader.h>
 #include <functional>
-
+#include <rtc_base/ref_counted_object.h>
+#include <pc/video_track_source.h>
+#include "peer/android_video_track_source.h"
 /*
  * ImageFormat:
  *     A Data Structure to communicate resolution between camera and ImageReader
@@ -37,7 +39,7 @@ public:
     /**
      * Ctor and Dtor()
      */
-    explicit ImageReader(ImageFormat *res, enum AIMAGE_FORMATS format);
+    explicit ImageReader(ImageFormat *res, enum AIMAGE_FORMATS format, rtc::scoped_refptr<rtc_demo::AndroidVideoTrackSource> video_source);
 
     ~ImageReader();
 
@@ -103,9 +105,9 @@ public:
 private:
     int32_t presentRotation_;
     AImageReader *reader_;
-
     std::function<void(void *ctx, const char *fileName)> callback_;
     void *callbackCtx_;
+    rtc::scoped_refptr<rtc_demo::AndroidVideoTrackSource> video_source_;
 
     void PresentImage(ANativeWindow_Buffer *buf, AImage *image);
 

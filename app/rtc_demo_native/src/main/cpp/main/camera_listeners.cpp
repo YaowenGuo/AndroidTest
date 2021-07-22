@@ -39,7 +39,7 @@ void OnCameraUnavailable(void* ctx, const char* id) {
  */
 void NDKCamera::OnCameraStatusChanged(const char* id, bool available) {
   if (valid_) {
-    cameras_[std::string(id)].available_ = available ? true : false;
+    cameras_[std::string(id)].available_ = available;
   }
 }
 

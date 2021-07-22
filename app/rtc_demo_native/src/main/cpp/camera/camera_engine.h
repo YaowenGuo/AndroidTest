@@ -22,11 +22,13 @@
 #include <android_native_app_glue.h>
 #include <functional>
 #include <thread>
-#include "rtc_base/ref_counted_object.h"
-#include "camera_manager.h"
+#include <rtc_base/ref_counted_object.h>
+#include <api/video/video_sink_interface.h>
 
-#include "../peer/android_video_track_source.h"
-#include "../peer/my_rtc_engine.h"
+#include "camera_manager.h"
+#include "peer/android_video_track_source.h"
+#include "peer/my_rtc_engine.h"
+#include "peer/android_video_sink.h"
 
 /**
  * basic CameraAppEngine
@@ -49,11 +51,11 @@ public:
     void OnAppTermWindow(void);
 
     // Native Window handlers
-    int32_t GetSavedNativeWinWidth(void);
+    int32_t GetSavedNativeWinWidth(void) const;
 
-    int32_t GetSavedNativeWinHeight(void);
+    int32_t GetSavedNativeWinHeight(void) const;
 
-    int32_t GetSavedNativeWinFormat(void);
+    int32_t GetSavedNativeWinFormat(void) const;
 
     void SaveNativeWinRes(int32_t w, int32_t h, int32_t format);
 
@@ -79,16 +81,17 @@ private:
     int GetDisplayRotation(void);
 
     struct android_app *app_;
-    JNIEnv* env_;
-    jobject context_;
-    ImageFormat savedNativeWinRes_;
+    JNIEnv* env_{};
+    jobject context_{};
+    ImageFormat savedNativeWinRes_{};
     bool cameraGranted_;
+    int rotatvideo_track_ion_{};
     int rotation_;
     volatile bool cameraReady_;
     NDKCamera *camera_;
     ImageReader *yuvReader_;
     ImageReader *jpgReader_;
-    rtc::scoped_refptr<rtc_demo::AndroidVideoTrackSource> video_track_;
+    rtc::scoped_refptr<rtc_demo::AndroidVideoTrackSource> video_source_;
 };
 
 /**

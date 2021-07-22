@@ -12,22 +12,6 @@
 #include <jni.h>
 #include "android_video_track_source.h"
 
-// InitFieldTrialsFromString stores the char*, so the char array must outlive
-// the application.
-//const std::string forced_field_trials =
-//        absl::GetFlag(FLAGS_force_fieldtrials);
-//webrtc::field_trial::InitFieldTrialsFromString(forced_field_trials.c_str());
-//
-//ABSL_FLAG(
-//        std::string,
-//        force_fieldtrials,
-//        "",
-//        "Field trials control experimental features. This flag specifies the field "
-//        "trials in effect. E.g. running with "
-//        "--force_fieldtrials=WebRTC-FooFeature/Enabled/ "
-//        "will assign the group Enabled to field trial WebRTC-FooFeature. Multiple "
-//        "trials are separated by \"/\"");
-
 const char kAudioLabel[] = "audio_label";
 const char kVideoLabel[] = "video_label";
 const char kStreamId[] = "stream_id";
@@ -40,11 +24,11 @@ const char kCandidateSdpName[] = "candidate";
 using namespace webrtc;
 
 class Live : public PeerConnectionObserver, public CreateSessionDescriptionObserver, public SetLocalDescriptionObserverInterface,
-             public SetRemoteDescriptionObserverInterface, public rtc::VideoSinkInterface<webrtc::VideoFrame> {
+             public SetRemoteDescriptionObserverInterface {
 public:
     Live(JNIEnv *jni, jobject context);
     void createEngine();
-    rtc::scoped_refptr<rtc_demo::AndroidVideoTrackSource> AddTracks(JNIEnv* jni);
+    rtc::scoped_refptr<rtc_demo::AndroidVideoTrackSource> AddTracks(rtc::VideoSinkInterface<VideoFrame>*);
     void connectToPeer(SessionDescriptionInterface* desc);
     void setRemoteDescription(SessionDescriptionInterface *desc);
     void addIce(const Json::Value jmessage);
@@ -72,10 +56,6 @@ public:
     };
     // L***************** SetRemoteDescriptionObserverInterface *******************
 
-    //「***************** VideoSinkInterface *******************
-    void OnFrame(const VideoFrame& frame) override;
-    void OnDiscardedFrame() override;
-    // L***************** VideoSinkInterface *******************
 
     // Triggered when the SignalingState changed.
     void OnSignalingChange(
@@ -210,10 +190,6 @@ public:
 protected:
     rtc::scoped_refptr<webrtc::PeerConnectionFactoryInterface> peer_connection_factory_;
     rtc::scoped_refptr<webrtc::PeerConnectionInterface> peer_connection_;
-
-    std::unique_ptr<rtc::Thread> network_thread;
-    std::unique_ptr<rtc::Thread> worker_thread;
-    std::unique_ptr<rtc::Thread> signaling_thread;
 };
 
 

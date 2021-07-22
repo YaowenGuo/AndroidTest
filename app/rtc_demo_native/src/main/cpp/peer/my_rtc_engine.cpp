@@ -13,7 +13,6 @@
 #include <api/video_codecs/builtin_video_encoder_factory.h>
 #include <api/video_codecs/builtin_video_decoder_factory.h>
 #include "my_rtc_engine.h"
-#include "vcm_capturer.h"
 #include "base/esUtil.h"
 #include "android_video_track_source.h"
 #include <api/video_codecs/builtin_video_decoder_factory.h>
@@ -40,16 +39,6 @@ Live::Live(JNIEnv *jni, jobject context) {
 //    rtc::PhysicalSocketServer socket = rtc::PhysicalSocketServer();
 //    rtc::AutoSocketServerThread thread(&socket);
     rtc::InitializeSSL();
-
-    network_thread = rtc::Thread::CreateWithSocketServer();
-    network_thread->SetName("network_thread", nullptr);
-    RTC_CHECK(network_thread->Start()) << "Failed to start thread";
-
-    worker_thread = rtc::Thread::Create();
-    worker_thread->SetName("worker_thread", nullptr);
-    RTC_CHECK(worker_thread->Start()) << "Failed to start thread";
-
-    signaling_thread = rtc::Thread::Create();
 }
 
 void Live::createEngine() {
@@ -86,46 +75,7 @@ void Live::createEngine() {
 }
 
 
-class CapturerTrackSource : public webrtc::VideoTrackSource {
-public:
-    static rtc::scoped_refptr<CapturerTrackSource> Create() {
-        const size_t kWidth = 640;
-        const size_t kHeight = 480;
-        const size_t kFps = 30;
-        std::unique_ptr<rtc_demo::VcmCapturer> capturer;
-        std::unique_ptr<webrtc::VideoCaptureModule::DeviceInfo> info(
-                webrtc::VideoCaptureFactory::CreateDeviceInfo());
-        if (!info) {
-            return nullptr;
-        }
-        int num_devices = info->NumberOfDevices();
-        for (int i = 0; i < num_devices; ++i) {
-            capturer = absl::WrapUnique(
-                    rtc_demo::VcmCapturer::Create(kWidth, kHeight, kFps, i));
-            if (capturer) {
-                return new rtc::RefCountedObject<CapturerTrackSource>(
-                        std::move(capturer));
-            }
-        }
-
-        return nullptr;
-    }
-
-protected:
-    explicit CapturerTrackSource(
-            std::unique_ptr<rtc_demo::VcmCapturer> capturer)
-            : VideoTrackSource(/*remote=*/false), capturer_(std::move(capturer)) {}
-
-private:
-    rtc::VideoSourceInterface<webrtc::VideoFrame> *source() override {
-        return capturer_.get();
-    }
-
-    std::unique_ptr<rtc_demo::VcmCapturer> capturer_;
-};
-
-
-rtc::scoped_refptr<rtc_demo::AndroidVideoTrackSource> Live::AddTracks(JNIEnv* jni) {
+rtc::scoped_refptr<rtc_demo::AndroidVideoTrackSource> Live::AddTracks(rtc::VideoSinkInterface<VideoFrame>* videoSink) {
     if (!peer_connection_->GetSenders().empty()) {
         return nullptr;  // Already added tracks.
     }
@@ -143,23 +93,25 @@ rtc::scoped_refptr<rtc_demo::AndroidVideoTrackSource> Live::AddTracks(JNIEnv* jn
                           << result_or_error.error().message();
     }
 
-//
-//    rtc::scoped_refptr<VideoTrackSourceInterface> video_device =
-//            CapturerTrackSource::Create();
-    rtc::scoped_refptr<rtc_demo::AndroidVideoTrackSource> video_device = new rtc::RefCountedObject<rtc_demo::AndroidVideoTrackSource>(
-            signaling_thread.get(), false, false);
+    // video source
+    rtc::scoped_refptr<rtc_demo::AndroidVideoTrackSource> video_source = new rtc::RefCountedObject<rtc_demo::AndroidVideoTrackSource>(
+            peer_connection_->signaling_thread(), false, false);
 
-    // Start local render
-    // main_wnd_->StartLocalRenderer(video_track_);
+    // track
     rtc::scoped_refptr<webrtc::VideoTrackInterface> video_track =
-            peer_connection_factory_->CreateVideoTrack(kVideoLabel, video_device);
+            peer_connection_factory_->CreateVideoTrack(kVideoLabel, video_source);
+    // add video sink
+    video_track->AddOrUpdateSink(videoSink,
+//            reinterpret_cast<rtc::VideoSinkInterface<VideoFrame>*>(j_native_sink),
+            rtc::VideoSinkWants());
 
     result_or_error = peer_connection_->AddTrack(video_track, {kStreamId});
     if (!result_or_error.ok()) {
         RTC_LOG(LS_ERROR) << "Failed to add video track to PeerConnection: "
                           << result_or_error.error().message();
     }
-    return video_device;
+
+    return video_source;
 //    AddOrUpdateSink(this, rtc::VideoSinkWants()
 //    main_wnd_->SwitchToStreamingUI();
 }
@@ -240,14 +192,3 @@ void Live::OnSetRemoteDescriptionComplete(RTCError error) {
 
 }
 // L***************** SetRemoteDescriptionObserverInterface *******************
-
-
-//「***************** VideoSinkInterface *******************
-void Live::OnFrame(const VideoFrame& frame) {
-    // TODO render frame.
-}
-
-void Live::OnDiscardedFrame() {
-
-}
-// L***************** VideoSinkInterface *******************

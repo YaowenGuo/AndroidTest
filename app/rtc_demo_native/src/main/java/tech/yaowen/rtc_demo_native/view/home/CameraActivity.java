@@ -116,13 +116,7 @@ public class CameraActivity extends NativeActivity
 
         setImmersiveSticky();
         View decorView = getWindow().getDecorView();
-        decorView.setOnSystemUiVisibilityChangeListener
-                (new View.OnSystemUiVisibilityChangeListener() {
-                    @Override
-                    public void onSystemUiVisibilityChange(int visibility) {
-                        setImmersiveSticky();
-                    }
-                });
+        decorView.setOnSystemUiVisibilityChangeListener(visibility -> setImmersiveSticky());
     }
 
     private boolean isCamera2Device() {

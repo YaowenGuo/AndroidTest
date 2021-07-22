@@ -43,14 +43,15 @@ CameraEngine::~CameraEngine() {
     DeleteCamera();
 }
 
-struct android_app *CameraEngine::AndroidApp(void) const {
+struct android_app *CameraEngine::AndroidApp() const {
     return app_;
 }
 
-rtc::scoped_refptr <rtc_demo::AndroidVideoTrackSource> createLive(android_app *app,JNIEnv *env, jobject context) {
+rtc::scoped_refptr<rtc_demo::AndroidVideoTrackSource> createLive(android_app *app,JNIEnv *env, jobject context) {
     Live live(env, context); // init;
     live.createEngine(); // PeerConnectionFactory + PeerConnection.
-    auto videoTrack = live.AddTracks(env); // add audio and video track.
+    auto videoSink = new rtc_demo::AndroidVideoSink(app->window);
+    auto videoTrack = live.AddTracks(videoSink); // add audio and video track.
     live.connectToPeer(nullptr); // create offer or answer.
     return videoTrack;
 }
@@ -58,7 +59,7 @@ rtc::scoped_refptr <rtc_demo::AndroidVideoTrackSource> createLive(android_app *a
 /**
  * Create a camera object for onboard BACK_FACING camera
  */
-void CameraEngine::CreateCamera(void) {
+void CameraEngine::CreateCamera() {
     // Camera needed to be requested at the run-time from Java SDK
     // if Not granted, do nothing.
     if (!cameraGranted_ || !app_->window) {
@@ -95,11 +96,11 @@ void CameraEngine::CreateCamera(void) {
             app_->window, portraitNativeWindow ? view.height : view.width,
             portraitNativeWindow ? view.width : view.height, WINDOW_FORMAT_RGBA_8888);
 
-    video_track_ = createLive(app_, env_, context_);
+    video_source_ = createLive(app_, env_, context_);
 
-    yuvReader_ = new ImageReader(&view, AIMAGE_FORMAT_YUV_420_888);
+    yuvReader_ = new ImageReader(&view, AIMAGE_FORMAT_YUV_420_888, video_source_);
     yuvReader_->SetPresentRotation(imageRotation);
-    jpgReader_ = new ImageReader(&capture, AIMAGE_FORMAT_JPEG);
+    jpgReader_ = new ImageReader(&capture, AIMAGE_FORMAT_JPEG, nullptr);
     jpgReader_->SetPresentRotation(imageRotation);
     jpgReader_->RegisterCallback(this, [this](void *ctx, const char *str) -> void {
         reinterpret_cast<CameraEngine * >(ctx)->OnPhotoTaken(str);
@@ -110,7 +111,7 @@ void CameraEngine::CreateCamera(void) {
                            jpgReader_->GetNativeWindow(), imageRotation);
 }
 
-void CameraEngine::DeleteCamera(void) {
+void CameraEngine::DeleteCamera() {
     cameraReady_ = false;
     if (camera_) {
         delete camera_;
@@ -138,7 +139,7 @@ void CameraEngine::RequestCameraPermission() {
     ANativeActivity* activity = app_->activity;
     activity->vm->GetEnv((void**)&env, JNI_VERSION_1_6);
 
-    activity->vm->AttachCurrentThread(&env, NULL);
+    activity->vm->AttachCurrentThread(&env, nullptr);
 
     jobject activityObj = env->NewGlobalRef(activity->clazz);
     jclass clz = env->GetObjectClass(activityObj);
@@ -163,21 +164,22 @@ void CameraEngine::OnCameraParameterChanged(int32_t code, int64_t val) {
  * The main function rendering a frame. In our case, it is yuv to RGBA8888
  * converter
  */
-void CameraEngine::DrawFrame(void) {
+void CameraEngine::DrawFrame() {
     if (!cameraReady_ || !yuvReader_) return;
-    AImage *image = yuvReader_->GetNextImage();
-    if (!image) {
-        return;
-    }
-
-    ANativeWindow_acquire(app_->window);
-    ANativeWindow_Buffer buf;
-    if (ANativeWindow_lock(app_->window, &buf, nullptr) < 0) {
-        yuvReader_->DeleteImage(image);
-        return;
-    }
-
-    yuvReader_->DisplayImage(&buf, image);
-    ANativeWindow_unlockAndPost(app_->window);
-    ANativeWindow_release(app_->window);
+//    AImage *image = yuvReader_->GetNextImage();
+//    if (!image) {
+//        return;
+//    }
+//
+//    ANativeWindow_acquire(app_->window);
+//    ANativeWindow_Buffer buf;
+//    if (ANativeWindow_lock(app_->window, &buf, nullptr) < 0) {
+//        yuvReader_->DeleteImage(image);
+//        return;
+//    }
+//
+//    yuvReader_->DisplayImage(&buf, image);
+//    ANativeWindow_unlockAndPost(app_->window);
+//    ANativeWindow_release(app_->window);
+    // TODO 使用 webrtc sink 返回的数据流
 }

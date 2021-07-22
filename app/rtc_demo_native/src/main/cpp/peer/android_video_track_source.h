@@ -46,7 +46,7 @@ namespace rtc_demo {
         // L------------------
 
         // Add image when captured.
-        void OnFrameCaptured(AImage *image);
+        void OnFrameCaptured(AImage *image, int32_t);
         void SetState(bool is_live);
 
     private:
