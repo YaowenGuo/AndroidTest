@@ -9,22 +9,18 @@ mod tests {
 #![cfg(target_os = "android")]
 #![allow(non_snake_case)]
 
-use std::ffi::{CString, CStr};
 use jni::JNIEnv;
 use jni::objects::{JObject, JString};
 use jni::sys::{jstring};
 
 #[no_mangle]
-pub unsafe extern "C"  fn Java_tech_yaowen_androidrust_Hello_stringFromJNI(env: JNIEnv, _: JObject, j_recipient: JString) -> jstring {
-    let recipient = CString::from(
-        CStr::from_ptr(
-            env.get_string(j_recipient).unwrap().as_ptr()
-        )
-    );
+pub unsafe extern "C"  fn Java_tech_yaowen_androidrust_Hello_stringFromJNI(env: JNIEnv, _: JObject, input: JString) -> jstring {
+    let input: String =
+            env.get_string(input).expect("Couldn't get java string!").into();
 
 
-
-    let output = env.new_string("Hello ".to_owned() + recipient.to_str().unwrap());
+    let output = env.new_string(format!("Hello, {}!", input))
+        .expect("Couldn't create java string!");
     output.into_inner()
 }
 
