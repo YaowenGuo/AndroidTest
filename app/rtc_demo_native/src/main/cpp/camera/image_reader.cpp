@@ -19,6 +19,7 @@
 #include <cstdlib>
 #include <dirent.h>
 #include <ctime>
+#include <utils/camera_utils.h>
 #include "image_reader.h"
 #include "utils/native_debug.h"
 #include "peer/my_rtc_engine.h"
@@ -87,7 +88,7 @@ void ImageReader::ImageCallback(AImageReader *reader) {
     ASSERT(status == AMEDIA_OK, "Failed to get the media format");
     if (format == AIMAGE_FORMAT_JPEG) {
         AImage *image = nullptr;
-        media_status_t status = AImageReader_acquireNextImage(reader, &image);
+        status = AImageReader_acquireNextImage(reader, &image);
         ASSERT(status == AMEDIA_OK && image, "Image is not available");
 
 
@@ -96,9 +97,8 @@ void ImageReader::ImageCallback(AImageReader *reader) {
         writeFileHandler.detach();
     } else if (video_source_) {
         AImage *image = nullptr;
-        media_status_t status = AImageReader_acquireNextImage(reader_, &image);
+        status = AImageReader_acquireNextImage(reader, &image);
         if (status != AMEDIA_OK) return;
-        LOGD("RTC yaowen: %s", "ImageCallback");
         ASSERT(status == AMEDIA_OK && image, "Image is not available");
         video_source_->OnFrameCaptured(image, presentRotation_);
     }
@@ -149,58 +149,6 @@ void ImageReader::DeleteImage(AImage *image) {
     if (image) AImage_delete(image);
 }
 
-/**
- * Helper function for YUV_420 to RGB conversion. Courtesy of Tensorflow
- * ImageClassifier Sample:
- * https://github.com/tensorflow/tensorflow/blob/master/tensorflow/examples/android/jni/yuv2rgb.cc
- * The difference is that here we have to swap UV plane when calling it.
- */
-#ifndef MAX
-#define MAX(a, b)           \
-  ({                        \
-    __typeof__(a) _a = (a); \
-    __typeof__(b) _b = (b); \
-    _a > _b ? _a : _b;      \
-  })
-#define MIN(a, b)           \
-  ({                        \
-    __typeof__(a) _a = (a); \
-    __typeof__(b) _b = (b); \
-    _a < _b ? _a : _b;      \
-  })
-#endif
-
-// This value is 2 ^ 18 - 1, and is used to clamp the RGB values before their
-// ranges
-// are normalized to eight bits.
-static const int kMaxChannelValue = 262143;
-
-static inline uint32_t YUV2RGB(int nY, int nU, int nV) {
-    nY -= 16;
-    nU -= 128;
-    nV -= 128;
-    if (nY < 0) nY = 0;
-
-    // This is the floating point equivalent. We do the conversion in integer
-    // because some Android devices do not have floating point in hardware.
-    // nR = (int)(1.164 * nY + 1.596 * nV);
-    // nG = (int)(1.164 * nY - 0.813 * nV - 0.391 * nU);
-    // nB = (int)(1.164 * nY + 2.018 * nU);
-
-    int nR = (int) (1192 * nY + 1634 * nV);
-    int nG = (int) (1192 * nY - 833 * nV - 400 * nU);
-    int nB = (int) (1192 * nY + 2066 * nU);
-
-    nR = MIN(kMaxChannelValue, MAX(0, nR));
-    nG = MIN(kMaxChannelValue, MAX(0, nG));
-    nB = MIN(kMaxChannelValue, MAX(0, nB));
-
-    nR = (nR >> 10) & 0xff;
-    nG = (nG >> 10) & 0xff;
-    nB = (nB >> 10) & 0xff;
-
-    return 0xff000000 | (nR << 16) | (nG << 8) | nB;
-}
 
 /**
  * Convert yuv image inside AImage into ANativeWindow_Buffer

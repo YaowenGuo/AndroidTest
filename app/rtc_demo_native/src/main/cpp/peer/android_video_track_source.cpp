@@ -16,8 +16,6 @@
 #include "rtc_base/logging.h"
 #include "android_video_sink.h"
 
-using namespace webrtc;
-
 namespace rtc_demo {
 
     // MediaCodec wants resolution to be divisible by 2.
@@ -73,24 +71,30 @@ namespace rtc_demo {
     void AndroidVideoTrackSource::OnFrameCaptured(AImage *image, int32_t rotation) {
         int format = 0;
         AImage_getFormat(image, &format);
-        LOGD("RTC yaowen: %s", "OnFrameCaptured");
         if (format == AIMAGE_FORMAT_YUV_420_888) {
             rtc::scoped_refptr<VideoFrameBuffer> buffer = AndroidVideoFrameBuffer::Create(image);
 
-            const VideoRotation rotation = kVideoRotation_0;
             int64_t timestamp_ns = 0;
             AImage_getTimestamp(image, &timestamp_ns);
             AImage_getTimestamp(image, &timestamp_ns);
             // notify sink video is update.
-            LOGD("RTC yaowen: %s", "OnFrame");
             OnFrame(VideoFrame::Builder()
                             .set_video_frame_buffer(buffer)
-                            .set_rotation(rotation)
+                            .set_rotation(ConvertRotation(rotation))
                             .set_timestamp_us(timestamp_ns / rtc::kNumNanosecsPerMicrosec)
                             .build());
-            // !!!! Must delete image, or it will block image callback. Maybe it's because memory be
-            // exhausted.
-            AImage_delete(image);
+        }
+    }
+
+    VideoRotation AndroidVideoTrackSource::ConvertRotation(int32_t rotation) {
+        if (rotation <= 45 || rotation > 315) {
+            return VideoRotation::kVideoRotation_90;
+        } else if (rotation <= 135) {
+            return VideoRotation::kVideoRotation_180;
+        } else if (rotation <= 225) {
+            return VideoRotation::kVideoRotation_270;
+        } else {
+            return VideoRotation::kVideoRotation_0;
         }
     }
 }  // namespace webrtc

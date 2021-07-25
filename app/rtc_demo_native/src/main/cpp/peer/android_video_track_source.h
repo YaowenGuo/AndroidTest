@@ -14,14 +14,14 @@
 #include <jni.h>
 #include <media/NdkImage.h>
 
-#include "media/base/adapted_video_track_source.h"
-#include "rtc_base/thread.h"
-#include "rtc_base/timestamp_aligner.h"
+#include <media/base/adapted_video_track_source.h>
+#include <rtc_base/thread.h>
+#include <rtc_base/timestamp_aligner.h>
 
-#include "api/scoped_refptr.h"
-#include "modules/video_capture/video_capture.h"
-#include "test/test_video_capturer.h"
+#include <api/scoped_refptr.h>
+#include <modules/video_capture/video_capture.h>
 
+using namespace webrtc;
 namespace rtc_demo {
 
     class AndroidVideoTrackSource : public rtc::AdaptedVideoTrackSource {
@@ -55,6 +55,8 @@ namespace rtc_demo {
         std::atomic<bool> is_screencast_;
         rtc::TimestampAligner timestamp_aligner_;
         const bool align_timestamps_;
+
+        static VideoRotation ConvertRotation(int32_t);
     };
 
 

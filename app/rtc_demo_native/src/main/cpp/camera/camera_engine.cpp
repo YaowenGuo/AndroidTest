@@ -165,7 +165,7 @@ void CameraEngine::OnCameraParameterChanged(int32_t code, int64_t val) {
  * converter
  */
 void CameraEngine::DrawFrame() {
-    if (!cameraReady_ || !yuvReader_) return;
+//    if (!cameraReady_ || !yuvReader_) return;
 //    AImage *image = yuvReader_->GetNextImage();
 //    if (!image) {
 //        return;
@@ -181,5 +181,4 @@ void CameraEngine::DrawFrame() {
 //    yuvReader_->DisplayImage(&buf, image);
 //    ANativeWindow_unlockAndPost(app_->window);
 //    ANativeWindow_release(app_->window);
-    // TODO 使用 webrtc sink 返回的数据流
 }

@@ -22,7 +22,7 @@ public:
 private:
     void OnFrame(const VideoFrame& frame) override;
 
-    void PresentImage(ANativeWindow_Buffer *, rtc::scoped_refptr<webrtc::I420BufferInterface>);
+    void PresentImage(ANativeWindow_Buffer *, const rtc::scoped_refptr<webrtc::I420BufferInterface>&);
 
     void PresentImage90(ANativeWindow_Buffer *, rtc::scoped_refptr<webrtc::I420BufferInterface>);
 

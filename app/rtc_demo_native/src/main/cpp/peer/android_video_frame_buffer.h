@@ -54,7 +54,7 @@ namespace rtc_demo {
         int width_ = 0;
         int height_ = 0;
         // Holds a VideoFrame.Buffer.
-        const AImage *image_;
+        AImage *image_;
     };
 
 }  // namespace webrtc

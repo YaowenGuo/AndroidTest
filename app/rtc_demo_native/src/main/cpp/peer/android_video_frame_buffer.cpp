@@ -15,6 +15,7 @@
 #include <rtc_base/time_utils.h>
 #include <sdk/android/src/jni/jni_helpers.h>
 #include <sdk/android/src/jni/wrapped_native_i420_buffer.h>
+#include <utils/camera_utils.h>
 #include "android_video_track_source.h"
 #include "android_video_frame_buffer.h"
 
@@ -66,22 +67,66 @@ namespace rtc_demo {
                 const AImage *image
         ) : width_(width),
             height_(height),
-            image_(image) {
+            image_(image),
+            stride_y_(width),
+            stride_u_(width >> 1),
+            stride_v_(width >> 1) {
+            int32_t yStride, uvStride;
             uint8_t *yPixel, *uPixel, *vPixel;
             int32_t yLen, uLen, vLen;
-            AImage_getPlaneRowStride(image, 0, &stride_y_);
-            AImage_getPlaneRowStride(image, 1, &stride_u_);
-            AImage_getPlaneRowStride(image, 2, &stride_v_);
+            AImage_getPlaneRowStride(image, 0, &yStride);
+            AImage_getPlaneRowStride(image, 1, &uvStride);
+
 
             AImage_getPlaneData(image, 0, &yPixel, &yLen);
             AImage_getPlaneData(image, 1, &vPixel, &vLen);
             AImage_getPlaneData(image, 2, &uPixel, &uLen);
-            data_y_ = yPixel;
-            data_u_ = yPixel;
-            data_v_ = vPixel;
+            AImageCropRect srcRect;
+            AImage_getCropRect(image, &srcRect);
+            int flatSize = height * width;
+            auto dataY = new uint8_t[flatSize]; // reinterpret_cast<uint8_t **>(malloc(flatSize * sizeof(uint8_t)));
+            auto dataU = new uint8_t[flatSize >> 2]; // reinterpret_cast<uint8_t **>(malloc(flatSize >> 2 * sizeof(uint8_t)));
+            auto dataV = new uint8_t[flatSize >> 2]; // reinterpret_cast<uint8_t **>(malloc(flatSize >> 2 * sizeof(uint8_t)));
+
+            data_y_ = dataY;
+            data_u_ = dataU;
+            data_v_ = dataV;
+            int32_t yPixelStride;
+            int32_t uvPixelStride;
+            AImage_getPlanePixelStride(image, 0, &yPixelStride);
+            AImage_getPlanePixelStride(image, 1, &uvPixelStride);
+
+            for (int32_t y = 0; y < height; y++) {
+                uint8_t *pY = yPixel + yStride * (y + srcRect.top) + srcRect.left; // 裁剪区域开始位置
+
+                // uv 为四像素公用一个，Y[x, y] 的位置对应 UV[x/2, y/2] 的位置。
+                int32_t uv_row_start = uvStride * ((y + srcRect.top) >> 1); // 行模 2
+                const uint8_t *pU = uPixel + uv_row_start + (srcRect.left >> 1); // 列模 2
+                const uint8_t *pV = vPixel + uv_row_start + (srcRect.left >> 1);
+
+                for (int32_t x = 0; x < width; x++) {
+                    dataY[x] = pY[x];
+                    const int32_t uv_offset = (x >> 1) * uvPixelStride;
+                    dataU[x >> 1] = pU[uv_offset];
+                    dataV[x >> 1] = pV[uv_offset];
+                }
+                dataY += width;
+                if (y & 1) { // 两行复用一个 u/v
+                    dataU += width >> 1;
+                    dataV += width >> 1;
+                }
+            }
+
+//            data_y_ = reinterpret_cast<const uint8_t *>(dataY);
+//            data_u_ = reinterpret_cast<const uint8_t *>(dataU);
+//            data_v_ = reinterpret_cast<const uint8_t *>(dataV);
         }
 
-        AndroidVideoI420Buffer::~AndroidVideoI420Buffer() = default;
+        AndroidVideoI420Buffer::~AndroidVideoI420Buffer() {
+            free((void *) data_y_);
+            free((void *) data_u_);
+            free((void *) data_v_);
+        }
     }  // namespace
 
 
@@ -90,12 +135,20 @@ namespace rtc_demo {
     }
 
 
-    AndroidVideoFrameBuffer::AndroidVideoFrameBuffer(AImage *image) : image_(image){
+    AndroidVideoFrameBuffer::AndroidVideoFrameBuffer(AImage *image) : image_(image) {
+        AImageCropRect srcRect;
+        AImage_getCropRect(image, &srcRect);
         AImage_getWidth(image, &width_);
         AImage_getHeight(image, &height_);
+        width_ = MIN(width_, (srcRect.right - srcRect.left));
+        height_ = MIN(height_, (srcRect.bottom - srcRect.top));
     }
 
-    AndroidVideoFrameBuffer::~AndroidVideoFrameBuffer() = default;
+    AndroidVideoFrameBuffer::~AndroidVideoFrameBuffer() {
+        if (image_) {
+            AImage_delete(image_);
+        }
+    }
 
     rtc::scoped_refptr<webrtc::VideoFrameBuffer> AndroidVideoFrameBuffer::CropAndScale(
             int crop_x,

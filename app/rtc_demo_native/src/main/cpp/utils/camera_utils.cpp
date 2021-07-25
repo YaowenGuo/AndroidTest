@@ -454,3 +454,35 @@ const char* GetCameraDeviceErrorStr(int err) {
 void PrintCameraDeviceError(int err) {
   LOGI("CameraDeviceError(%#x): %s", err, GetCameraDeviceErrorStr(err));
 }
+
+// This value is 2 ^ 18 - 1, and is used to clamp the RGB values before their
+// ranges
+// are normalized to eight bits.
+static const int kMaxChannelValue = 262143;
+
+uint32_t YUV2RGB(int nY, int nU, int nV) {
+  nY -= 16;
+  nU -= 128;
+  nV -= 128;
+  if (nY < 0) nY = 0;
+
+  // This is the floating point equivalent. We do the conversion in integer
+  // because some Android devices do not have floating point in hardware.
+  // nR = (int)(1.164 * nY + 1.596 * nV);
+  // nG = (int)(1.164 * nY - 0.813 * nV - 0.391 * nU);
+  // nB = (int)(1.164 * nY + 2.018 * nU);
+
+  int nR = (int) (1192 * nY + 1634 * nV);
+  int nG = (int) (1192 * nY - 833 * nV - 400 * nU);
+  int nB = (int) (1192 * nY + 2066 * nU);
+
+  nR = MIN(kMaxChannelValue, MAX(0, nR));
+  nG = MIN(kMaxChannelValue, MAX(0, nG));
+  nB = MIN(kMaxChannelValue, MAX(0, nB));
+
+  nR = (nR >> 10) & 0xff;
+  nG = (nG >> 10) & 0xff;
+  nB = (nB >> 10) & 0xff;
+
+  return 0xff000000 | (nR << 16) | (nG << 8) | nB;
+}

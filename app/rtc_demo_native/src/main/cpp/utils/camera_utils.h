@@ -49,4 +49,27 @@ void PrintCameras(ACameraManager* cameraMgr);
 void PrintCameraDeviceError(int err);
 
 void PrintRequestMetadata(ACaptureRequest* req);
+
+uint32_t YUV2RGB(int nY, int nU, int nV);
+
+/**
+ * Helper function for YUV_420 to RGB conversion. Courtesy of Tensorflow
+ * ImageClassifier Sample:
+ * https://github.com/tensorflow/tensorflow/blob/master/tensorflow/examples/android/jni/yuv2rgb.cc
+ * The difference is that here we have to swap UV plane when calling it.
+ */
+#ifndef MAX
+#define MAX(a, b)           \
+  ({                        \
+    __typeof__(a) _a = (a); \
+    __typeof__(b) _b = (b); \
+    _a > _b ? _a : _b;      \
+  })
+#define MIN(a, b)           \
+  ({                        \
+    __typeof__(a) _a = (a); \
+    __typeof__(b) _b = (b); \
+    _a < _b ? _a : _b;      \
+  })
+#endif
 #endif  // __CAMERA_CAMERA_UTILS_H__
