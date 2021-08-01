@@ -38,6 +38,7 @@ class RangeValue {
 public:
     T min_, max_;
 
+
     /**
      * return absolute value from relative value
      * value: in percent (50 for 50%)
@@ -46,7 +47,9 @@ public:
         return static_cast<T>(min_ + (max_ - min_) * percent / 100);
     }
 
+
     RangeValue() { min_ = max_ = static_cast<T>(0); }
+
 
     bool Supported(void) const { return (min_ != max_); }
 };
@@ -71,12 +74,12 @@ class CameraId;
 class NDKCamera {
 private:
     ACameraManager *cameraMgr_;
-    std::map <std::string, CameraId> cameras_;
+    std::map<std::string, CameraId> cameras_;
     std::string activeCameraId_;
     uint32_t cameraFacing_;
     uint32_t cameraOrientation_;
 
-    std::vector <CaptureRequestInfo> requests_;
+    std::vector<CaptureRequestInfo> requests_;
 
     ACaptureSessionOutputContainer *outputContainer_;
     ACameraCaptureSession *captureSession_;
@@ -89,50 +92,71 @@ private:
     RangeValue<int32_t> sensitivityRange_;
     volatile bool valid_;
 
+
     ACameraManager_AvailabilityCallbacks *GetManagerListener();
+
 
     ACameraDevice_stateCallbacks *GetDeviceListener();
 
+
     ACameraCaptureSession_stateCallbacks *GetSessionListener();
 
+
     ACameraCaptureSession_captureCallbacks *GetCaptureCallback();
+
 
 public:
     NDKCamera();
 
+
     ~NDKCamera();
 
+
     void EnumerateCamera(void);
+
 
     bool MatchCaptureSizeRequest(ANativeWindow *display, ImageFormat *view,
                                  ImageFormat *capture);
 
+
     void CreateSession(ANativeWindow *previewWindow, ANativeWindow *jpgWindow,
                        int32_t imageRotation);
 
+
     bool GetSensorOrientation(int32_t *facing, int32_t *angle);
+
 
     void OnCameraStatusChanged(const char *id, bool available);
 
+
     void OnDeviceState(ACameraDevice *dev);
+
 
     void OnDeviceError(ACameraDevice *dev, int err);
 
+
     void OnSessionState(ACameraCaptureSession *ses, CaptureSessionState state);
+
 
     void OnCaptureSequenceEnd(ACameraCaptureSession *session, int sequenceId,
                               int64_t frameNumber);
 
+
     void OnCaptureFailed(ACameraCaptureSession *session, ACaptureRequest *request,
                          ACameraCaptureFailure *failure);
 
+
     void StartPreview(bool start);
+
 
     bool TakePhoto(void);
 
+
     bool GetExposureRange(int64_t *min, int64_t *max, int64_t *curVal);
 
+
     bool GetSensitivityRange(int64_t *min, int64_t *max, int64_t *curVal);
+
 
     void UpdateCameraRequestParameter(int32_t code, int64_t val);
 };
@@ -152,6 +176,7 @@ public:
               owner_(false) {
         id_ = id;
     }
+
 
     explicit CameraId(void) { CameraId(""); }
 };

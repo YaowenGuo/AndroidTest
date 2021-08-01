@@ -38,17 +38,30 @@
 #define CALL_REQUEST(func) CALL_CAMERA(ACaptureRequest_##func)
 #define CALL_SESSION(func) CALL_CAMERA(ACameraCaptureSession_##func)
 
+
 /*
  * A few debugging functions for error code strings etc
  */
-const char* GetErrorStr(camera_status_t err);
-const char* GetTagStr(acamera_metadata_tag_t tag);
-void PrintMetadataTags(int32_t entries, const uint32_t* pTags);
-void PrintLensFacing(ACameraMetadata_const_entry& lensData);
-void PrintCameras(ACameraManager* cameraMgr);
+const char *GetErrorStr(camera_status_t err);
+
+
+const char *GetTagStr(acamera_metadata_tag_t tag);
+
+
+void PrintMetadataTags(int32_t entries, const uint32_t *pTags);
+
+
+void PrintLensFacing(ACameraMetadata_const_entry &lensData);
+
+
+void PrintCameras(ACameraManager *cameraMgr);
+
+
 void PrintCameraDeviceError(int err);
 
-void PrintRequestMetadata(ACaptureRequest* req);
+
+void PrintRequestMetadata(ACaptureRequest *req);
+
 
 uint32_t YUV2RGB(int nY, int nU, int nV);
 

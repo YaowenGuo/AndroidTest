@@ -41,6 +41,7 @@ dependencies {
     implementation fileTree(dir: "libs", include: ["*.jar"])
     implementation deps.appcompat
     implementation deps.material
+    implementation deps.constraintlayout
     implementation deps.webrtc
 
     testImplementation deps.junit

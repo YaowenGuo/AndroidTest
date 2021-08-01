@@ -74,10 +74,6 @@
 #define TRUE 1
 #endif
 
-#define LOGI(...) ((void)__android_log_print(ANDROID_LOG_INFO, "rtc-demo", __VA_ARGS__))
-#define LOGW(...) ((void)__android_log_print(ANDROID_LOG_WARN, "rtc-demo", __VA_ARGS__))
-#define LOGE(...) ((void)__android_log_print(ANDROID_LOG_ERROR, "rtc-demo", __VA_ARGS__))
-
 #ifndef MAX
 #define MAX(a, b)           \
   ({                        \
@@ -130,6 +126,7 @@ struct Engine {
 
 typedef struct Engine Engine;
 
+
 ///
 // Create a shader object, load the shader source, and
 // compile the shader.
@@ -138,5 +135,6 @@ GLuint load_shader(GLenum type, const char *shaderSrc);
 
 
 GLuint printEGLConfig(EGLDisplay display);
+
 
 #endif

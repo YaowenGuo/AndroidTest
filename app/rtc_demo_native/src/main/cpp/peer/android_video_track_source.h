@@ -30,16 +30,21 @@ namespace rtc_demo {
                                 bool is_screencast,
                                 bool align_timestamps);
 
+
         ~AndroidVideoTrackSource() override;
+
 
         // 「------------------
         SourceState state() const override;
 
+
         // 是否是远端接收
         bool remote() const override;
 
+
         // 是否是录屏
         bool is_screencast() const override;
+
 
         // 是否需要降噪
         absl::optional<bool> needs_denoising() const override;
@@ -47,7 +52,10 @@ namespace rtc_demo {
 
         // Add image when captured.
         void OnFrameCaptured(AImage *image, int32_t);
+
+
         void SetState(bool is_live);
+
 
     private:
         rtc::Thread *signaling_thread_;
@@ -55,6 +63,7 @@ namespace rtc_demo {
         std::atomic<bool> is_screencast_;
         rtc::TimestampAligner timestamp_aligner_;
         const bool align_timestamps_;
+
 
         static VideoRotation ConvertRotation(int32_t);
     };

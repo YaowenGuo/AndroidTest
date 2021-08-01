@@ -19,6 +19,7 @@
  */
 
 #include <cstdio>
+#include <utility>
 #include "camera_engine.h"
 #include "utils/native_debug.h"
 
@@ -47,19 +48,10 @@ struct android_app *CameraEngine::AndroidApp() const {
     return app_;
 }
 
-rtc::scoped_refptr<rtc_demo::AndroidVideoTrackSource> createLive(android_app *app,JNIEnv *env, jobject context) {
-    Live live(env, context); // init;
-    live.createEngine(); // PeerConnectionFactory + PeerConnection.
-    auto videoSink = new rtc_demo::AndroidVideoSink(app->window);
-    auto videoTrack = live.AddTracks(videoSink); // add audio and video track.
-    live.connectToPeer(nullptr); // create offer or answer.
-    return videoTrack;
-}
-
 /**
  * Create a camera object for onboard BACK_FACING camera
  */
-void CameraEngine::CreateCamera() {
+void CameraEngine::CreateCamera(rtc::scoped_refptr<rtc_demo::AndroidVideoTrackSource> &video_source) {
     // Camera needed to be requested at the run-time from Java SDK
     // if Not granted, do nothing.
     if (!cameraGranted_ || !app_->window) {
@@ -96,7 +88,7 @@ void CameraEngine::CreateCamera() {
             app_->window, portraitNativeWindow ? view.height : view.width,
             portraitNativeWindow ? view.width : view.height, WINDOW_FORMAT_RGBA_8888);
 
-    video_source_ = createLive(app_, env_, context_);
+    video_source_ = video_source;
 
     yuvReader_ = new ImageReader(&view, AIMAGE_FORMAT_YUV_420_888, video_source_);
     yuvReader_->SetPresentRotation(imageRotation);

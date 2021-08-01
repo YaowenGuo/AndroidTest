@@ -31,24 +31,34 @@ namespace rtc_demo {
                     int height,
                     const AImage *);
 
+
             ~AndroidVideoI420Buffer() override;
+
 
         private:
             const uint8_t *DataY() const override { return data_y_; }
 
+
             const uint8_t *DataU() const override { return data_u_; }
+
 
             const uint8_t *DataV() const override { return data_v_; }
 
+
             int StrideY() const override { return stride_y_; }
+
 
             int StrideU() const override { return stride_u_; }
 
+
             int StrideV() const override { return stride_v_; }
+
 
             int width() const override { return width_; }
 
+
             int height() const override { return height_; }
+
 
             const int width_;
             const int height_;
@@ -60,6 +70,7 @@ namespace rtc_demo {
             int stride_u_;
             int stride_v_;
         };
+
 
         AndroidVideoI420Buffer::AndroidVideoI420Buffer(
                 int width,
@@ -84,9 +95,10 @@ namespace rtc_demo {
             AImageCropRect srcRect;
             AImage_getCropRect(image, &srcRect);
             int flatSize = height * width;
-            auto dataY = new uint8_t[flatSize]; // reinterpret_cast<uint8_t **>(malloc(flatSize * sizeof(uint8_t)));
-            auto dataU = new uint8_t[flatSize >> 2]; // reinterpret_cast<uint8_t **>(malloc(flatSize >> 2 * sizeof(uint8_t)));
-            auto dataV = new uint8_t[flatSize >> 2]; // reinterpret_cast<uint8_t **>(malloc(flatSize >> 2 * sizeof(uint8_t)));
+
+            auto dataY = new uint8_t[flatSize];
+            auto dataU = new uint8_t[flatSize >> 2];
+            auto dataV = new uint8_t[flatSize >> 2];
 
             data_y_ = dataY;
             data_u_ = dataU;
@@ -116,16 +128,13 @@ namespace rtc_demo {
                     dataV += width >> 1;
                 }
             }
-
-//            data_y_ = reinterpret_cast<const uint8_t *>(dataY);
-//            data_u_ = reinterpret_cast<const uint8_t *>(dataU);
-//            data_v_ = reinterpret_cast<const uint8_t *>(dataV);
         }
 
+
         AndroidVideoI420Buffer::~AndroidVideoI420Buffer() {
-            free((void *) data_y_);
-            free((void *) data_u_);
-            free((void *) data_v_);
+            delete data_y_;
+            delete data_u_;
+            delete data_v_;
         }
     }  // namespace
 
@@ -144,11 +153,13 @@ namespace rtc_demo {
         height_ = MIN(height_, (srcRect.bottom - srcRect.top));
     }
 
+
     AndroidVideoFrameBuffer::~AndroidVideoFrameBuffer() {
         if (image_) {
             AImage_delete(image_);
         }
     }
+
 
     rtc::scoped_refptr<webrtc::VideoFrameBuffer> AndroidVideoFrameBuffer::CropAndScale(
             int crop_x,
@@ -160,18 +171,22 @@ namespace rtc_demo {
         return nullptr;
     }
 
+
     AndroidVideoFrameBuffer::Type AndroidVideoFrameBuffer::type() const {
 //        return Type::kNative;
         return Type::kI420;
     }
 
+
     int AndroidVideoFrameBuffer::width() const {
         return width_;
     }
 
+
     int AndroidVideoFrameBuffer::height() const {
         return height_;
     }
+
 
     rtc::scoped_refptr<webrtc::I420BufferInterface> AndroidVideoFrameBuffer::ToI420() {
         // We don't need to retain the buffer because toI420 returns a new object that

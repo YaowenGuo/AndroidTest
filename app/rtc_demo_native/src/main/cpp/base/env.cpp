@@ -3,6 +3,7 @@
 //
 
 #include "env.h"
+
 namespace rtc_demo {
     android_app *app = nullptr;
 //    Camera* camera = nullptr;

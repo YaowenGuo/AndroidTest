@@ -10,7 +10,7 @@ import tech.yaowen.rtc_demo.base.log
 import tech.yaowen.rtc_demo.lib.RtcEngine
 
 /**
- * 1. 连接服务器，获取自己是发起者还是应答着
+ * 1. 连接服务器，获取自己是发起者还是应答者
  * 2. 创建本地视频捕获。
  * 3. 如果是发起者，创建 offer 并发送。如果是接收者，接收 offer 并创建 answer 发送。
  * 4. 设置接收到的 offer/answer.

@@ -17,25 +17,16 @@ namespace rtc_demo {
     AndroidVideoSink::AndroidVideoSink(ANativeWindow *window) : window_(window) {
     }
 
+
     AndroidVideoSink::~AndroidVideoSink() {
         window_ = nullptr;
     }
+
 
     void AndroidVideoSink::OnFrame(const VideoFrame &frame) {
         if (window_ == nullptr) {
             return;
         }
-
-//    ANativeWindow_acquire(app_->window);
-//    ANativeWindow_Buffer buf;
-//    if (ANativeWindow_lock(app_->window, &buf, nullptr) < 0) {
-//        yuvReader_->DeleteImage(image);
-//        return;
-//    }
-//
-//    yuvReader_->DisplayImage(&buf, image);
-//    ANativeWindow_unlockAndPost(app_->window);
-//    ANativeWindow_release(app_->window);
 
         ANativeWindow_acquire(window_);
         ANativeWindow_Buffer buf;
@@ -65,7 +56,9 @@ namespace rtc_demo {
         ANativeWindow_release(window_);
     }
 
-    void AndroidVideoSink::PresentImage(ANativeWindow_Buffer *buf, const rtc::scoped_refptr<webrtc::I420BufferInterface>& frame_buf) {
+
+    void AndroidVideoSink::PresentImage(ANativeWindow_Buffer *buf,
+                                        const rtc::scoped_refptr<webrtc::I420BufferInterface> &frame_buf) {
         int32_t yStride, uvStride;
         const uint8_t *yPixel, *uPixel, *vPixel;
         int32_t yLen, uLen, vLen;
@@ -95,15 +88,21 @@ namespace rtc_demo {
         }
     }
 
-    void AndroidVideoSink::PresentImage90(ANativeWindow_Buffer *buf, rtc::scoped_refptr<webrtc::I420BufferInterface> frame_buf) {
+
+    void AndroidVideoSink::PresentImage90(ANativeWindow_Buffer *buf,
+                                          rtc::scoped_refptr<webrtc::I420BufferInterface> frame_buf) {
 
     }
 
-    void AndroidVideoSink::PresentImage180(ANativeWindow_Buffer *buf, rtc::scoped_refptr<webrtc::I420BufferInterface> frame_buf) {
+
+    void AndroidVideoSink::PresentImage180(ANativeWindow_Buffer *buf,
+                                           rtc::scoped_refptr<webrtc::I420BufferInterface> frame_buf) {
 
     }
 
-    void AndroidVideoSink::PresentImage270(ANativeWindow_Buffer *buf, rtc::scoped_refptr<webrtc::I420BufferInterface> frame_buf) {
+
+    void AndroidVideoSink::PresentImage270(ANativeWindow_Buffer *buf,
+                                           rtc::scoped_refptr<webrtc::I420BufferInterface> frame_buf) {
 
     }
 }

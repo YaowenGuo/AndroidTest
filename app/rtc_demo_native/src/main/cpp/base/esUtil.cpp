@@ -50,6 +50,7 @@
 #include <android/log.h>
 #include <android_native_app_glue.h>
 #include <android/asset_manager.h>
+#include <utils/native_debug.h>
 
 typedef AAsset esFile;
 #else
@@ -125,11 +126,13 @@ GLuint load_shader(GLenum type, const char *shaderSrc) {
     return shader;
 }
 
+
 void localGetConfigAttrib(EGLDisplay dpy, EGLConfig config, EGLint attribute, EGLint *value) {
     if (!eglGetConfigAttrib(dpy, config, attribute, value)) {
         *value = -1;
     }
 }
+
 
 GLuint printEGLConfig(EGLDisplay display) {
     EGLint numConfigs;

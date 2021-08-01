@@ -14,24 +14,36 @@
 using webrtc::VideoFrame;
 
 namespace rtc_demo {
-class AndroidVideoSink : public rtc::VideoSinkInterface<VideoFrame> {
-public:
-    AndroidVideoSink(ANativeWindow* window);
-    ~AndroidVideoSink() override;
+    class AndroidVideoSink : public rtc::VideoSinkInterface<VideoFrame> {
+    public:
+        AndroidVideoSink(ANativeWindow *window);
 
-private:
-    void OnFrame(const VideoFrame& frame) override;
 
-    void PresentImage(ANativeWindow_Buffer *, const rtc::scoped_refptr<webrtc::I420BufferInterface>&);
+        ~AndroidVideoSink() override;
 
-    void PresentImage90(ANativeWindow_Buffer *, rtc::scoped_refptr<webrtc::I420BufferInterface>);
 
-    void PresentImage180(ANativeWindow_Buffer *, rtc::scoped_refptr<webrtc::I420BufferInterface>);
+    private:
+        void OnFrame(const VideoFrame &frame) override;
 
-    void PresentImage270(ANativeWindow_Buffer *, rtc::scoped_refptr<webrtc::I420BufferInterface>);
 
-    ANativeWindow* window_;
-};
+        void PresentImage(ANativeWindow_Buffer *,
+                          const rtc::scoped_refptr<webrtc::I420BufferInterface> &);
+
+
+        void
+        PresentImage90(ANativeWindow_Buffer *, rtc::scoped_refptr<webrtc::I420BufferInterface>);
+
+
+        void
+        PresentImage180(ANativeWindow_Buffer *, rtc::scoped_refptr<webrtc::I420BufferInterface>);
+
+
+        void
+        PresentImage270(ANativeWindow_Buffer *, rtc::scoped_refptr<webrtc::I420BufferInterface>);
+
+
+        ANativeWindow *window_;
+    };
 }  // namespace rtc_demo
 
 

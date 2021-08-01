@@ -21,6 +21,7 @@ namespace rtc_demo {
     // MediaCodec wants resolution to be divisible by 2.
     const int kRequiredResolutionAlignment = 2;
 
+
     AndroidVideoTrackSource::AndroidVideoTrackSource(
             rtc::Thread *signaling_thread,
             bool is_screencast,
@@ -28,16 +29,19 @@ namespace rtc_demo {
     ) : AdaptedVideoTrackSource(kRequiredResolutionAlignment),
         signaling_thread_(signaling_thread),
         is_screencast_(is_screencast),
-        align_timestamps_(align_timestamps){
+        align_timestamps_(align_timestamps) {
 
     }
+
 
     AndroidVideoTrackSource::~AndroidVideoTrackSource() {
     }
 
+
     AndroidVideoTrackSource::SourceState AndroidVideoTrackSource::state() const {
         return state_.load();
     }
+
 
     void AndroidVideoTrackSource::SetState(bool is_live) {
         const SourceState state = is_live ? kLive : kEnded;
@@ -53,7 +57,7 @@ namespace rtc_demo {
     }
 
 
-    bool AndroidVideoTrackSource::remote() const  {
+    bool AndroidVideoTrackSource::remote() const {
         return false;
     }
 
@@ -85,6 +89,7 @@ namespace rtc_demo {
                             .build());
         }
     }
+
 
     VideoRotation AndroidVideoTrackSource::ConvertRotation(int32_t rotation) {
         if (rotation <= 45 || rotation > 315) {

@@ -31,6 +31,7 @@
 static const uint64_t kMinExposureTime = static_cast<uint64_t>(1000000);
 static const uint64_t kMaxExposureTime = static_cast<uint64_t>(250000000);
 
+
 NDKCamera::NDKCamera()
         : cameraMgr_(nullptr),
           activeCameraId_(""),
@@ -97,6 +98,7 @@ NDKCamera::NDKCamera()
     valid_ = true;
 }
 
+
 /**
  * A helper class to assist image size comparison, by comparing the absolute
  * size
@@ -113,17 +115,20 @@ public:
         }
     }
 
+
     DisplayDimension(const DisplayDimension &other) {
         w_ = other.w_;
         h_ = other.h_;
         portrait_ = other.portrait_;
     }
 
+
     DisplayDimension(void) {
         w_ = 0;
         h_ = 0;
         portrait_ = false;
     }
+
 
     DisplayDimension &operator=(const DisplayDimension &other) {
         w_ = other.w_;
@@ -133,39 +138,51 @@ public:
         return (*this);
     }
 
+
     bool IsSameRatio(DisplayDimension &other) {
         return (w_ * other.h_ == h_ * other.w_);
     }
+
 
     bool operator>(DisplayDimension &other) {
         return (w_ >= other.w_ & h_ >= other.h_);
     }
 
+
     bool operator==(DisplayDimension &other) {
         return (w_ == other.w_ && h_ == other.h_ && portrait_ == other.portrait_);
     }
+
 
     DisplayDimension operator-(DisplayDimension &other) {
         DisplayDimension delta(w_ - other.w_, h_ - other.h_);
         return delta;
     }
 
+
     void Flip(void) { portrait_ = !portrait_; }
+
 
     bool IsPortrait(void) { return portrait_; }
 
+
     int32_t width(void) { return w_; }
+
 
     int32_t height(void) { return h_; }
 
+
     int32_t org_width(void) { return (portrait_ ? h_ : w_); }
 
+
     int32_t org_height(void) { return (portrait_ ? w_ : h_); }
+
 
 private:
     int32_t w_, h_;
     bool portrait_;
 };
+
 
 /**
  * Find a compatible camera modes:
@@ -233,6 +250,7 @@ bool NDKCamera::MatchCaptureSizeRequest(ANativeWindow *display,
     return foundIt;
 }
 
+
 void NDKCamera::CreateSession(ANativeWindow *previewWindow,
                               ANativeWindow *jpgWindow, int32_t imageRotation) {
     // Create output from this app's ANativeWindow, and add into output container
@@ -276,6 +294,7 @@ void NDKCamera::CreateSession(ANativeWindow *previewWindow,
                               ACAMERA_SENSOR_EXPOSURE_TIME, 1, &exposureTime_));
 }
 
+
 NDKCamera::~NDKCamera() {
     valid_ = false;
     // stop session if it is on:
@@ -310,6 +329,7 @@ NDKCamera::~NDKCamera() {
         cameraMgr_ = nullptr;
     }
 }
+
 
 /**
  * EnumerateCamera()
@@ -359,6 +379,7 @@ void NDKCamera::EnumerateCamera() {
     ACameraManager_deleteCameraIdList(cameraIds);
 }
 
+
 /**
  * GetSensorOrientation()
  *     Retrieve current sensor orientation regarding to the phone device
@@ -390,6 +411,7 @@ bool NDKCamera::GetSensorOrientation(int32_t *facing, int32_t *angle) {
     return true;
 }
 
+
 /**
  * StartPreview()
  *   Toggle preview start/stop
@@ -407,6 +429,7 @@ void NDKCamera::StartPreview(bool start) {
     }
 }
 
+
 /**
  * Capture one jpg photo into
  *     /sdcard/DCIM/Camera
@@ -422,6 +445,7 @@ bool NDKCamera::TakePhoto(void) {
                          &requests_[JPG_CAPTURE_REQUEST_IDX].sessionSequenceId_));
     return true;
 }
+
 
 void NDKCamera::UpdateCameraRequestParameter(int32_t code, int64_t val) {
     ACaptureRequest *request = requests_[PREVIEW_REQUEST_IDX].request_;
@@ -454,6 +478,7 @@ void NDKCamera::UpdateCameraRequestParameter(int32_t code, int64_t val) {
                                 &requests_[PREVIEW_REQUEST_IDX].sessionSequenceId_));
 }
 
+
 /**
  * Retrieve Camera Exposure adjustable range.
  *
@@ -473,6 +498,7 @@ bool NDKCamera::GetExposureRange(int64_t *min, int64_t *max, int64_t *curVal) {
 
     return true;
 }
+
 
 /**
  * Retrieve Camera sensitivity range.

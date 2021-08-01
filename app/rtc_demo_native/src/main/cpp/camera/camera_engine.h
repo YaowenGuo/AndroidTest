@@ -37,51 +37,75 @@ class CameraEngine {
 public:
     explicit CameraEngine(android_app *app);
 
+
     ~CameraEngine();
+
 
     // Interfaces to android application framework
     struct android_app *AndroidApp(void) const;
 
+
     void OnAppInitWindow(void);
+
 
     void DrawFrame(void);
 
+
     void OnAppConfigChange(void);
 
+
     void OnAppTermWindow(void);
+
 
     // Native Window handlers
     int32_t GetSavedNativeWinWidth(void) const;
 
+
     int32_t GetSavedNativeWinHeight(void) const;
+
 
     int32_t GetSavedNativeWinFormat(void) const;
 
+
     void SaveNativeWinRes(int32_t w, int32_t h, int32_t format);
+
 
     // UI handlers
     void RequestCameraPermission();
 
+
     void OnCameraPermission(JNIEnv *env, jboolean granted, jobject context);
+
+
+    void JoinRoom(JNIEnv *env, jstring, jobject context);
+
 
     void EnableUI(void);
 
+
     void OnTakePhoto(void);
+
 
     void OnCameraParameterChanged(int32_t code, int64_t val);
 
+
     // Manage NDKCamera Object
-    void CreateCamera(void);
+    void CreateCamera(rtc::scoped_refptr<rtc_demo::AndroidVideoTrackSource> &);
+
 
     void DeleteCamera(void);
+
+
+    struct android_app *app_;
 
 private:
     void OnPhotoTaken(const char *fileName);
 
+
     int GetDisplayRotation(void);
 
-    struct android_app *app_;
-    JNIEnv* env_{};
+
+    JNIEnv *env_{};
     jobject context_{};
     ImageFormat savedNativeWinRes_{};
     bool cameraGranted_;
@@ -94,10 +118,12 @@ private:
     rtc::scoped_refptr<rtc_demo::AndroidVideoTrackSource> video_source_;
 };
 
+
 /**
  * retrieve global singleton CameraEngine instance
  * @return the only instance of CameraEngine in the app
  */
 CameraEngine *GetAppEngine(void);
+
 
 #endif  // __CAMERA_ENGINE_H__

@@ -4,8 +4,10 @@
 
 #ifndef ANDROIDTEST_IMAGEUTIL_H
 #define ANDROIDTEST_IMAGEUTIL_H
+
 #include <media/NdkImageReader.h>
 #include <android/native_window.h>
+
 
 ANativeWindow *createWindow(AImageReader *reader);
 

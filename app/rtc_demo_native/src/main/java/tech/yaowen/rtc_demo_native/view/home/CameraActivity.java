@@ -49,9 +49,10 @@ class CameraSeekBar {
     long _min, _max, _absVal;
     SeekBar _seekBar;
     TextView _sliderPrompt;
+
     CameraSeekBar() {
         _progress = 0;
-        _min = _max = _absVal  = 0;
+        _min = _max = _absVal = 0;
     }
 
     CameraSeekBar(SeekBar seekBar, TextView textView, long min, long max, long val) {
@@ -61,7 +62,7 @@ class CameraSeekBar {
         _max = max;
         _absVal = val;
 
-        if(_min != _max) {
+        if (_min != _max) {
             _progress = (int) ((_absVal - _min) * _seekBar.getMax() / (_max - _min));
             seekBar.setProgress(_progress);
             updateProgress(_progress);
@@ -74,25 +75,29 @@ class CameraSeekBar {
     public boolean isSupported() {
         return (_min != _max);
     }
+
     public void updateProgress(int progress) {
         if (!isSupported())
             return;
 
         _progress = progress;
-        _absVal = (progress * ( _max - _min )) / _seekBar.getMax() + _min;
+        _absVal = (progress * (_max - _min)) / _seekBar.getMax() + _min;
         int val = (progress * (_seekBar.getWidth() - 2 * _seekBar.getThumbOffset())) / _seekBar.getMax();
         _sliderPrompt.setText("" + _absVal);
         _sliderPrompt.setX(_seekBar.getX() + val + _seekBar.getThumbOffset() / 2);
     }
+
     public int getProgress() {
         return _progress;
     }
+
     public void updateAbsProgress(long val) {
         if (!isSupported())
             return;
-        int progress = (int)((val - _min) * _seekBar.getMax() / (_max - _min));
+        int progress = (int) ((val - _min) * _seekBar.getMax() / (_max - _min));
         updateProgress(progress);
     }
+
     public long getAbsProgress() {
         return _absVal;
     }
@@ -107,12 +112,13 @@ public class CameraActivity extends NativeActivity
     long[] _initParams;
 
     private final String DBG_TAG = "NDK-CAMERA-BASIC";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Log.i(DBG_TAG, "OnCreate()");
         // new initialization here... request for permission
-        _savedInstance  = this;
+        _savedInstance = this;
 
         setImmersiveSticky();
         View decorView = getWindow().getDecorView();
@@ -120,18 +126,18 @@ public class CameraActivity extends NativeActivity
     }
 
     private boolean isCamera2Device() {
-        CameraManager camMgr = (CameraManager)getSystemService(Context.CAMERA_SERVICE);
+        CameraManager camMgr = (CameraManager) getSystemService(Context.CAMERA_SERVICE);
         boolean camera2Dev = true;
         try {
             String[] cameraIds = camMgr.getCameraIdList();
-            if (cameraIds.length != 0 ) {
+            if (cameraIds.length != 0) {
                 for (String id : cameraIds) {
                     CameraCharacteristics characteristics = camMgr.getCameraCharacteristics(id);
                     int deviceLevel = characteristics.get(CameraCharacteristics.INFO_SUPPORTED_HARDWARE_LEVEL);
                     int facing = characteristics.get(CameraCharacteristics.LENS_FACING);
                     if (deviceLevel == CameraCharacteristics.INFO_SUPPORTED_HARDWARE_LEVEL_LEGACY &&
-                        facing == LENS_FACING_BACK) {
-                        camera2Dev =  false;
+                            facing == LENS_FACING_BACK) {
+                        camera2Dev = false;
                     }
                 }
             }
@@ -144,15 +150,18 @@ public class CameraActivity extends NativeActivity
 
     // get current rotation method
     int getRotationDegree() {
-        return 90 * ((WindowManager)(getSystemService(WINDOW_SERVICE)))
+        return 90 * ((WindowManager) (getSystemService(WINDOW_SERVICE)))
                 .getDefaultDisplay()
                 .getRotation();
     }
+
     @Override
     protected void onResume() {
         super.onResume();
         setImmersiveSticky();
+        RequestCamera();
     }
+
     void setImmersiveSticky() {
         View decorView = getWindow().getDecorView();
         decorView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_FULLSCREEN
@@ -178,22 +187,23 @@ public class CameraActivity extends NativeActivity
     }
 
     private static final int PERMISSION_REQUEST_CODE_CAMERA = 1;
+
     public void RequestCamera() {
-        if(!isCamera2Device()) {
+        if (!isCamera2Device()) {
             Log.e(DBG_TAG, "Found legacy camera Device, this sample needs camera2 device");
             return;
         }
-        String[] accessPermissions = new String[] {
-            Manifest.permission.CAMERA,
-            Manifest.permission.WRITE_EXTERNAL_STORAGE
+        String[] accessPermissions = new String[]{
+                Manifest.permission.CAMERA,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE
         };
-        boolean needRequire  = false;
-        for(String access : accessPermissions) {
-           int curPermission = ActivityCompat.checkSelfPermission(this, access);
-           if(curPermission != PackageManager.PERMISSION_GRANTED) {
-               needRequire = true;
-               break;
-           }
+        boolean needRequire = false;
+        for (String access : accessPermissions) {
+            int curPermission = ActivityCompat.checkSelfPermission(this, access);
+            if (curPermission != PackageManager.PERMISSION_GRANTED) {
+                needRequire = true;
+                break;
+            }
         }
         if (needRequire) {
             ActivityCompat.requestPermissions(
@@ -202,7 +212,8 @@ public class CameraActivity extends NativeActivity
                     PERMISSION_REQUEST_CODE_CAMERA);
             return;
         }
-        notifyCameraPermission(true, this);
+        inputRoomName();
+//        notifyCameraPermission(true, this);
     }
 
     @Override
@@ -214,36 +225,39 @@ public class CameraActivity extends NativeActivity
          */
         if (PERMISSION_REQUEST_CODE_CAMERA != requestCode) {
             super.onRequestPermissionsResult(requestCode,
-                                             permissions,
-                                             grantResults);
+                    permissions,
+                    grantResults);
             return;
         }
 
-        if(grantResults.length == 2) {
-            notifyCameraPermission(grantResults[0] == PackageManager.PERMISSION_GRANTED &&
-                    grantResults[1] == PackageManager.PERMISSION_GRANTED, this);
+        if (grantResults.length == 2) {
+            if (grantResults[0] == PackageManager.PERMISSION_GRANTED &&
+                    grantResults[1] == PackageManager.PERMISSION_GRANTED) {
+                inputRoomName();
+            }
+//            notifyCameraPermission(grantResults[0] == PackageManager.PERMISSION_GRANTED &&
+//                    grantResults[1] == PackageManager.PERMISSION_GRANTED, this);
         }
     }
 
     /**
      * params[] exposure and sensitivity init values in (min, max, curVa) tuple
-     *   0: exposure min
-     *   1: exposure max
-     *   2: exposure val
-     *   3: sensitivity min
-     *   4: sensitivity max
-     *   5: sensitivity val
+     * 0: exposure min
+     * 1: exposure max
+     * 2: exposure val
+     * 3: sensitivity min
+     * 4: sensitivity max
+     * 5: sensitivity val
      */
     @SuppressLint("InflateParams")
-    public void EnableUI(final long[] params)
-    {
+    public void EnableUI(final long[] params) {
         // make our own copy
         _initParams = new long[params.length];
         System.arraycopy(params, 0, _initParams, 0, params.length);
 
-        runOnUiThread(new Runnable()  {
+        runOnUiThread(new Runnable() {
             @Override
-            public void run()  {
+            public void run() {
                 try {
                     if (_popupWindow != null) {
                         _popupWindow.dismiss();
@@ -320,10 +334,12 @@ public class CameraActivity extends NativeActivity
                     // UI error out, ignore and continue
                     Log.e(DBG_TAG, "UI Exception Happened: " + e.getMessage());
                 }
-            }});
+            }
+        });
     }
+
     /**
-      Called from Native side to notify that a photo is taken
+     * Called from Native side to notify that a photo is taken
      */
     public void OnPhotoTaken(String fileName) {
         final String name = fileName;
@@ -336,9 +352,26 @@ public class CameraActivity extends NativeActivity
         });
     }
 
+    private void inputRoomName() {
+        new JoinRoomDialog(this, new JoinRoomDialog.OnSubmitListener() {
+            @Override
+            public void onSubmit(String roomName) {
+                joinRoom(roomName, CameraActivity.this);
+            }
+
+
+        }).show();
+    }
+
+
+    native static void joinRoom(String joinRoom, Context context);
+
     native static void notifyCameraPermission(boolean granted, Context context);
+
     native static void TakePhoto();
+
     native void OnExposureChanged(long exposure);
+
     native void OnSensitivityChanged(long sensitivity);
 
     static {

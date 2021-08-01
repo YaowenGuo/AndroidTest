@@ -40,6 +40,7 @@ static const char *kFileName = "capture";
  */
 #define MAX_BUF_COUNT 4
 
+
 /**
  * ImageReader listener: called by AImageReader for every frame captured
  * We pass the event to ImageReader class, so it could do some housekeeping
@@ -54,10 +55,12 @@ void OnImageCallback(void *ctx, AImageReader *reader) {
     reinterpret_cast<ImageReader *>(ctx)->ImageCallback(reader);
 }
 
+
 /**
  * Constructor
  */
-ImageReader::ImageReader(ImageFormat *res, enum AIMAGE_FORMATS format,  rtc::scoped_refptr<rtc_demo::AndroidVideoTrackSource> video_source)
+ImageReader::ImageReader(ImageFormat *res, enum AIMAGE_FORMATS format,
+                         rtc::scoped_refptr<rtc_demo::AndroidVideoTrackSource> video_source)
         : presentRotation_(0), reader_(nullptr), video_source_(video_source) {
     callback_ = nullptr;
     callbackCtx_ = nullptr;
@@ -71,16 +74,19 @@ ImageReader::ImageReader(ImageFormat *res, enum AIMAGE_FORMATS format,  rtc::sco
     AImageReader_setImageListener(reader_, &listener);
 }
 
+
 ImageReader::~ImageReader() {
     ASSERT(reader_, "NULL Pointer to %s", __FUNCTION__);
     AImageReader_delete(reader_);
 }
+
 
 void ImageReader::RegisterCallback(void *ctx,
                                    std::function<void(void *ctx, const char *fileName)> func) {
     callbackCtx_ = ctx;
     callback_ = func;
 }
+
 
 void ImageReader::ImageCallback(AImageReader *reader) {
     int32_t format;
@@ -104,6 +110,7 @@ void ImageReader::ImageCallback(AImageReader *reader) {
     }
 }
 
+
 ANativeWindow *ImageReader::GetNativeWindow(void) {
     if (!reader_) return nullptr;
     ANativeWindow *nativeWindow;
@@ -112,6 +119,7 @@ ANativeWindow *ImageReader::GetNativeWindow(void) {
 
     return nativeWindow;
 }
+
 
 /**
  * GetNextImage()
@@ -127,6 +135,7 @@ AImage *ImageReader::GetNextImage(void) {
     return image;
 }
 
+
 /**
  * GetLatestImage()
  *   Retrieve the last image in ImageReader's bufferQueue, deleting images in
@@ -140,6 +149,7 @@ AImage *ImageReader::GetLatestImage(void) {
     }
     return image;
 }
+
 
 /**
  * Delete Image
@@ -194,6 +204,7 @@ bool ImageReader::DisplayImage(ANativeWindow_Buffer *buf, AImage *image) {
     return true;
 }
 
+
 /*
  * PresentImage()
  *   Converting yuv to RGB
@@ -235,6 +246,7 @@ void ImageReader::PresentImage(ANativeWindow_Buffer *buf, AImage *image) {
     }
 }
 
+
 /*
  * PresentImage90()
  *   Converting YUV to RGB
@@ -275,6 +287,7 @@ void ImageReader::PresentImage90(ANativeWindow_Buffer *buf, AImage *image) {
         out -= 1;  // move to the next column
     }
 }
+
 
 /*
  * PresentImage180()
@@ -318,6 +331,7 @@ void ImageReader::PresentImage180(ANativeWindow_Buffer *buf, AImage *image) {
     }
 }
 
+
 /*
  * PresentImage270()
  *   Converting image from YUV to RGB
@@ -358,9 +372,11 @@ void ImageReader::PresentImage270(ANativeWindow_Buffer *buf, AImage *image) {
     }
 }
 
+
 void ImageReader::SetPresentRotation(int32_t angle) {
     presentRotation_ = angle;
 }
+
 
 /**
  * Write out jpeg files to kDirName directory

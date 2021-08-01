@@ -18,29 +18,34 @@
 #include "camera/camera_engine.h"
 #include "utils/native_debug.h"
 
+#define CameraActivity(func, ...) \
+  Java_tech_yaowen_rtc_1demo_1native_view_home_CameraActivity_##func (__VA_ARGS__)
+
+
 /**
  * Retrieve current rotation from Java side
  *
  * @return current rotation angle
  */
 int CameraEngine::GetDisplayRotation() {
-  ASSERT(app_, "Application is not initialized");
+    ASSERT(app_, "Application is not initialized");
 
-  JNIEnv *env;
-  ANativeActivity *activity = app_->activity;
-  activity->vm->GetEnv((void **)&env, JNI_VERSION_1_6);
+    JNIEnv *env;
+    ANativeActivity *activity = app_->activity;
+    activity->vm->GetEnv((void **) &env, JNI_VERSION_1_6);
 
-//  activity->vm->AttachCurrentThread(&env, NULL);
+    activity->vm->AttachCurrentThread(&env, NULL);
 
-  jobject activityObj = env->NewGlobalRef(activity->clazz);
-  jclass clz = env->GetObjectClass(activityObj);
-  jint newOrientation = env->CallIntMethod(
-      activityObj, env->GetMethodID(clz, "getRotationDegree", "()I"));
-  env->DeleteGlobalRef(activityObj);
+    jobject activityObj = env->NewGlobalRef(activity->clazz);
+    jclass clz = env->GetObjectClass(activityObj);
+    jint newOrientation = env->CallIntMethod(
+            activityObj, env->GetMethodID(clz, "getRotationDegree", "()I"));
+    env->DeleteGlobalRef(activityObj);
 
-//  activity->vm->DetachCurrentThread();
-  return newOrientation;
+    activity->vm->DetachCurrentThread();
+    return newOrientation;
 }
+
 
 /**
  * Initializate UI on Java side. The 2 seekBars' values are passed in
@@ -53,55 +58,61 @@ int CameraEngine::GetDisplayRotation() {
  *   5: sensitivity val
  */
 const int kInitDataLen = 6;
+
+
 void CameraEngine::EnableUI(void) {
-  JNIEnv *jni = env_;
+    JNIEnv *jni = env_;
 //  app_->activity->vm->AttachCurrentThread(&jni, NULL);
-  int64_t range[3];
+    int64_t range[3];
 
-  // Default class retrieval
-  jclass clazz = jni->GetObjectClass(app_->activity->clazz);
-  jmethodID methodID = jni->GetMethodID(clazz, "EnableUI", "([J)V");
-  jlongArray initData = jni->NewLongArray(kInitDataLen);
+    // Default class retrieval
+    jclass clazz = jni->GetObjectClass(app_->activity->clazz);
+    jmethodID methodID = jni->GetMethodID(clazz, "EnableUI", "([J)V");
+    jlongArray initData = jni->NewLongArray(kInitDataLen);
 
-  ASSERT(initData && methodID, "JavaUI interface Object failed(%p, %p)",
-         methodID, initData);
+    ASSERT(initData && methodID, "JavaUI interface Object failed(%p, %p)",
+           methodID, initData);
 
-  if (!camera_->GetExposureRange(&range[0], &range[1], &range[2])) {
-    memset(range, 0, sizeof(int64_t) * 3);
-  }
+    if (!camera_->GetExposureRange(&range[0], &range[1], &range[2])) {
+        memset(range, 0, sizeof(int64_t) * 3);
+    }
 
-  jni->SetLongArrayRegion(initData, 0, 3, range);
+    jni->SetLongArrayRegion(initData, 0, 3, range);
 
-  if (!camera_->GetSensitivityRange(&range[0], &range[1], &range[2])) {
-    memset(range, 0, sizeof(int64_t) * 3);
-  }
-  jni->SetLongArrayRegion(initData, 3, 3, range);
-  jni->CallVoidMethod(app_->activity->clazz, methodID, initData);
+    if (!camera_->GetSensitivityRange(&range[0], &range[1], &range[2])) {
+        memset(range, 0, sizeof(int64_t) * 3);
+    }
+    jni->SetLongArrayRegion(initData, 3, 3, range);
+    jni->CallVoidMethod(app_->activity->clazz, methodID, initData);
 //  app_->activity->vm->DetachCurrentThread();
 }
+
 
 /**
  * Handles UI request to take a photo into
  *   /sdcard/DCIM/Camera
  */
 void CameraEngine::OnTakePhoto() {
-  if (camera_) {
-    camera_->TakePhoto();
-  }
+    if (camera_) {
+        camera_->TakePhoto();
+    }
 }
 
-void CameraEngine::OnPhotoTaken(const char* fileName) {
-  JNIEnv *jni;
-  app_->activity->vm->AttachCurrentThread(&jni, NULL);
 
-  // Default class retrieval
-  jclass clazz = jni->GetObjectClass(app_->activity->clazz);
-  jmethodID methodID = jni->GetMethodID(clazz, "OnPhotoTaken", "(Ljava/lang/String;)V");
-  jstring javaName = jni->NewStringUTF(fileName);
+void CameraEngine::OnPhotoTaken(const char *fileName) {
+    JNIEnv *jni;
+    app_->activity->vm->AttachCurrentThread(&jni, NULL);
 
-  jni->CallVoidMethod(app_->activity->clazz, methodID, javaName);
-  app_->activity->vm->DetachCurrentThread();
+    // Default class retrieval
+    jclass clazz = jni->GetObjectClass(app_->activity->clazz);
+    jmethodID methodID = jni->GetMethodID(clazz, "OnPhotoTaken", "(Ljava/lang/String;)V");
+    jstring javaName = jni->NewStringUTF(fileName);
+
+    jni->CallVoidMethod(app_->activity->clazz, methodID, javaName);
+    app_->activity->vm->DetachCurrentThread();
 }
+
+
 /**
  * Process user camera and disk writing permission
  * Resume application initialization after user granted camera and disk usage
@@ -111,13 +122,45 @@ void CameraEngine::OnPhotoTaken(const char* fileName) {
  * @return none
  */
 void CameraEngine::OnCameraPermission(JNIEnv *env, jboolean granted, jobject context) {
-  cameraGranted_ = (granted != JNI_FALSE);
-  env_ = env;
-  context_ = context;
+    cameraGranted_ = (granted != JNI_FALSE);
+    env_ = env;
+    context_ = context;
 
-  if (cameraGranted_) {
-    OnAppInitWindow();
-  }
+    if (cameraGranted_) {
+        OnAppInitWindow();
+    }
+}
+
+
+std::string jstring2str(JNIEnv *jni, jstring jstr) {
+    const char *charArr = jni->GetStringUTFChars(jstr, 0);
+    std::string str(charArr);
+    return str;
+}
+
+extern Live *pLiveObj;
+void CameraEngine::JoinRoom(JNIEnv *env, jstring roomName, jobject context) {
+    env_ = env;
+    context_ = context;
+    cameraGranted_ = true;
+    if (pLiveObj == nullptr) {
+        pLiveObj = new Live(env, context);
+    }
+
+    pLiveObj->joinRoom(jstring2str(env, roomName));
+//    OnAppInitWindow();
+}
+
+
+/**
+ *  A couple UI handles ( from UI )
+ *      user camera and disk permission
+ *      exposure and sensitivity SeekBars
+ *      takePhoto button
+ */
+extern "C" JNIEXPORT void JNICALL
+CameraActivity(joinRoom, JNIEnv *env, jclass type, jstring name, jobject context) {
+    GetAppEngine()->JoinRoom(env, name, context);
 }
 
 /**
@@ -127,31 +170,28 @@ void CameraEngine::OnCameraPermission(JNIEnv *env, jboolean granted, jobject con
  *      takePhoto button
  */
 extern "C" JNIEXPORT void JNICALL
-Java_tech_yaowen_rtc_1demo_1native_view_home_CameraActivity_notifyCameraPermission(
-    JNIEnv *env, jclass type, jboolean permission, jobject context) {
-  GetAppEngine()->OnCameraPermission(env, permission, context);
+CameraActivity(notifyCameraPermission, JNIEnv *env, jclass type, jboolean permission,
+               jobject context) {
+    GetAppEngine()->OnCameraPermission(env, permission, context);
 //  std::thread permissionHandler(&CameraEngine::OnCameraPermission,
 //                                GetAppEngine(), env, permission, context);
 //  permissionHandler.detach();
 }
 
 extern "C" JNIEXPORT void JNICALL
-Java_tech_yaowen_rtc_1demo_1native_view_home_CameraActivity_TakePhoto(JNIEnv *env,
-                                                      jclass type) {
-  std::thread takePhotoHandler(&CameraEngine::OnTakePhoto, GetAppEngine());
-  takePhotoHandler.detach();
+CameraActivity(TakePhoto, JNIEnv *env, jclass type) {
+    std::thread takePhotoHandler(&CameraEngine::OnTakePhoto, GetAppEngine());
+    takePhotoHandler.detach();
 }
 
 extern "C" JNIEXPORT void JNICALL
-Java_tech_yaowen_rtc_1demo_1native_view_home_CameraActivity_OnExposureChanged(
-    JNIEnv *env, jobject instance, jlong exposurePercent) {
-  GetAppEngine()->OnCameraParameterChanged(ACAMERA_SENSOR_EXPOSURE_TIME,
-                                           exposurePercent);
+CameraActivity(OnExposureChanged, JNIEnv *env, jobject instance, jlong exposurePercent) {
+    GetAppEngine()->OnCameraParameterChanged(ACAMERA_SENSOR_EXPOSURE_TIME,
+                                             exposurePercent);
 }
 
 extern "C" JNIEXPORT void JNICALL
-Java_tech_yaowen_rtc_1demo_1native_view_home_CameraActivity_OnSensitivityChanged(
-    JNIEnv *env, jobject instance, jlong sensitivity) {
-  GetAppEngine()->OnCameraParameterChanged(ACAMERA_SENSOR_SENSITIVITY,
-                                           sensitivity);
+CameraActivity(OnSensitivityChanged, JNIEnv *env, jobject instance, jlong sensitivity) {
+    GetAppEngine()->OnCameraParameterChanged(ACAMERA_SENSOR_SENSITIVITY,
+                                             sensitivity);
 }

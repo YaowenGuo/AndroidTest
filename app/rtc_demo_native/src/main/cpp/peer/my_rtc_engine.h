@@ -11,6 +11,7 @@
 #include <third_party/jsoncpp/source/include/json/value.h>
 #include <jni.h>
 #include "android_video_track_source.h"
+#include "signaling/signaling_client.h"
 
 const char kAudioLabel[] = "audio_label";
 const char kVideoLabel[] = "video_label";
@@ -23,18 +24,44 @@ const char kCandidateSdpName[] = "candidate";
 
 using namespace webrtc;
 
-class Live : public PeerConnectionObserver, public CreateSessionDescriptionObserver, public SetLocalDescriptionObserverInterface,
-             public SetRemoteDescriptionObserverInterface {
+class Live : public PeerConnectionObserver,
+             public CreateSessionDescriptionObserver,
+             public SetLocalDescriptionObserverInterface,
+             public SetRemoteDescriptionObserverInterface,
+             public rtc_demo::SocketCallbackInterface {
 public:
     Live(JNIEnv *jni, jobject context);
+
+
+    void joinRoom(const string &room);
+
+
+    ~Live();
+
+
     void createEngine();
-    rtc::scoped_refptr<rtc_demo::AndroidVideoTrackSource> AddTracks(rtc::VideoSinkInterface<VideoFrame>*);
-    void connectToPeer(SessionDescriptionInterface* desc);
+
+
+    void InitLive();
+
+
+    rtc::scoped_refptr<rtc_demo::AndroidVideoTrackSource>
+    AddTracks(rtc::VideoSinkInterface<VideoFrame> *);
+
+
+    void connectToPeer(SessionDescriptionInterface *desc);
+
+
     void setRemoteDescription(SessionDescriptionInterface *desc);
+
+
     void addIce(const Json::Value jmessage);
 
+
     //「***************** CreateSessionDescriptionObserver *******************
-    void OnSuccess(SessionDescriptionInterface* desc) override;
+    void OnSuccess(SessionDescriptionInterface *desc) override;
+
+
     void OnFailure(RTCError error) override;
     // L***************** CreateSessionDescriptionObserver *******************
 
@@ -51,6 +78,8 @@ public:
 
     //「***************** SetRemoteDescriptionObserverInterface *******************
     void AddRef() const override {};
+
+
     rtc::RefCountReleaseStatus Release() const override {
         return rtc::RefCountReleaseStatus::kDroppedLastRef;
     };
@@ -61,23 +90,28 @@ public:
     void OnSignalingChange(
             PeerConnectionInterface::SignalingState new_state) override {};
 
+
     // Triggered when media is received on a new stream from remote peer.
     void OnAddStream(
             rtc::scoped_refptr<MediaStreamInterface> stream) override {};
+
 
     // Triggered when a remote peer closes a stream.
     void OnRemoveStream(
             rtc::scoped_refptr<MediaStreamInterface> stream) override {};
 
+
     // Triggered when a remote peer opens a data channel.
     void OnDataChannel(
             rtc::scoped_refptr<DataChannelInterface> data_channel) override {}
+
 
     // Triggered when renegotiation is needed. For example, an ICE restart
     // has begun.
     // TODO(hbos): Delete in favor of OnNegotiationNeededEvent() when downstream
     // projects have migrated.
     void OnRenegotiationNeeded() override {}
+
 
     // Used to fire spec-compliant onnegotiationneeded events, which should only
     // fire when the Operations Chain is empty. The observer is responsible for
@@ -88,6 +122,7 @@ public:
     // chained.
     void OnNegotiationNeededEvent(
             uint32_t event_id) override {}
+
 
     // Called any time the legacy IceConnectionState changes.
     //
@@ -100,20 +135,25 @@ public:
     void OnIceConnectionChange(
             PeerConnectionInterface::IceConnectionState new_state) override {}
 
+
     // Called any time the standards-compliant IceConnectionState changes.
     void OnStandardizedIceConnectionChange(
             PeerConnectionInterface::IceConnectionState new_state) override {}
+
 
     // Called any time the PeerConnectionState changes.
     void OnConnectionChange(
             PeerConnectionInterface::PeerConnectionState new_state) override {}
 
+
     // Called any time the IceGatheringState changes.
     void OnIceGatheringChange(
             PeerConnectionInterface::IceGatheringState new_state) override {}
 
+
     // A new ICE candidate has been gathered.
     void OnIceCandidate(const IceCandidateInterface *candidate) override;
+
 
     // Gathering of an ICE candidate failed.
     // See https://w3c.github.io/webrtc-pc/#event-icecandidateerror
@@ -125,6 +165,7 @@ public:
             const std::string &error_text
     ) override {}
 
+
     // Gathering of an ICE candidate failed.
     // See https://w3c.github.io/webrtc-pc/#event-icecandidateerror
     void OnIceCandidateError(
@@ -135,19 +176,23 @@ public:
             const std::string &error_text
     ) override {}
 
+
     // Ice candidates have been removed.
     // TODO(honghaiz): Make this a pure method when all its subclasses
     // implement it.
     void OnIceCandidatesRemoved(
             const std::vector<cricket::Candidate> &candidates) override {}
 
+
     // Called when the ICE connection receiving status changes.
     void OnIceConnectionReceivingChange(
             bool receiving) override {}
 
+
     // Called when the selected candidate pair for the ICE connection changes.
     void OnIceSelectedCandidatePairChanged(
             const cricket::CandidatePairChangeEvent &event) override {}
+
 
     // This is called when a receiver and its track are created.
     // TODO(zhihuang): Make this pure when all subclasses implement it.
@@ -157,6 +202,7 @@ public:
     void OnAddTrack(
             rtc::scoped_refptr<RtpReceiverInterface> receiver,
             const std::vector<rtc::scoped_refptr<MediaStreamInterface>> &streams) override {}
+
 
     // This is called when signaling indicates a transceiver will be receiving
     // media from the remote endpoint. This is fired during a call to
@@ -169,6 +215,7 @@ public:
     // https://w3c.github.io/webrtc-pc/#set-description
     void OnTrack(rtc::scoped_refptr<RtpTransceiverInterface> transceiver) override {}
 
+
     // Called when signaling indicates that media will no longer be received on a
     // track.
     // With Plan B semantics, the given receiver will have been removed from the
@@ -179,6 +226,7 @@ public:
     // TODO(hbos,deadbeef): Make pure when all subclasses implement it.
     void OnRemoveTrack(rtc::scoped_refptr<RtpReceiverInterface> receiver) override {}
 
+
     // Called when an interesting usage is detected by WebRTC.
     // An appropriate action is to add information about the context of the
     // PeerConnection and write the event to some kind of "interesting events"
@@ -187,11 +235,32 @@ public:
     // implementation-defined.
     void OnInterestingUsage(int usage_pattern) override {}
 
+
+    //「***************** SocketCallbackInterface *******************
+    void onCreateRoom() override;
+
+
+    void onJoinedRoom() override;
+
+
+    void onPeerJoined() override;
+
+
+    void onPeerLeave(string const &msg) override;
+
+
+    void onSDPReceived(string const &) override;
+
+
+    void onIceCandidateReceived(string const &) override;
+    // L***************** SocketCallbackInterface *******************
+
 protected:
     rtc::scoped_refptr<webrtc::PeerConnectionFactoryInterface> peer_connection_factory_;
     rtc::scoped_refptr<webrtc::PeerConnectionInterface> peer_connection_;
+    rtc_demo::SignalingClient *signaling_;
+    rtc::scoped_refptr<rtc_demo::AndroidVideoTrackSource> videoTrack;
 };
 
-
-
+static Live *pLiveObj = nullptr;
 #endif //ANDROIDTEST_MY_RTC_ENGINE_H

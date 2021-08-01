@@ -22,6 +22,7 @@
 #include <rtc_base/ref_counted_object.h>
 #include <pc/video_track_source.h>
 #include "peer/android_video_track_source.h"
+
 /*
  * ImageFormat:
  *     A Data Structure to communicate resolution between camera and ImageReader
@@ -39,9 +40,12 @@ public:
     /**
      * Ctor and Dtor()
      */
-    explicit ImageReader(ImageFormat *res, enum AIMAGE_FORMATS format, rtc::scoped_refptr<rtc_demo::AndroidVideoTrackSource> video_source);
+    explicit ImageReader(ImageFormat *res, enum AIMAGE_FORMATS format,
+                         rtc::scoped_refptr<rtc_demo::AndroidVideoTrackSource> video_source);
+
 
     ~ImageReader();
+
 
     /**
      * Report cached ANativeWindow, which was used to create camera's capture
@@ -49,15 +53,18 @@ public:
      */
     ANativeWindow *GetNativeWindow(void);
 
+
     /**
      * Retrieve Image on the top of Reader's queue
      */
     AImage *GetNextImage(void);
 
+
     /**
     * Retrieve Image on the back of Reader's queue, dropping older images
     */
     AImage *GetLatestImage(void);
+
 
     /**
      * Delete Image
@@ -65,12 +72,14 @@ public:
      */
     void DeleteImage(AImage *image);
 
+
     /**
      * AImageReader callback handler. Called by AImageReader when a frame is
      * captured
      * (Internal function, not to be called by clients)
      */
     void ImageCallback(AImageReader *reader);
+
 
     /**
      * DisplayImage()
@@ -86,6 +95,7 @@ public:
      */
     bool DisplayImage(ANativeWindow_Buffer *buf, AImage *image);
 
+
     /**
      * Configure the rotation angle necessary to apply to
      * Camera image when presenting: all rotations should be accumulated:
@@ -93,6 +103,7 @@ public:
      *    Human Rotation (rotated degree related to Phone native orientation
      */
     void SetPresentRotation(int32_t angle);
+
 
     /**
      * regsiter a callback function for client to be notified that jpeg already
@@ -102,6 +113,7 @@ public:
      */
     void RegisterCallback(void *ctx, std::function<void(void *ctx, const char *fileName)>);
 
+
 private:
     int32_t presentRotation_;
     AImageReader *reader_;
@@ -109,13 +121,18 @@ private:
     void *callbackCtx_;
     rtc::scoped_refptr<rtc_demo::AndroidVideoTrackSource> video_source_;
 
+
     void PresentImage(ANativeWindow_Buffer *buf, AImage *image);
+
 
     void PresentImage90(ANativeWindow_Buffer *buf, AImage *image);
 
+
     void PresentImage180(ANativeWindow_Buffer *buf, AImage *image);
 
+
     void PresentImage270(ANativeWindow_Buffer *buf, AImage *image);
+
 
     void WriteFile(AImage *image);
 };
