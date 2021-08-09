@@ -80,7 +80,7 @@ class RTCDataChannelActivity : BaseActivity() {
     private fun call() {
         peerConnectionLocal = connection(null, object :
             RtcEngine.DspAndIdeObserver {
-            override fun onDspCreate(sdp: SessionDescription) {
+            override fun onSdCreate(sdp: SessionDescription) {
                 // 通过 Singling 服务器发送 offer。对方接收到后设置。
                 answer(sdp)
             }
@@ -108,7 +108,7 @@ class RTCDataChannelActivity : BaseActivity() {
     private fun answer(sdp: SessionDescription) {
         peerConnectionRemote = answerConnection(sdp, object :
             RtcEngine.DspAndIdeObserver {
-            override fun onDspCreate(sdp: SessionDescription) {
+            override fun onSdCreate(sdp: SessionDescription) {
                 // 应答方通过 Singling 服务器发送 answer。对方接收到后设置。
                 peerConnectionLocal.setRemoteDescription(sdpObserver, sdp)
             }
@@ -186,7 +186,7 @@ class RTCDataChannelActivity : BaseActivity() {
                 // 使用 createOffer 创建的是 offer, 使用 createAnswer 创建的是 answer.
                 // 太蠢了，自己的 description 为什么还要设置一次?
                 peerConnection.setLocalDescription(this, sdp)
-                observer.onDspCreate(sdp)
+                observer.onSdCreate(sdp)
             }
 
             override fun onSetSuccess() {}
@@ -267,7 +267,7 @@ class RTCDataChannelActivity : BaseActivity() {
                 // 使用 createOffer 创建的是 offer, 使用 createAnswer 创建的是 answer.
                 // 太蠢了，自己的 description 为什么还要设置一次?
                 peerConnection.setLocalDescription(this, sdp)
-                observer.onDspCreate(sdp)
+                observer.onSdCreate(sdp)
             }
 
             override fun onSetSuccess() {}

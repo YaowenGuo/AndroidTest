@@ -1,21 +1,12 @@
-package tech.yaowen.rtc_demo
+package tech.yaowen.signaling
 
 import android.content.Context
 import android.util.Log
-import io.socket.client.Ack
 import io.socket.client.IO
 import io.socket.client.Socket
-import io.socket.emitter.Emitter
-import io.socket.thread.EventThread
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
-import org.json.JSONException
 import org.json.JSONObject
-import org.webrtc.IceCandidate
-import org.webrtc.SessionDescription
-import tech.yaowen.rtc_demo.base.Server
-import tech.yaowen.rtc_demo.base.log
-import tech.yaowen.rtc_demo.lib.HttpsUtil
 import java.io.IOException
 import java.net.URISyntaxException
 import java.security.KeyManagementException
@@ -28,7 +19,8 @@ import javax.net.ssl.SSLContext
 import javax.net.ssl.SSLSession
 import kotlin.jvm.Throws
 
-class SignalingClient private constructor(context: Context) {
+open class SignalingClient constructor(context: Context) {
+    protected var context: Context
     private lateinit var socket: Socket
     private var callback: Callback? = null
     fun setCallback(callback: Callback?): SignalingClient {
@@ -44,12 +36,14 @@ class SignalingClient private constructor(context: Context) {
             socket = customCertificate(context)
             socket.connect()
             socket.on("created") { args: Array<Any?>? ->
+                threadCurrent("created")
                 // 房间创建者收到此回调
                 Log.e("webrtc_albert", "created")
                 callback!!.onCreateRoom()
             }
 
             socket.on("joined") { args: Array<Any?>? ->
+                threadCurrent("joined")
                 Log.e("webrtc_albert", "joined")
                 callback!!.onJoinedRoom()
             }
@@ -75,6 +69,7 @@ class SignalingClient private constructor(context: Context) {
                 callback!!.onPeerLeave(args[0] as String)
             }
             socket.on("message") { args: Array<Any?> ->
+                threadCurrent("message")
                 when (val data = args[0]) {
                     is String -> {
                         Log.e("webrtc_albert", "message $data")
@@ -123,29 +118,12 @@ class SignalingClient private constructor(context: Context) {
         socket.emit("bye")
     }
 
-    fun sendIceCandidate(iceCandidate: IceCandidate) {
-        val jo = JSONObject()
-        try {
-            jo.put("type", "candidate")
-            jo.put("label", iceCandidate.sdpMLineIndex)
-            jo.put("id", iceCandidate.sdpMid)
-            jo.put("candidate", iceCandidate.sdp)
-            socket.emit("message", jo)
-            log("Sending ice: $jo" )
-        } catch (e: JSONException) {
-            e.printStackTrace()
-        }
+    fun sendIceCandidate(iceCandidate: String) {
+        socket.emit("message", iceCandidate)
     }
 
-    fun sendSessionDescription(sdp: SessionDescription) {
-        val jo = JSONObject()
-        try {
-            jo.put("type", sdp.type.canonicalForm())
-            jo.put("sdp", sdp.description)
-            sendMessage(jo)
-        } catch (e: JSONException) {
-            e.printStackTrace()
-        }
+    fun sendSessionDescription(sdp: String) {
+        sendMessage(sdp)
     }
 
     interface Callback {
@@ -195,7 +173,7 @@ class SignalingClient private constructor(context: Context) {
     }
 
     companion object {
-        private var instance: SignalingClient? = null
+        var instance: SignalingClient? = null
         operator fun get(context: Context): SignalingClient {
             if (instance == null) {
                 synchronized(SignalingClient::class.java) {
@@ -206,9 +184,15 @@ class SignalingClient private constructor(context: Context) {
             }
             return instance!!
         }
+
+        @JvmStatic
+        open fun threadCurrent(tag: String?) {
+            Log.e("RTC-DEMO", "Current Thread: id = " + Thread.currentThread().id + " tag = " + tag)
+        }
     }
 
     init {
+        this.context = context
         init(context)
     }
 }

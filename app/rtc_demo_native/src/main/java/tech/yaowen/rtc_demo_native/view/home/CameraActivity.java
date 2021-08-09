@@ -43,6 +43,7 @@ import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
 
 import tech.yaowen.rtc_demo_native.R;
+import tech.yaowen.rtc_demo_native.signaling.SignalingClient;
 
 class CameraSeekBar {
     int _progress;
@@ -178,6 +179,7 @@ public class CameraActivity extends NativeActivity
             _popupWindow.dismiss();
             _popupWindow = null;
         }
+        release();
         super.onPause();
     }
 
@@ -255,85 +257,82 @@ public class CameraActivity extends NativeActivity
         _initParams = new long[params.length];
         System.arraycopy(params, 0, _initParams, 0, params.length);
 
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    if (_popupWindow != null) {
-                        _popupWindow.dismiss();
-                    }
-                    LayoutInflater layoutInflater
-                            = (LayoutInflater) getBaseContext()
-                            .getSystemService(LAYOUT_INFLATER_SERVICE);
-                    View popupView = layoutInflater.inflate(R.layout.widgets, null);
-                    _popupWindow = new PopupWindow(
-                            popupView,
-                            WindowManager.LayoutParams.MATCH_PARENT,
-                            WindowManager.LayoutParams.WRAP_CONTENT);
-
-                    RelativeLayout mainLayout = new RelativeLayout(_savedInstance);
-                    ViewGroup.MarginLayoutParams params = new ViewGroup.MarginLayoutParams(
-                            -1, -1);
-                    params.setMargins(0, 0, 0, 0);
-                    _savedInstance.setContentView(mainLayout, params);
-
-                    // Show our UI over NativeActivity window
-                    _popupWindow.showAtLocation(mainLayout, Gravity.BOTTOM | Gravity.START, 0, 0);
-                    _popupWindow.update();
-
-                    _takePhoto = (ImageButton) popupView.findViewById(R.id.takePhoto);
-                    _takePhoto.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            TakePhoto();
-                        }
-                    });
-                    _takePhoto.setEnabled(true);
-                    (popupView.findViewById(R.id.exposureLabel)).setEnabled(true);
-                    (popupView.findViewById(R.id.sensitivityLabel)).setEnabled(true);
-
-                    SeekBar seekBar = (SeekBar) popupView.findViewById(R.id.exposure_seekbar);
-                    _exposure = new CameraSeekBar(seekBar,
-                            (TextView) popupView.findViewById(R.id.exposureVal),
-                            _initParams[0], _initParams[1], _initParams[2]);
-                    seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-                        @Override
-                        public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                            _exposure.updateProgress(progress);
-                            OnExposureChanged(_exposure.getAbsProgress());
-                        }
-
-                        @Override
-                        public void onStartTrackingTouch(SeekBar seekBar) {
-                        }
-
-                        @Override
-                        public void onStopTrackingTouch(SeekBar seekBar) {
-                        }
-                    });
-                    seekBar = ((SeekBar) popupView.findViewById(R.id.sensitivity_seekbar));
-                    _sensitivity = new CameraSeekBar(seekBar,
-                            (TextView) popupView.findViewById(R.id.sensitivityVal),
-                            _initParams[3], _initParams[4], _initParams[5]);
-                    seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-                        @Override
-                        public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                            _sensitivity.updateProgress(progress);
-                            OnSensitivityChanged(_sensitivity.getAbsProgress());
-                        }
-
-                        @Override
-                        public void onStartTrackingTouch(SeekBar seekBar) {
-                        }
-
-                        @Override
-                        public void onStopTrackingTouch(SeekBar seekBar) {
-                        }
-                    });
-                } catch (WindowManager.BadTokenException e) {
-                    // UI error out, ignore and continue
-                    Log.e(DBG_TAG, "UI Exception Happened: " + e.getMessage());
+        runOnUiThread(() -> {
+            try {
+                if (_popupWindow != null) {
+                    _popupWindow.dismiss();
                 }
+                LayoutInflater layoutInflater
+                        = (LayoutInflater) getBaseContext()
+                        .getSystemService(LAYOUT_INFLATER_SERVICE);
+                View popupView = layoutInflater.inflate(R.layout.widgets, null);
+                _popupWindow = new PopupWindow(
+                        popupView,
+                        WindowManager.LayoutParams.MATCH_PARENT,
+                        WindowManager.LayoutParams.WRAP_CONTENT);
+
+                RelativeLayout mainLayout = new RelativeLayout(_savedInstance);
+                ViewGroup.MarginLayoutParams params1 = new ViewGroup.MarginLayoutParams(
+                        -1, -1);
+                params1.setMargins(0, 0, 0, 0);
+                _savedInstance.setContentView(mainLayout, params1);
+
+                // Show our UI over NativeActivity window
+                _popupWindow.showAtLocation(mainLayout, Gravity.BOTTOM | Gravity.START, 0, 0);
+                _popupWindow.update();
+
+                _takePhoto = (ImageButton) popupView.findViewById(R.id.takePhoto);
+                _takePhoto.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        TakePhoto();
+                    }
+                });
+                _takePhoto.setEnabled(true);
+                (popupView.findViewById(R.id.exposureLabel)).setEnabled(true);
+                (popupView.findViewById(R.id.sensitivityLabel)).setEnabled(true);
+
+                SeekBar seekBar = (SeekBar) popupView.findViewById(R.id.exposure_seekbar);
+                _exposure = new CameraSeekBar(seekBar,
+                        (TextView) popupView.findViewById(R.id.exposureVal),
+                        _initParams[0], _initParams[1], _initParams[2]);
+                seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+                    @Override
+                    public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                        _exposure.updateProgress(progress);
+                        OnExposureChanged(_exposure.getAbsProgress());
+                    }
+
+                    @Override
+                    public void onStartTrackingTouch(SeekBar seekBar) {
+                    }
+
+                    @Override
+                    public void onStopTrackingTouch(SeekBar seekBar) {
+                    }
+                });
+                seekBar = ((SeekBar) popupView.findViewById(R.id.sensitivity_seekbar));
+                _sensitivity = new CameraSeekBar(seekBar,
+                        (TextView) popupView.findViewById(R.id.sensitivityVal),
+                        _initParams[3], _initParams[4], _initParams[5]);
+                seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+                    @Override
+                    public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                        _sensitivity.updateProgress(progress);
+                        OnSensitivityChanged(_sensitivity.getAbsProgress());
+                    }
+
+                    @Override
+                    public void onStartTrackingTouch(SeekBar seekBar) {
+                    }
+
+                    @Override
+                    public void onStopTrackingTouch(SeekBar seekBar) {
+                    }
+                });
+            } catch (WindowManager.BadTokenException e) {
+                // UI error out, ignore and continue
+                Log.e(DBG_TAG, "UI Exception Happened: " + e.getMessage());
             }
         });
     }
@@ -343,28 +342,23 @@ public class CameraActivity extends NativeActivity
      */
     public void OnPhotoTaken(String fileName) {
         final String name = fileName;
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                Toast.makeText(getApplicationContext(),
-                        "Photo saved to " + name, Toast.LENGTH_SHORT).show();
-            }
+        runOnUiThread(() -> {
+            Toast.makeText(getApplicationContext(), "Photo saved to " + name, Toast.LENGTH_SHORT)
+                    .show();
         });
     }
 
     private void inputRoomName() {
-        new JoinRoomDialog(this, new JoinRoomDialog.OnSubmitListener() {
-            @Override
-            public void onSubmit(String roomName) {
-                joinRoom(roomName, CameraActivity.this);
-            }
-
-
+        joinRoom(this);
+        new JoinRoomDialog(this, roomName -> {
+            SignalingClient.threadCurrent("JoinRoomDialog");
+            SignalingClient.getInstance(CameraActivity.this)
+                    .join(roomName);
         }).show();
     }
 
+    native static void joinRoom(Context context);
 
-    native static void joinRoom(String joinRoom, Context context);
 
     native static void notifyCameraPermission(boolean granted, Context context);
 
@@ -373,6 +367,8 @@ public class CameraActivity extends NativeActivity
     native void OnExposureChanged(long exposure);
 
     native void OnSensitivityChanged(long sensitivity);
+
+    native void release();
 
     static {
         System.loadLibrary("rtc_demo");

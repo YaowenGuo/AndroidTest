@@ -175,7 +175,7 @@ enum class RtcEngine {
                 // 使用 createOffer 创建的是 offer, 使用 createAnswer 创建的是 answer.
                 // 太蠢了，自己的 description 为什么还要设置一次?
                 peerConnection.setLocalDescription(this, sdp)
-                observer.onDspCreate(sdp)
+                observer.onSdCreate(sdp)
             }
 
             override fun onSetSuccess() {}
@@ -197,7 +197,7 @@ enum class RtcEngine {
 
 
     interface DspAndIdeObserver {
-        fun onDspCreate(sessionDescription: SessionDescription) {};
+        fun onSdCreate(sessionDescription: SessionDescription) {};
 
         fun onIceCreate(iceCandidate: IceCandidate)
 

@@ -50,11 +50,6 @@ find_library(media-lib mediandk)
 #        EXCLUDE_FROM_ALL)
 
 
-add_subdirectory(../../../../../lib/socket.io-client-cpp
-        sioclient
-        EXCLUDE_FROM_ALL)
-
-
 target_link_libraries(
         rtc_demo
         ${OPENGL_LIB}
@@ -66,7 +61,6 @@ target_link_libraries(
         EGL
         GLESv3
         OpenSLES
-        sioclient
         ${camera-lib}
         ${media-lib}
         ${log-lib}

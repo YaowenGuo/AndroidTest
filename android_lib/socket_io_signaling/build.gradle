@@ -1,0 +1,10 @@
+apply from:"../android_lib_basic.gradle"
+
+dependencies {
+    // EXIF Interface
+    implementation deps.exifinterface
+    implementation deps.kotlinx_coroutines
+
+    api deps.okhttp_log
+    implementation deps.socket_io
+}

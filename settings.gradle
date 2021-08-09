@@ -18,6 +18,7 @@ include ':android_lib:ffmpeg'
 include ':android_lib:lib_share'
 include ':android_lib:my_butter_knife'
 include ':android_lib:media_tool'
+include ':android_lib:socket_io_signaling'
 
 
 include ':lib:test_rust'

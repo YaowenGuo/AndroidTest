@@ -7,28 +7,20 @@
 
 #include <string>
 #include <api/jsep.h>
+#include <jni.h>
 
 #include "socket_callback_interface.h"
-#include "../../../../../../lib/socket.io-client-cpp/src/sio_client.h"
 
 using std::string;
-using webrtc::IceCandidateInterface;
-using webrtc::SessionDescriptionInterface;
-using sio::message;
 
 namespace rtc_demo {
-    class SignalingClient {
+
+    class SignalingClientWrapper {
     public:
-        SignalingClient(SocketCallbackInterface *);
+        SignalingClientWrapper(JNIEnv *jni, jclass &clazz);
 
 
-        ~SignalingClient();
-
-
-        void join(string const &name);
-
-
-        void leave();
+        ~SignalingClientWrapper();
 
 
         void SendIceCandidate(string const &candidate);
@@ -38,11 +30,10 @@ namespace rtc_demo {
 
 
     private:
-        sio::client client_;
-        SocketCallbackInterface *callback_ = nullptr;
+        JavaVM *vm_;
+        jobject j_signaling_client_;
+        jmethodID j_send_session_method;
+        jmethodID j_send_ice_method;
     };
-
-
-    void printMsgLog(string prefix, message::ptr const &data);
 }
 #endif //ANDROIDTEST_SIGNALING_CLIENT_H

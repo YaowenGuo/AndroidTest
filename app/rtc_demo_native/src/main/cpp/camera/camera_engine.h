@@ -77,9 +77,6 @@ public:
     void OnCameraPermission(JNIEnv *env, jboolean granted, jobject context);
 
 
-    void JoinRoom(JNIEnv *env, jstring, jobject context);
-
-
     void EnableUI(void);
 
 

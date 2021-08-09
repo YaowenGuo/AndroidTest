@@ -1,4 +1,4 @@
-package tech.yaowen.rtc_demo.lib
+package tech.yaowen.signaling
 
 import android.annotation.SuppressLint
 import java.io.IOException

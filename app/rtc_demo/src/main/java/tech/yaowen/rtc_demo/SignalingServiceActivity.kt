@@ -8,8 +8,9 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import okhttp3.*
 import org.json.JSONObject
-import tech.yaowen.rtc_demo.base.Server
-import tech.yaowen.rtc_demo.lib.HttpsUtil
+import tech.yaowen.signaling.HttpsUtil
+import tech.yaowen.signaling.Server
+import tech.yaowen.signaling.SignalingClient
 import java.io.IOException
 import java.security.SecureRandom
 import javax.net.ssl.HostnameVerifier

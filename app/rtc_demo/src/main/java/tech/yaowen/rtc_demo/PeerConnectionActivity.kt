@@ -4,10 +4,12 @@ import android.hardware.camera2.CameraMetadata
 import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
+import org.json.JSONException
 import org.json.JSONObject
 import org.webrtc.*
 import tech.yaowen.rtc_demo.base.log
 import tech.yaowen.rtc_demo.lib.RtcEngine
+import tech.yaowen.signaling.SignalingClient
 
 /**
  * 1. 连接服务器，获取自己是发起者还是应答者
@@ -22,6 +24,7 @@ class PeerConnectionActivity : BaseActivity(), SignalingClient.Callback {
     val eglBaseContext = EglBase.create().eglBaseContext
     var videoTrack: VideoTrack? = null
     private var joined = false
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -46,7 +49,8 @@ class PeerConnectionActivity : BaseActivity(), SignalingClient.Callback {
 
     private fun captureVideoAndVideo() {
         peerConnectionFactory = RtcEngine.INSTANCE.createPeerConnection(eglBaseContext, this)
-        val frontCameraCapture = RtcEngine.INSTANCE.createCameraCapturer(this, CameraMetadata.LENS_FACING_FRONT)
+        val frontCameraCapture =
+            RtcEngine.INSTANCE.createCameraCapturer(this, CameraMetadata.LENS_FACING_FRONT)
         if (frontCameraCapture != null) {
             val id = "front"
             videoTrack = RtcEngine.INSTANCE.createVideoTrack(
@@ -55,7 +59,11 @@ class PeerConnectionActivity : BaseActivity(), SignalingClient.Callback {
 
             val localAudioTrack = RtcEngine.INSTANCE.createAudioTrack(peerConnectionFactory, id)
             runOnUiThread {
-                RtcEngine.INSTANCE.displayVideo(videoTrack!!, findViewById(R.id.localView), eglBaseContext)
+                RtcEngine.INSTANCE.displayVideo(
+                    videoTrack!!,
+                    findViewById(R.id.localView),
+                    eglBaseContext
+                )
             }
         } else {
             hint("获取摄像头失败")
@@ -94,7 +102,10 @@ class PeerConnectionActivity : BaseActivity(), SignalingClient.Callback {
     }
 
     override fun onOfferReceived(data: JSONObject?) {
-        answer(videoTrack!!, SessionDescription(SessionDescription.Type.OFFER, data!!.optString("sdp")))
+        answer(
+            videoTrack!!,
+            SessionDescription(SessionDescription.Type.OFFER, data!!.optString("sdp"))
+        )
     }
 
     override fun onAnswerReceived(data: JSONObject?) {
@@ -124,15 +135,12 @@ class PeerConnectionActivity : BaseActivity(), SignalingClient.Callback {
         log("Start to call")
         peerConnection = RtcEngine.INSTANCE.connection(videoTrack, null, object :
             RtcEngine.DspAndIdeObserver {
-            override fun onDspCreate(sdp: SessionDescription) {
-                // 通过 Singling 服务器发送 offer。对方接收到后设置。
-                log("Send offer")
-                SignalingClient[this@PeerConnectionActivity].sendSessionDescription(sdp)
+            override fun onSdCreate(sdp: SessionDescription) {
+                sendSd(sdp)
             }
 
             override fun onIceCreate(iceCandidate: IceCandidate) {
-                // 通过 Singling 服务器发送 ice。对方接收到后设置。
-                SignalingClient[this@PeerConnectionActivity].sendIceCandidate(iceCandidate);
+                sendIce(iceCandidate)
             }
 
             override fun onAddMediaStream(mediaStream: MediaStream) {
@@ -153,16 +161,12 @@ class PeerConnectionActivity : BaseActivity(), SignalingClient.Callback {
         log("Start to answer")
         peerConnection = RtcEngine.INSTANCE.connection(videoTrack, sdp, object :
             RtcEngine.DspAndIdeObserver {
-            override fun onDspCreate(sdp: SessionDescription) {
-                // 应答方通过 Singling 服务器发送 answer。对方接收到后设置。
-                log("Send answer")
-                SignalingClient[this@PeerConnectionActivity].sendSessionDescription(sdp)
+            override fun onSdCreate(sdp: SessionDescription) {
+                sendSd(sdp)
             }
 
             override fun onIceCreate(iceCandidate: IceCandidate) {
-                // 通过 Singling 服务器发送 ice。对方接收到后设置。
-                log("Send ice")
-                SignalingClient[this@PeerConnectionActivity].sendIceCandidate(iceCandidate);
+                sendIce(iceCandidate)
             }
 
             override fun onAddMediaStream(mediaStream: MediaStream) {
@@ -190,5 +194,33 @@ class PeerConnectionActivity : BaseActivity(), SignalingClient.Callback {
     private fun hint(str: String) {
         Toast.makeText(this, str, Toast.LENGTH_SHORT).show()
         Log.e("webrtc_albert", str)
+    }
+
+    fun sendIce(iceCandidate: IceCandidate) {
+        // 通过 Singling 服务器发送 ice。对方接收到后设置。
+        val jo = JSONObject()
+        try {
+            jo.put("type", "candidate")
+            jo.put("label", iceCandidate.sdpMLineIndex)
+            jo.put("id", iceCandidate.sdpMid)
+            jo.put("candidate", iceCandidate.sdp)
+            Log.d("Sending ice", jo.toString())
+            SignalingClient[this@PeerConnectionActivity].sendIceCandidate(jo.toString());
+        } catch (e: JSONException) {
+            e.printStackTrace()
+        }
+    }
+
+    fun sendSd(sdp: SessionDescription) {
+        // 通过 Singling 服务器发送 offer。对方接收到后设置。
+        log("Send offer")
+        val jo = JSONObject()
+        try {
+            jo.put("type", sdp.type.canonicalForm())
+            jo.put("sdp", sdp.description)
+            SignalingClient[this@PeerConnectionActivity].sendSessionDescription(jo.toString())
+        } catch (e: JSONException) {
+            e.printStackTrace()
+        }
     }
 }

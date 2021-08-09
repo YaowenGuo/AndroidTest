@@ -46,7 +46,7 @@ public:
 };
 
 
-Live::Live(JNIEnv *jni, jobject context) {
+Live::Live(JNIEnv *jni, jobject context, rtc_demo::SignalingClientWrapper* signaling) {
     /**
      * 1. 初始化
      */
@@ -61,15 +61,9 @@ Live::Live(JNIEnv *jni, jobject context) {
 //    rtc::PhysicalSocketServer socket = rtc::PhysicalSocketServer();
 //    rtc::AutoSocketServerThread thread(&socket);
     rtc::InitializeSSL();
-    signaling_ = new rtc_demo::SignalingClient(this);
+    signaling_ = signaling;
 
     // ------------------------
-}
-
-
-void Live::joinRoom(const string &room) {
-//    signaling_->join(room);
-    onCreateRoom();
 }
 
 
@@ -83,24 +77,24 @@ void Live::createEngine() {
      * 2. 创建 PeerConnectionFactory, 因为 Webrtc 可以同时进行多个连接，以创建多个 PeerConnection (PC).
      */
 //    rtc::ThreadManager::Instance()->WrapCurrentThread();
-//
-//    std::unique_ptr<rtc::Thread> network_thread =
-//            rtc::Thread::CreateWithSocketServer();
-//    network_thread->SetName("network_thread", nullptr);
-//    RTC_CHECK(network_thread->Start()) << "Failed to start thread";
-//
-//    std::unique_ptr<rtc::Thread> worker_thread = rtc::Thread::Create();
-//    worker_thread->SetName("worker_thread", nullptr);
-//    RTC_CHECK(worker_thread->Start()) << "Failed to start thread";
-//
-//
-//    std::unique_ptr<rtc::Thread> signaling_thread = rtc::Thread::Create();
-//    signaling_thread->SetName("signaling_thread", NULL);
-//    RTC_CHECK(signaling_thread->Start()) << "Failed to start thread";
+
+    std::unique_ptr<rtc::Thread> network_thread =
+            rtc::Thread::CreateWithSocketServer();
+    network_thread->SetName("network_thread", nullptr);
+    RTC_CHECK(network_thread->Start()) << "Failed to start thread";
+
+    std::unique_ptr<rtc::Thread> worker_thread = rtc::Thread::Create();
+    worker_thread->SetName("worker_thread", nullptr);
+    RTC_CHECK(worker_thread->Start()) << "Failed to start thread";
+
+
+    std::unique_ptr<rtc::Thread> signaling_thread = rtc::Thread::Create();
+    signaling_thread->SetName("signaling_thread", NULL);
+    RTC_CHECK(signaling_thread->Start()) << "Failed to start thread";
 
     peer_connection_factory_ = webrtc::CreatePeerConnectionFactory(
-            nullptr /* network_thread */, nullptr /* worker_thread */,
-            nullptr /* signaling_thread */, nullptr /* default_adm */,
+            network_thread.get() /* network_thread */, worker_thread.get() /* worker_thread */,
+            signaling_thread.get() /* signaling_thread */, nullptr /* default_adm */,
             webrtc::CreateBuiltinAudioEncoderFactory(),
             webrtc::CreateBuiltinAudioDecoderFactory(),
             webrtc::CreateBuiltinVideoEncoderFactory(),
@@ -171,22 +165,10 @@ Live::AddTracks(rtc::VideoSinkInterface<VideoFrame> *videoSink) {
 }
 
 
-void Live::connectToPeer(SessionDescriptionInterface *desc) {
-    if (desc == nullptr) {
-        peer_connection_->CreateOffer(this,
-                                      webrtc::PeerConnectionInterface::RTCOfferAnswerOptions());
-    } else {
-        setRemoteDescription(desc);
-        peer_connection_->CreateAnswer(this,
-                                       webrtc::PeerConnectionInterface::RTCOfferAnswerOptions());
-    }
-}
-
-
-void Live::setRemoteDescription(SessionDescriptionInterface *desc) {
-    peer_connection_->SetRemoteDescription(std::unique_ptr<SessionDescriptionInterface>(desc),
-                                           this);
-
+void Live::connectToPeer() {
+    THREAD_CURRENT("CreateOffer");
+    peer_connection_->CreateOffer(this,
+                                  webrtc::PeerConnectionInterface::RTCOfferAnswerOptions());
 }
 
 
@@ -219,6 +201,7 @@ void Live::addIce(const Json::Value jmessage) {
 
 
 void Live::OnIceCandidate(const IceCandidateInterface *candidate) {
+    THREAD_CURRENT("OnIceCandidate");
     RTC_LOG(INFO) << __FUNCTION__ << " " << candidate->sdp_mline_index();
 
     Json::StyledWriter writer;
@@ -241,6 +224,7 @@ void Live::OnIceCandidate(const IceCandidateInterface *candidate) {
 
 //「***************** CreateSessionDescriptionObserver *******************
 void Live::OnSuccess(SessionDescriptionInterface *desc) {
+    THREAD_CURRENT("OnSuccess");
     // 可以在设置之前，对 SDP 做一些排序等操作，以设置某些编解码的优先级。
     peer_connection_->SetLocalDescription(std::unique_ptr<SessionDescriptionInterface>(desc), this);
     // 发起者没有收到 remote session, 应该为空。
@@ -259,6 +243,7 @@ void Live::OnSuccess(SessionDescriptionInterface *desc) {
 
 
 void Live::OnFailure(RTCError error) {
+    THREAD_CURRENT("OnFailure");
     RTC_LOG(LS_ERROR) << "Failed to create SDP: " << error.message();
 }
 // L***************** CreateSessionDescriptionObserver *******************
@@ -283,33 +268,15 @@ void Live::InitLive() {
     //    LOGE("webrtc_albert: %s", std::this_thread::get_id());
     createEngine(); // PeerConnectionFactory + PeerConnection.
     auto videoSink = new rtc_demo::AndroidVideoSink(GetAppEngine()->app_->window);
-//    videoTrack = AddTracks(videoSink); // add audio and video track.
+    videoTrack = AddTracks(videoSink); // add audio and video track.
     GetAppEngine()->CreateCamera(videoTrack);
 }
 
 
 //「***************** SocketCallbackInterface *******************
-void Live::onCreateRoom() {
-    InitLive();
-    connectToPeer(nullptr);
-}
-
-
-void Live::onJoinedRoom() {
-    InitLive();
-}
-
-
-void Live::onPeerJoined() {
-
-}
-
-
-void Live::onPeerLeave(const string &msg) {
-}
-
 
 void Live::onSDPReceived(const string &message) {
+    THREAD_CURRENT("onSDPReceived");
     Json::Reader reader;
     Json::Value jmessage;
     if (!reader.parse(message, jmessage)) {
@@ -358,6 +325,8 @@ void Live::onSDPReceived(const string &message) {
 
 
 void Live::onIceCandidateReceived(const string &message) {
+    THREAD_CURRENT("onIceCandidateReceived");
+
     Json::Reader reader;
     Json::Value jmessage;
     if (!reader.parse(message, jmessage)) {

@@ -13,10 +13,10 @@ dependencies {
     implementation deps.kotlin_std
     implementation deps.core_ktx
     implementation deps.constraintlayout
-    implementation deps.okhttp_log
     implementation deps.webrtc
-    implementation deps.socket_io
+    implementation project(":android_lib:socket_io_signaling")
 
+    
     testImplementation deps.junit
     androidTestImplementation deps.ext_junit
     androidTestImplementation deps.espresso

@@ -12,18 +12,6 @@ using std::string;
 namespace rtc_demo {
     class SocketCallbackInterface {
     public:
-        virtual void onCreateRoom() = 0;
-
-
-        virtual void onJoinedRoom() = 0;
-
-
-        virtual void onPeerJoined() = 0;
-
-
-        virtual void onPeerLeave(string const &msg) = 0;
-
-
         virtual void onSDPReceived(string const &) = 0;
 
 

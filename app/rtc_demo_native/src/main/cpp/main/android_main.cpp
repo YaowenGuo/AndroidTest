@@ -33,6 +33,7 @@ CameraEngine *GetAppEngine() {
 
 Live *GetLive() {
     ASSERT(pLiveObj, "Live has not initialized");
+    return pLiveObj;
 }
 
 
@@ -69,7 +70,7 @@ static void ProcessAndroidCmd(struct android_app *app, int32_t cmd) {
 
 
 extern "C" void android_main(struct android_app *state) {
-    test_thread();
+//    test_thread();
 //  CameraEngine engine(state);
     pEngineObj = new CameraEngine(state);
 

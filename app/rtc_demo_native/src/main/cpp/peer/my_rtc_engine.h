@@ -30,10 +30,7 @@ class Live : public PeerConnectionObserver,
              public SetRemoteDescriptionObserverInterface,
              public rtc_demo::SocketCallbackInterface {
 public:
-    Live(JNIEnv *jni, jobject context);
-
-
-    void joinRoom(const string &room);
+    Live(JNIEnv *jni, jobject context, rtc_demo::SignalingClientWrapper*);
 
 
     ~Live();
@@ -49,10 +46,7 @@ public:
     AddTracks(rtc::VideoSinkInterface<VideoFrame> *);
 
 
-    void connectToPeer(SessionDescriptionInterface *desc);
-
-
-    void setRemoteDescription(SessionDescriptionInterface *desc);
+    void connectToPeer();
 
 
     void addIce(const Json::Value jmessage);
@@ -237,17 +231,6 @@ public:
 
 
     //「***************** SocketCallbackInterface *******************
-    void onCreateRoom() override;
-
-
-    void onJoinedRoom() override;
-
-
-    void onPeerJoined() override;
-
-
-    void onPeerLeave(string const &msg) override;
-
 
     void onSDPReceived(string const &) override;
 
@@ -258,7 +241,7 @@ public:
 protected:
     rtc::scoped_refptr<webrtc::PeerConnectionFactoryInterface> peer_connection_factory_;
     rtc::scoped_refptr<webrtc::PeerConnectionInterface> peer_connection_;
-    rtc_demo::SignalingClient *signaling_;
+    rtc_demo::SignalingClientWrapper *signaling_;
     rtc::scoped_refptr<rtc_demo::AndroidVideoTrackSource> videoTrack;
 };
 
