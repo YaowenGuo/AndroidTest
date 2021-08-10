@@ -182,39 +182,24 @@ CameraActivity(release, JNIEnv *env, jobject activity) {
     }
 }
 
+
 extern "C" JNIEXPORT void JNICALL
-CameraActivity(joinRoom, JNIEnv *env, jclass clazz, jobject context) {
+SignalingClient(joinRoom, JNIEnv *env, jclass clazz, jobject context, jobject jSignaling) {
     THREAD_CURRENT("joinRoom");
     if (pLiveObj == nullptr) {
-        auto signaling = new rtc_demo::SignalingClientWrapper(env, clazz);
+        auto signaling = new rtc_demo::SignalingClientWrapper(env, jSignaling);
         pLiveObj = new Live(env, context, signaling);
     }
-    JavaVM *jvm;
-    env->GetJavaVM(&jvm);
-    AttachThreadScoped ats(jvm);
     pLiveObj->InitLive();
 //    pLiveObj->connectToPeer();
 }
 
-extern "C" JNIEXPORT void JNICALL
-SignalingClient(joinRoom, JNIEnv *env, jclass clazz, jobject context) {
-    THREAD_CURRENT("joinRoom");
-//    if (pLiveObj == nullptr) {
-//        auto signaling = new rtc_demo::SignalingClientWrapper(env, clazz);
-//        pLiveObj = new Live(env, context, signaling);
-//    }
-//    JavaVM *jvm;
-//    env->GetJavaVM(&jvm);
-//    AttachThreadScoped ats(jvm);
-//    pLiveObj->InitLive();
-    pLiveObj->connectToPeer();
-}
 
 extern "C" JNIEXPORT void JNICALL
-SignalingClient(answer, JNIEnv *env, jclass clazz, jobject context, jstring offer) {
+SignalingClient(answer, JNIEnv *env, jclass clazz, jobject context, jobject jSignaling, jstring offer) {
     THREAD_CURRENT("joinRoom");
     if (pLiveObj == nullptr) {
-        auto signaling = new rtc_demo::SignalingClientWrapper(env, clazz);
+        auto signaling = new rtc_demo::SignalingClientWrapper(env, jSignaling);
         pLiveObj = new Live(env, context, signaling);
     }
     pLiveObj->InitLive();

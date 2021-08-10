@@ -20,9 +20,8 @@
 #include <modules/video_capture/video_capture_factory.h>
 #include <rtc_base/strings/json.h>
 #include <camera/camera_engine.h>
+#include "utils/jvm.h"
 
-
-#define _LIBCPP_NAMESPACE _LIBCPP_CONCAT(__,_LIBCPP_ABI_VERSION)
 // Names used for a SessionDescription JSON object.
 const char kSessionDescriptionTypeName[] = "type";
 const char kSessionDescriptionSdpName[] = "sdp";
@@ -44,6 +43,7 @@ public:
                       << error.message();
     }
 };
+
 
 
 Live::Live(JNIEnv *jni, jobject context, rtc_demo::SignalingClientWrapper* signaling) {
@@ -71,6 +71,22 @@ Live::~Live() {
     delete signaling_;
 }
 
+// One-off message handler that calls the Java method on the specified Java
+// object before deleting itself.
+class JavaAsyncCallback : public rtc::MessageHandler {
+public:
+    void OnMessage(rtc::Message*) override {
+        jni::AttachCurrentThreadIfNeeded();
+        delete this;
+    }
+};
+
+// Post a message on the given thread that will call the Java method on the
+// given Java object.
+void PostThreadAttachTask(rtc::Thread* queue,const rtc::Location& posted_from) {
+    queue->Post(posted_from,new JavaAsyncCallback());
+}
+
 
 void Live::createEngine() {
     /**
@@ -91,10 +107,12 @@ void Live::createEngine() {
     std::unique_ptr<rtc::Thread> signaling_thread = rtc::Thread::Create();
     signaling_thread->SetName("signaling_thread", NULL);
     RTC_CHECK(signaling_thread->Start()) << "Failed to start thread";
-
+    auto network_p = network_thread.get();
+    auto worker_p = worker_thread.get();
+    auto signaling_p = signaling_thread.get();
     peer_connection_factory_ = webrtc::CreatePeerConnectionFactory(
-            network_thread.get() /* network_thread */, worker_thread.get() /* worker_thread */,
-            signaling_thread.get() /* signaling_thread */, nullptr /* default_adm */,
+            network_p /* network_thread */, worker_p /* worker_thread */,
+            signaling_p /* signaling_thread */, nullptr /* default_adm */,
             webrtc::CreateBuiltinAudioEncoderFactory(),
             webrtc::CreateBuiltinAudioDecoderFactory(),
             webrtc::CreateBuiltinVideoEncoderFactory(),
@@ -102,6 +120,11 @@ void Live::createEngine() {
             nullptr /* audio_mixer */,
             nullptr /* audio_processing */
     );
+
+    // 线程启动后 attach Jni.
+    PostThreadAttachTask(network_p, RTC_FROM_HERE);
+    PostThreadAttachTask(worker_p, RTC_FROM_HERE);
+    PostThreadAttachTask(signaling_p, RTC_FROM_HERE);
 
     /**
      * 3. 创建 PC
@@ -119,6 +142,12 @@ void Live::createEngine() {
             nullptr,
             this
     );
+    auto videoSink = new rtc_demo::AndroidVideoSink(GetAppEngine()->app_->window);
+    videoTrack = AddTracks(videoSink); // add audio and video track.
+    GetAppEngine()->CreateCamera(videoTrack);
+    THREAD_CURRENT("CreateOffer");
+    peer_connection_->CreateOffer(this,
+                                  webrtc::PeerConnectionInterface::RTCOfferAnswerOptions());
 }
 
 
@@ -160,8 +189,6 @@ Live::AddTracks(rtc::VideoSinkInterface<VideoFrame> *videoSink) {
     }
 
     return video_source;
-//    AddOrUpdateSink(this, rtc::VideoSinkWants()
-//    main_wnd_->SwitchToStreamingUI();
 }
 
 
@@ -267,9 +294,7 @@ void Live::OnSetRemoteDescriptionComplete(RTCError error) {
 void Live::InitLive() {
     //    LOGE("webrtc_albert: %s", std::this_thread::get_id());
     createEngine(); // PeerConnectionFactory + PeerConnection.
-    auto videoSink = new rtc_demo::AndroidVideoSink(GetAppEngine()->app_->window);
-    videoTrack = AddTracks(videoSink); // add audio and video track.
-    GetAppEngine()->CreateCamera(videoTrack);
+
 }
 
 

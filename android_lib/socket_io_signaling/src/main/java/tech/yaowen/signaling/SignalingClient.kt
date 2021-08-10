@@ -118,11 +118,11 @@ open class SignalingClient constructor(context: Context) {
         socket.emit("bye")
     }
 
-    fun sendIceCandidate(iceCandidate: String) {
+    open fun sendIceCandidate(iceCandidate: String) {
         socket.emit("message", iceCandidate)
     }
 
-    fun sendSessionDescription(sdp: String) {
+    open fun sendSessionDescription(sdp: String) {
         sendMessage(sdp)
     }
 

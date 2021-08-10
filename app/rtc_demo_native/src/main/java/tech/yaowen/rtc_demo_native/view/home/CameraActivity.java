@@ -349,15 +349,12 @@ public class CameraActivity extends NativeActivity
     }
 
     private void inputRoomName() {
-        joinRoom(this);
         new JoinRoomDialog(this, roomName -> {
             SignalingClient.threadCurrent("JoinRoomDialog");
             SignalingClient.getInstance(CameraActivity.this)
                     .join(roomName);
         }).show();
     }
-
-    native static void joinRoom(Context context);
 
 
     native static void notifyCameraPermission(boolean granted, Context context);

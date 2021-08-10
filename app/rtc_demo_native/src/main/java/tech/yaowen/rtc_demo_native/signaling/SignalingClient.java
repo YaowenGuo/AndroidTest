@@ -2,6 +2,7 @@ package tech.yaowen.rtc_demo_native.signaling;
 
 import android.content.Context;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import org.json.JSONObject;
@@ -9,6 +10,7 @@ import org.json.JSONObject;
 
 public class SignalingClient extends tech.yaowen.signaling.SignalingClient implements tech.yaowen.signaling.SignalingClient.Callback {
     protected static SignalingClient instance;
+
     public static SignalingClient getInstance(Context context) {
         if (instance == null) {
             synchronized (SignalingClient.class) {
@@ -25,14 +27,15 @@ public class SignalingClient extends tech.yaowen.signaling.SignalingClient imple
         super(context);
     }
 
+
     @Override
     public void onCreateRoom() {
-        joinRoom(getContext());
+        joinRoom(getContext(), this);
     }
 
     @Override
     public void onJoinedRoom() {
-        joinRoom(getContext());
+//        joinRoom(getContext(), this);
     }
 
     @Override
@@ -46,7 +49,8 @@ public class SignalingClient extends tech.yaowen.signaling.SignalingClient imple
 
     @Override
     public void onOfferReceived(@Nullable JSONObject data) {
-        answer(getContext(), data.toString());
+        if (data == null) return;
+        answer(getContext(), this, data.toString());
     }
 
     @Override
@@ -58,6 +62,8 @@ public class SignalingClient extends tech.yaowen.signaling.SignalingClient imple
     public void onIceCandidateReceived(@Nullable JSONObject data) {
 
     }
-    private native static void joinRoom(Context context);
-    private native static void answer(Context context, String offer);
+
+    private native static void joinRoom(Context context, SignalingClient signaling);
+
+    private native static void answer(Context context, SignalingClient signaling, String offer);
 }

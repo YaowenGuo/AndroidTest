@@ -1,7 +1,6 @@
 #include "attach_thread_scoped.h"
 
-#include <cassert>
-#include <cstddef>
+#include "native_debug.h"
 
 namespace rtc_demo {
 

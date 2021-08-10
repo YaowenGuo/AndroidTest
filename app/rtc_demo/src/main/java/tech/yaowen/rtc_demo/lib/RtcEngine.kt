@@ -164,11 +164,12 @@ enum class RtcEngine {
                 }
             })!!
 
+        // SdpSemantics.UNIFIED_PLAN. 模式被废弃
         // 创建 MediaStream 对象。
-        val mediaStream = peerConnectionFactory.createLocalMediaStream(if (sdp == null)  "offerMediaStream" else "answerMediaStream")
-        mediaStream.addTrack(videoTrack)
+        // val mediaStream = peerConnectionFactory.createLocalMediaStream(if (sdp == null)  "offerMediaStream" else "answerMediaStream")
+        // mediaStream.addTrack(videoTrack)
         // 添加 MediaStream.
-        peerConnection.addStream(mediaStream)
+        peerConnection.addTrack(videoTrack)
         // 用户创建 Offer 或者 Answer 的回调。
         val sdpObserver = object : SdpObserver {
             override fun onCreateSuccess(sdp: SessionDescription) {

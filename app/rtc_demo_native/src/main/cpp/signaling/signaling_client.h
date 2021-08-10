@@ -5,9 +5,9 @@
 #ifndef ANDROIDTEST_SIGNALING_CLIENT_H
 #define ANDROIDTEST_SIGNALING_CLIENT_H
 
-#include <string>
+
 #include <api/jsep.h>
-#include <jni.h>
+
 
 #include "socket_callback_interface.h"
 
@@ -17,7 +17,7 @@ namespace rtc_demo {
 
     class SignalingClientWrapper {
     public:
-        SignalingClientWrapper(JNIEnv *jni, jclass &clazz);
+        SignalingClientWrapper(JNIEnv *jni, jobject &instance);
 
 
         ~SignalingClientWrapper();
