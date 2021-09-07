@@ -189,9 +189,9 @@ SignalingClient(joinRoom, JNIEnv *env, jclass clazz, jobject context, jobject jS
     if (pLiveObj == nullptr) {
         auto signaling = new rtc_demo::SignalingClientWrapper(env, jSignaling);
         pLiveObj = new Live(env, context, signaling);
+        pLiveObj->createEngine();
     }
-    pLiveObj->InitLive();
-//    pLiveObj->connectToPeer();
+    pLiveObj->connectToPeer();
 }
 
 
@@ -201,7 +201,7 @@ SignalingClient(answer, JNIEnv *env, jclass clazz, jobject context, jobject jSig
     if (pLiveObj == nullptr) {
         auto signaling = new rtc_demo::SignalingClientWrapper(env, jSignaling);
         pLiveObj = new Live(env, context, signaling);
+        pLiveObj->createEngine();
     }
-    pLiveObj->InitLive();
     pLiveObj->onSDPReceived(jstring2str(env, offer));
 }

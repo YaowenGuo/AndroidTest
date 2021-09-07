@@ -30,7 +30,7 @@ class Live : public PeerConnectionObserver,
              public SetRemoteDescriptionObserverInterface,
              public rtc_demo::SocketCallbackInterface {
 public:
-    Live(JNIEnv *jni, jobject context, rtc_demo::SignalingClientWrapper*);
+    Live(JNIEnv *jni, jobject context, rtc_demo::SignalingClientWrapper *);
 
 
     ~Live();
@@ -39,17 +39,11 @@ public:
     void createEngine();
 
 
-    void InitLive();
-
-
     rtc::scoped_refptr<rtc_demo::AndroidVideoTrackSource>
     AddTracks(rtc::VideoSinkInterface<VideoFrame> *);
 
 
     void connectToPeer();
-
-
-    void addIce(const Json::Value jmessage);
 
 
     //「***************** CreateSessionDescriptionObserver *******************
@@ -80,24 +74,22 @@ public:
     // L***************** SetRemoteDescriptionObserverInterface *******************
 
 
+    //「***************** PeerConnectionObserver *******************
+
     // Triggered when the SignalingState changed.
-    void OnSignalingChange(
-            PeerConnectionInterface::SignalingState new_state) override {};
+    void OnSignalingChange(PeerConnectionInterface::SignalingState new_state) override {};
 
 
     // Triggered when media is received on a new stream from remote peer.
-    void OnAddStream(
-            rtc::scoped_refptr<MediaStreamInterface> stream) override {};
+    void OnAddStream(rtc::scoped_refptr<MediaStreamInterface> stream) override;
 
 
     // Triggered when a remote peer closes a stream.
-    void OnRemoveStream(
-            rtc::scoped_refptr<MediaStreamInterface> stream) override {};
+    void OnRemoveStream(rtc::scoped_refptr<MediaStreamInterface> stream) override;
 
 
     // Triggered when a remote peer opens a data channel.
-    void OnDataChannel(
-            rtc::scoped_refptr<DataChannelInterface> data_channel) override {}
+    void OnDataChannel(rtc::scoped_refptr<DataChannelInterface> data_channel) override;
 
 
     // Triggered when renegotiation is needed. For example, an ICE restart
@@ -126,8 +118,7 @@ public:
     // state, so it may be "failed" if DTLS fails while ICE succeeds.
     //
     // TODO(jonasolsson): deprecate and remove this.
-    void OnIceConnectionChange(
-            PeerConnectionInterface::IceConnectionState new_state) override {}
+    void OnIceConnectionChange(PeerConnectionInterface::IceConnectionState new_state) override {}
 
 
     // Called any time the standards-compliant IceConnectionState changes.
@@ -136,13 +127,11 @@ public:
 
 
     // Called any time the PeerConnectionState changes.
-    void OnConnectionChange(
-            PeerConnectionInterface::PeerConnectionState new_state) override {}
+    void OnConnectionChange(PeerConnectionInterface::PeerConnectionState new_state) override {}
 
 
     // Called any time the IceGatheringState changes.
-    void OnIceGatheringChange(
-            PeerConnectionInterface::IceGatheringState new_state) override {}
+    void OnIceGatheringChange(PeerConnectionInterface::IceGatheringState new_state) override {}
 
 
     // A new ICE candidate has been gathered.
@@ -174,8 +163,7 @@ public:
     // Ice candidates have been removed.
     // TODO(honghaiz): Make this a pure method when all its subclasses
     // implement it.
-    void OnIceCandidatesRemoved(
-            const std::vector<cricket::Candidate> &candidates) override {}
+    void OnIceCandidatesRemoved(const std::vector<cricket::Candidate> &candidates) override {}
 
 
     // Called when the ICE connection receiving status changes.
@@ -228,6 +216,8 @@ public:
     // The heuristics for defining what constitutes "interesting" are
     // implementation-defined.
     void OnInterestingUsage(int usage_pattern) override {}
+
+    // L***************** PeerConnectionObserver *******************
 
 
     //「***************** SocketCallbackInterface *******************

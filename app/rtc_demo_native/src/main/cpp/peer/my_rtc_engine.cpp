@@ -145,9 +145,6 @@ void Live::createEngine() {
     auto videoSink = new rtc_demo::AndroidVideoSink(GetAppEngine()->app_->window);
     videoTrack = AddTracks(videoSink); // add audio and video track.
     GetAppEngine()->CreateCamera(videoTrack);
-    THREAD_CURRENT("CreateOffer");
-    peer_connection_->CreateOffer(this,
-                                  webrtc::PeerConnectionInterface::RTCOfferAnswerOptions());
 }
 
 
@@ -199,33 +196,7 @@ void Live::connectToPeer() {
 }
 
 
-void Live::addIce(const Json::Value jmessage) {
-    std::string sdp_mid;
-    int sdp_mlineindex = 0;
-    std::string sdp;
-    if (!rtc::GetStringFromJsonObject(jmessage, kCandidateSdpMidName,
-                                      &sdp_mid) ||
-        !rtc::GetIntFromJsonObject(jmessage, kCandidateSdpMlineIndexName,
-                                   &sdp_mlineindex) ||
-        !rtc::GetStringFromJsonObject(jmessage, kCandidateSdpName, &sdp)) {
-        RTC_LOG(WARNING) << "Can't parse received message.";
-        return;
-    }
-    webrtc::SdpParseError error;
-    std::unique_ptr<webrtc::IceCandidateInterface> candidate(
-            webrtc::CreateIceCandidate(sdp_mid, sdp_mlineindex, sdp, &error));
-    if (!candidate.get()) {
-        RTC_LOG(WARNING) << "Can't parse received candidate message. "
-                            "SdpParseError was: "
-                         << error.description;
-        return;
-    }
-    if (!peer_connection_->AddIceCandidate(candidate.get())) {
-        RTC_LOG(WARNING) << "Failed to apply the received candidate";
-        return;
-    }
-}
-
+//「***************** PeerConnectionObserver *******************
 
 void Live::OnIceCandidate(const IceCandidateInterface *candidate) {
     THREAD_CURRENT("OnIceCandidate");
@@ -247,6 +218,27 @@ void Live::OnIceCandidate(const IceCandidateInterface *candidate) {
     jmessage[kCandidateSdpName] = sdp;
     signaling_->SendIceCandidate(writer.write(jmessage));
 }
+
+// Triggered when media is received on a new stream from remote peer.
+void Live::OnAddStream(rtc::scoped_refptr<MediaStreamInterface> stream) {
+    auto tracks = stream->GetVideoTracks();
+    // TODO 显示对等方的视频/音频数据
+}
+
+
+// Triggered when a remote peer closes a stream.
+void Live::OnRemoveStream(rtc::scoped_refptr<MediaStreamInterface> stream) {
+    // TODO 关闭对等方的视频/音频显示
+}
+
+
+// Triggered when a remote peer opens a data channel.
+void Live::OnDataChannel(rtc::scoped_refptr<DataChannelInterface> data_channel) {
+
+}
+
+// L***************** PeerConnectionObserver *******************
+
 
 
 //「***************** CreateSessionDescriptionObserver *******************
@@ -288,14 +280,6 @@ void Live::OnSetRemoteDescriptionComplete(RTCError error) {
 
 }
 // L***************** SetRemoteDescriptionObserverInterface *******************
-
-
-
-void Live::InitLive() {
-    //    LOGE("webrtc_albert: %s", std::this_thread::get_id());
-    createEngine(); // PeerConnectionFactory + PeerConnection.
-
-}
 
 
 //「***************** SocketCallbackInterface *******************
