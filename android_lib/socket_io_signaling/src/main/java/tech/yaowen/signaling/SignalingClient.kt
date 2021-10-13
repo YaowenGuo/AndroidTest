@@ -1,5 +1,6 @@
 package tech.yaowen.signaling
 
+import android.app.Application
 import android.content.Context
 import android.util.Log
 import io.socket.client.IO
@@ -19,8 +20,7 @@ import javax.net.ssl.SSLContext
 import javax.net.ssl.SSLSession
 import kotlin.jvm.Throws
 
-open class SignalingClient constructor(context: Context) {
-    protected var context: Context
+open class SignalingClient constructor(context: Application) {
     private lateinit var socket: Socket
     private var callback: Callback? = null
     fun setCallback(callback: Callback?): SignalingClient {
@@ -28,7 +28,7 @@ open class SignalingClient constructor(context: Context) {
         return this
     }
 
-    private fun init(context: Context) {
+    private fun init(context: Application) {
         try {
             // socket = IO.socket(Server.URL);
             // 或者
@@ -72,6 +72,11 @@ open class SignalingClient constructor(context: Context) {
                 threadCurrent("message")
                 when (val data = args[0]) {
                     is String -> {
+                        when (data) {
+                            "got user media" -> {
+                                callback!!.onPeerReady();
+                            }
+                        }
                         Log.e("webrtc_albert", "message $data")
                     }
                     is JSONObject -> {
@@ -118,18 +123,11 @@ open class SignalingClient constructor(context: Context) {
         socket.emit("bye")
     }
 
-    open fun sendIceCandidate(iceCandidate: String) {
-        socket.emit("message", iceCandidate)
-    }
-
-    open fun sendSessionDescription(sdp: String) {
-        sendMessage(sdp)
-    }
-
     interface Callback {
         fun onCreateRoom()
         fun onJoinedRoom()
         fun onPeerJoined()
+        fun onPeerReady()
         fun onPeerLeave(msg: String?)
         fun onOfferReceived(data: JSONObject?)
         fun onAnswerReceived(data: JSONObject?)
@@ -144,7 +142,7 @@ open class SignalingClient constructor(context: Context) {
         NoSuchAlgorithmException::class,
         KeyManagementException::class
     )
-    private fun customCertificate(context: Context): Socket {
+    private fun customCertificate(context: Application): Socket {
         val sslParams =
             HttpsUtil.getSslSocketFactory(arrayOf(context.assets.open("burp.pem")), null, null)
         val sslContext: SSLContext = SSLContext.getInstance("SSL")
@@ -167,6 +165,7 @@ open class SignalingClient constructor(context: Context) {
     }
 
 
+    // 一定要传 object, 传 String 在 js 端无法自动转换成对象。
     fun sendMessage(msg: Any) {
         Log.e("webrtc_albert", "Sending message: $msg")
         socket.emit("message", msg)
@@ -174,7 +173,7 @@ open class SignalingClient constructor(context: Context) {
 
     companion object {
         var instance: SignalingClient? = null
-        operator fun get(context: Context): SignalingClient {
+        operator fun get(context: Application): SignalingClient {
             if (instance == null) {
                 synchronized(SignalingClient::class.java) {
                     if (instance == null) {
@@ -192,7 +191,6 @@ open class SignalingClient constructor(context: Context) {
     }
 
     init {
-        this.context = context
         init(context)
     }
 }

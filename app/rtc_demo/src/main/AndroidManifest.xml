@@ -18,14 +18,15 @@
         android:theme="@style/AppTheme">
         <!-- 对等连接 -->
         <activity android:name=".PeerConnectionActivity">
-        </activity>
-        <!-- 捕获视频 -->
-        <activity android:name=".VideoCaputreActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+        </activity>
+        <!-- 捕获视频 -->
+        <activity android:name=".VideoCaputreActivity">
+
         </activity>
         <!-- 本地连接 -->
         <activity

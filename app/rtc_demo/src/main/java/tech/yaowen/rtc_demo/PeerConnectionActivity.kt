@@ -10,6 +10,7 @@ import org.webrtc.*
 import tech.yaowen.rtc_demo.base.log
 import tech.yaowen.rtc_demo.lib.RtcEngine
 import tech.yaowen.signaling.SignalingClient
+import tech.yaowen.signaling.data.SessionDescriptionMsg
 
 /**
  * 1. 连接服务器，获取自己是发起者还是应答者
@@ -24,6 +25,8 @@ class PeerConnectionActivity : BaseActivity(), SignalingClient.Callback {
     val eglBaseContext = EglBase.create().eglBaseContext
     var videoTrack: VideoTrack? = null
     private var joined = false
+    private var isInitiator = false
+    private var videoCapturer: VideoCapturer? = null
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -37,7 +40,7 @@ class PeerConnectionActivity : BaseActivity(), SignalingClient.Callback {
 
     private fun joinRoom() {
         JoinRoomDialog(this, JoinRoomDialog.OnSubmitListener {
-            SignalingClient[this]
+            SignalingClient[application]
                 .setCallback(this)
                 .join(it)
 
@@ -49,12 +52,11 @@ class PeerConnectionActivity : BaseActivity(), SignalingClient.Callback {
 
     private fun captureVideoAndVideo() {
         peerConnectionFactory = RtcEngine.INSTANCE.createPeerConnection(eglBaseContext, this)
-        val frontCameraCapture =
-            RtcEngine.INSTANCE.createCameraCapturer(this, CameraMetadata.LENS_FACING_FRONT)
-        if (frontCameraCapture != null) {
+        videoCapturer = RtcEngine.INSTANCE.createCameraCapturer(this, CameraMetadata.LENS_FACING_FRONT)
+        if (videoCapturer != null) {
             val id = "front"
             videoTrack = RtcEngine.INSTANCE.createVideoTrack(
-                peerConnectionFactory, id, frontCameraCapture, this, eglBaseContext, "FrontCapture"
+                peerConnectionFactory, id, videoCapturer!!, this, eglBaseContext, "FrontCapture"
             )
 
             val localAudioTrack = RtcEngine.INSTANCE.createAudioTrack(peerConnectionFactory, id)
@@ -65,6 +67,12 @@ class PeerConnectionActivity : BaseActivity(), SignalingClient.Callback {
                     eglBaseContext
                 )
             }
+            if (videoTrack != null) {
+                SignalingClient[application]
+                    .sendMessage("got user media")
+            } else {
+                hint("创建视频轨失败")
+            }
         } else {
             hint("获取摄像头失败")
         }
@@ -73,22 +81,20 @@ class PeerConnectionActivity : BaseActivity(), SignalingClient.Callback {
 
     override fun onCreateRoom() {
         joined = true
+        isInitiator = true
         captureVideoAndVideo()
-        if (videoTrack != null) {
-            call(videoTrack!!)
-        } else {
-            hint("创建视频轨失败")
-        }
     }
 
     override fun onJoinedRoom() {
+        isInitiator = false
         joined = true
         captureVideoAndVideo()
-        if (videoTrack != null) {
-            SignalingClient[this]
-                .sendMessage("got user media")
-        } else {
-            hint("创建视频轨失败")
+    }
+
+    override fun onPeerReady() {
+        // 接收方已经获取到音/视频，可以建立连接了。
+        if (isInitiator && videoTrack != null) {
+            call(videoTrack!!)
         }
     }
 
@@ -154,6 +160,13 @@ class PeerConnectionActivity : BaseActivity(), SignalingClient.Callback {
                     )
                 }
             }
+
+            override fun onRemoveMediaStream(mediaStream: MediaStream) {
+                // 接收数据流
+                runOnUiThread {
+                    // TODO 如何知道移除的哪一个？
+                }
+            }
         })
     }
 
@@ -186,8 +199,9 @@ class PeerConnectionActivity : BaseActivity(), SignalingClient.Callback {
 
     override fun onDestroy() {
         if (joined) {
-            SignalingClient[this].leave()
+            SignalingClient[application].leave()
         }
+        videoCapturer?.stopCapture()
         super.onDestroy()
     }
 
@@ -205,7 +219,7 @@ class PeerConnectionActivity : BaseActivity(), SignalingClient.Callback {
             jo.put("id", iceCandidate.sdpMid)
             jo.put("candidate", iceCandidate.sdp)
             Log.d("Sending ice", jo.toString())
-            SignalingClient[this@PeerConnectionActivity].sendIceCandidate(jo.toString());
+            SignalingClient[application].sendMessage(jo);
         } catch (e: JSONException) {
             e.printStackTrace()
         }
@@ -218,7 +232,7 @@ class PeerConnectionActivity : BaseActivity(), SignalingClient.Callback {
         try {
             jo.put("type", sdp.type.canonicalForm())
             jo.put("sdp", sdp.description)
-            SignalingClient[this@PeerConnectionActivity].sendSessionDescription(jo.toString())
+            SignalingClient[application].sendMessage(jo)
         } catch (e: JSONException) {
             e.printStackTrace()
         }

@@ -1,6 +1,6 @@
-include ':app:opengles3_native'
+
 include ':app:rtc_demo'
-include ':app:rtc_demo_native'
+include ':app:rtc_native'
 include ':app:recycler'
 include ':app:test_rust_jni'
 include ':app:opengles3'

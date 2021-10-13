@@ -25,7 +25,7 @@ class SignalingServiceActivity : AppCompatActivity(), SignalingClient.Callback {
         setContentView(R.layout.signaling_service_activity)
         roomView = findViewById(R.id.room)
 
-        SignalingClient[this].setCallback(this)
+        SignalingClient[application].setCallback(this)
     }
 
 
@@ -34,7 +34,7 @@ class SignalingServiceActivity : AppCompatActivity(), SignalingClient.Callback {
         if (room == null || room.isEmpty()) {
             Toast.makeText(this, "请输入房间号", Toast.LENGTH_SHORT).show()
         } else {
-            SignalingClient[this].join(room.toString())
+            SignalingClient[application].join(room.toString())
         }
     }
 
@@ -44,6 +44,10 @@ class SignalingServiceActivity : AppCompatActivity(), SignalingClient.Callback {
 
     override fun onPeerJoined() {
         Log.e("webrtc_albert", "peer joined")
+    }
+
+    override fun onPeerReady() {
+        TODO("Not yet implemented")
     }
 
     override fun onPeerLeave(msg: String?) {

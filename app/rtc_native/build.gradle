@@ -1,0 +1,52 @@
+apply from:"../app_basic.gradle"
+
+android {
+    defaultConfig {
+        applicationId "tech.yaowen.rtc_native"
+        //camera2ndk only can be use above android api 24
+        minSdkVersion 24
+
+        ndk {
+            abiFilters 'armeabi-v7a', 'arm64-v8a', 'x86', 'x86_64'
+        }
+        externalNativeBuild {
+            cmake {
+                arguments '-DANDROID_STL=c++_static'
+                // https://developer.android.com/studio/projects/gradle-external-native-builds
+                // Passes optional arguments to CMake.
+                //arguments "-DANDROID_ARM_NEON=TRUE", "-DANDROID_TOOLCHAIN=clang"
+
+                // either -DCMAKE_FIND_DEBUG_MODE=true or --debug-find to your CMake command.
+//                arguments "--debug-find"
+
+                // Sets a flag to enable format macro constants for the C compiler.
+                // cFlags "-D__STDC_FORMAT_MACROS"
+
+                // Sets optional flags for the C++ compiler.
+                // cppFlags "-fexceptions", "-frtti"
+//                cppFlags '-fno-rtti'
+            }
+        }
+        multiDexKeepProguard file('proguard-rules.pro')
+    }
+    externalNativeBuild {
+        cmake {
+            path "src/main/cpp/CMakeLists.txt"
+            version "3.18.1"
+        }
+    }
+}
+
+dependencies {
+    implementation fileTree(dir: "libs", include: ["*.jar"])
+    implementation deps.appcompat
+    implementation deps.material
+    implementation deps.constraintlayout
+    implementation deps.webrtc
+    implementation project(":android_lib:socket_io_signaling")
+
+
+    testImplementation deps.junit
+    androidTestImplementation deps.ext_junit
+    androidTestImplementation deps.espresso
+}
