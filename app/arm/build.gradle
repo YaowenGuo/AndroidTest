@@ -1,0 +1,30 @@
+apply from:"../app_basic.gradle"
+
+android {
+    defaultConfig {
+        applicationId "tech.yaowen.arm"
+        externalNativeBuild {
+            cmake {
+                cppFlags '-march=armv8.1-a'
+            }
+        }
+    }
+
+    externalNativeBuild {
+        cmake {
+            path file('src/main/cpp/CMakeLists.txt')
+            version '3.10.2'
+        }
+    }
+}
+
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation project(":lib:lib_jni")
+    implementation project(":android_lib:theme")
+    implementation deps.appcompat
+    implementation deps.constraintlayout
+    testImplementation deps.junit
+    androidTestImplementation deps.ext_junit
+    androidTestImplementation deps.espresso
+}

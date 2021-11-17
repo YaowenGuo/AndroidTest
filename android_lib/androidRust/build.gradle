@@ -1,5 +1,4 @@
 apply from:"../android_lib_basic.gradle"
-
 apply plugin: 'org.mozilla.rust-android-gradle.rust-android'
 
 

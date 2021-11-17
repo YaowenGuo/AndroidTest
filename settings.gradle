@@ -36,3 +36,5 @@ include ':lib:test_java'
 include ':lib:lib_jni'
 
 
+include ':app:arm'
+include ':android_lib:theme'

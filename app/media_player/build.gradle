@@ -8,6 +8,7 @@ android {
 
 dependencies {
     implementation fileTree(dir: "libs", include: ["*.jar"])
+    implementation project(":android_lib:theme")
     implementation deps.appcompat
     implementation deps.constraintlayout
     implementation deps.kotlin_std

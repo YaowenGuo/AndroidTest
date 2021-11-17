@@ -8,6 +8,7 @@ android {
 
 dependencies {
     implementation fileTree(dir: "libs", include: ["*.jar"])
+    implementation project(":android_lib:theme")
     implementation deps.appcompat
     implementation deps.viewmodel_ktx
     implementation deps.kotlin_std
@@ -16,7 +17,6 @@ dependencies {
     implementation deps.webrtc
     implementation project(":android_lib:socket_io_signaling")
 
-    
     testImplementation deps.junit
     androidTestImplementation deps.ext_junit
     androidTestImplementation deps.espresso

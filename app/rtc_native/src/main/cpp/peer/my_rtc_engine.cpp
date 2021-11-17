@@ -53,6 +53,8 @@ Live::Live(JNIEnv *jni, jobject context, rtc_demo::SignalingClientWrapper *signa
     /**
      * 1. 初始化
      */
+    rtc::InitializeSSL();
+
     JavaVM *jvm = nullptr;
     jni->GetJavaVM(&jvm);
 
@@ -63,7 +65,6 @@ Live::Live(JNIEnv *jni, jobject context, rtc_demo::SignalingClientWrapper *signa
     webrtc::field_trial::InitFieldTrialsFromString(field_trials.c_str());
 //    rtc::PhysicalSocketServer socket = rtc::PhysicalSocketServer();
 //    rtc::AutoSocketServerThread thread(&socket);
-    rtc::InitializeSSL();
     signaling_ = signaling;
 
     // ------------------------
