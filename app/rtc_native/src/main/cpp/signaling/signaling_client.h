@@ -7,11 +7,13 @@
 
 
 #include <api/jsep.h>
-
+#include <jni.h>
 
 #include "socket_callback_interface.h"
 
 using std::string;
+using webrtc::IceCandidateInterface;
+using webrtc::SessionDescriptionInterface;
 
 namespace rtc_demo {
 
@@ -23,14 +25,13 @@ namespace rtc_demo {
         ~SignalingClientWrapper();
 
 
-        void SendIceCandidate(string const &candidate);
+        void SendIceCandidate(const IceCandidateInterface *candidate);
 
 
-        void SendSessionDescription(string const &desc);
+        void SendSessionDescription(const SessionDescriptionInterface *desc);
 
 
     private:
-        JavaVM *vm_;
         jobject j_signaling_client_;
         jmethodID j_send_session_method;
         jmethodID j_send_ice_method;

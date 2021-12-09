@@ -8,7 +8,6 @@
 
 #include <api/peer_connection_interface.h>
 #include <pc/video_track_source.h>
-#include <third_party/jsoncpp/source/include/json/value.h>
 #include <jni.h>
 #include "android_video_track_source.h"
 #include "signaling/signaling_client.h"

@@ -290,23 +290,7 @@ void Live::connectToPeer() {
 
 void Live::OnIceCandidate(const IceCandidateInterface *candidate) {
     THREAD_CURRENT("OnIceCandidate");
-    RTC_LOG(INFO) << __FUNCTION__ << " " << candidate->sdp_mline_index();
-
-    Json::StyledWriter writer;
-    Json::Value jmessage;
-
-    jmessage["type"] = "candidate";
-    jmessage["label"] = candidate->sdp_mline_index();
-    jmessage["id"] = candidate->sdp_mid();
-    jmessage[kCandidateSdpMidName] = candidate->sdp_mid();
-    jmessage[kCandidateSdpMlineIndexName] = candidate->sdp_mline_index();
-    std::string sdp;
-    if (!candidate->ToString(&sdp)) {
-        RTC_LOG(LS_ERROR) << "Failed to serialize candidate";
-        return;
-    }
-    jmessage[kCandidateSdpName] = sdp;
-    signaling_->SendIceCandidate(writer.write(jmessage));
+    signaling_->SendIceCandidate(candidate);
 }
 
 
@@ -342,18 +326,8 @@ void Live::OnSuccess(SessionDescriptionInterface *desc) {
     THREAD_CURRENT("OnSuccess");
     // 可以在设置之前，对 SDP 做一些排序等操作，以设置某些编解码的优先级。
     peer_connection_->SetLocalDescription(std::unique_ptr<SessionDescriptionInterface>(desc), this);
-    // 发起者没有收到 remote session, 应该为空。
-    // 发起者创建 session 成功后要发送到远端。
-    std::string sdp;
-    desc->ToString(&sdp);
-
-    Json::StyledWriter writer;
-    Json::Value jmessage;
-    jmessage[kSessionDescriptionTypeName] =
-            webrtc::SdpTypeToString(desc->GetType());
-    jmessage[kSessionDescriptionSdpName] = sdp;
-    signaling_->SendSessionDescription(writer.write(jmessage));
-
+    // 创建 session 成功后要发送到远端。
+    signaling_->SendSessionDescription(desc);
 }
 
 
