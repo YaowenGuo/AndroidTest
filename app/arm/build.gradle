@@ -5,6 +5,8 @@ android {
         applicationId "tech.yaowen.arm"
         externalNativeBuild {
             cmake {
+                // Can also use system or none as ANDROID_STL, but not c++_static.
+                arguments "-DANDROID_STL=c++_shared"
                 cppFlags '-march=armv8.1-a'
             }
         }

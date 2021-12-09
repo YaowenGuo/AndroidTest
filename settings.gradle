@@ -11,6 +11,7 @@ include ':app:provider'
 include ':app:media'
 include ':app:media_player'
 include ':app:test_glide'
+include ':app:arm'
 
 include ':android_lib:media_tool'
 include ':android_lib:androidRust'
@@ -19,7 +20,7 @@ include ':android_lib:lib_share'
 include ':android_lib:my_butter_knife'
 include ':android_lib:media_tool'
 include ':android_lib:socket_io_signaling'
-
+include ':android_lib:theme'
 
 include ':lib:test_rust'
 include ':lib:test_reflection'
@@ -34,7 +35,7 @@ include ':lib:33_lib_processor'
 include ':lib:33_lib_annotations'
 include ':lib:test_java'
 include ':lib:lib_jni'
+include ':lib:tools'
 
 
-include ':app:arm'
-include ':android_lib:theme'
+

@@ -9,8 +9,9 @@ android {
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation project(":android_lib:theme")
+    implementation project(":lib:tools")
     implementation deps.appcompat
     implementation deps.constraintlayout
-    testImplementation deps.junit
+    androidTestImplementation deps.ext_junit
     androidTestImplementation deps.espresso
 }
