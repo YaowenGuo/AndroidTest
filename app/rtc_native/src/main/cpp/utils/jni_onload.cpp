@@ -15,6 +15,7 @@
 #include "rtc_base/ssl_adapter.h"
 
 #include "jvm.h"
+#include "class_loader.h"
 
 namespace jni {
 
@@ -25,7 +26,7 @@ extern "C" jint JNIEXPORT JNICALL JNI_OnLoad(JavaVM* jvm, void* reserved) {
     return -1;
 
   RTC_CHECK(rtc::InitializeSSL()) << "Failed to InitializeSSL()";
-
+  rtc_demo::InitClassLoader(GetEnv());
   return ret;
 }
 

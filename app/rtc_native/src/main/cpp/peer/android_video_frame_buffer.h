@@ -16,7 +16,7 @@
 #include <media/NdkImageReader.h>
 #include <api/video/video_frame_buffer.h>
 #include <api/video/video_rotation.h>
-#include <sdk/android/src/jni/jni_helpers.h>
+#include <utils/jni_helpers.h>
 
 namespace rtc_demo {
 

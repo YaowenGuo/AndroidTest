@@ -79,6 +79,7 @@ public class SignalingClient extends tech.yaowen.signaling.SignalingClient imple
     public void sendIce(IceCandidate iceCandidate) {
         // 通过 Singling 服务器发送 ice。对方接收到后设置。
         JSONObject jo = new JSONObject();
+        threadCurrent("sendIce");
         try {
             jo.put("type", "candidate");
             jo.put("label", iceCandidate.sdpMLineIndex);
@@ -93,6 +94,7 @@ public class SignalingClient extends tech.yaowen.signaling.SignalingClient imple
 
     public void sendSd(SessionDescription sdp) {
         // 通过 Singling 服务器发送 offer。对方接收到后设置。
+        threadCurrent("sendSd");
         JSONObject jo = new JSONObject();
         try {
             jo.put("type", sdp.type.canonicalForm());

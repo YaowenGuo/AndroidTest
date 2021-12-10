@@ -7,73 +7,89 @@
 #include <iostream>
 #include <condition_variable>
 #include <utils/attach_thread_scoped.h>
+#include <peer/android_video_frame_buffer.h>
 
+#include "utils/class_loader.h"
 #include "signaling_client.h"
 #include "peer/my_rtc_engine.h"
 #include "utils/jvm.h"
+#include "utils/jni_generator_helper.h"
+
 
 using std::string;
 
 namespace rtc_demo {
 
-    SignalingClientWrapper::SignalingClientWrapper(JNIEnv *jni, jobject &instance) {
-        JavaVM *jvm =  jni::GetJVM();
-        AttachThreadScoped ats(jvm);
-        JNIEnv *env = ats.env();
 
-        j_signaling_client_ = instance;
+    const char kClassPath_org_webrtc_SessionDescription[] = "org/webrtc/SessionDescription";
+
+    const char kClassPath_org_webrtc_SessionDescription_00024Type[] = "org/webrtc/SessionDescription$Type";
+    std::atomic<jclass> g_org_webrtc_SessionDescription_clazz(nullptr);
+    inline jclass org_webrtc_SessionDescription_clazz(JNIEnv* env) {
+        return LazyGetClass(env, kClassPath_org_webrtc_SessionDescription,
+                            &g_org_webrtc_SessionDescription_clazz);
+    }
+
+    SignalingClientWrapper::SignalingClientWrapper(JNIEnv *env, jobject &instance) {
+        env = jni::GetEnv();
+        j_signaling_client_ = env->NewGlobalRef(instance); // Java 函数调用结束后，JNI 参数中的 jObject 会被删除，所以要新创建一个全局的。
         jclass j_class_CoreDispatcher = env->FindClass(
                 "tech/yaowen/rtc_native/signaling/SignalingClient");
         j_send_session_method = env->GetMethodID(j_class_CoreDispatcher, "sendSd",
                                                  "(Lorg/webrtc/SessionDescription;)V");
         j_send_ice_method = env->GetMethodID(j_class_CoreDispatcher, "sendIce",
                                              "(Lorg/webrtc/IceCandidate;)V");
+
+        jclass j_pc_class = env->FindClass("org/webrtc/PeerConnection");
+        ASSERT(j_pc_class != nullptr, "Find PeerConnection Class return null pointer: %s, %d", __FUNCTION__, __LINE__)
+        j_pc_class = jni::GetEnv()->FindClass("org/webrtc/PeerConnection");
+        ASSERT(j_pc_class != nullptr, "Find PeerConnection Class return null pointer: %s, %d", __FUNCTION__, __LINE__)
+
     }
 
 
     SignalingClientWrapper::~SignalingClientWrapper() {
-        AttachThreadScoped ats(jni::GetJVM());
-        JNIEnv *env = ats.env();
-        env->DeleteGlobalRef(j_signaling_client_);
+        jni::GetEnv()->DeleteGlobalRef(j_signaling_client_);
     }
 
 
     void SignalingClientWrapper::SendSessionDescription(const SessionDescriptionInterface *desc) {
-        AttachThreadScoped ats(jni::GetJVM());
-        JNIEnv *env = ats.env();
-        jclass sd_class = env->FindClass("org/webrtc/SessionDescription");
-        ASSERT(sd_class != nullptr, "FindClass return null pointer: %s, %d", __FUNCTION__, __LINE__)
+        JNIEnv* env = AttachCurrentThreadIfNeeded();
+
+        jclass sd_class = org_webrtc_SessionDescription_clazz(env);
+        ASSERT(sd_class != nullptr, "FindClass return null pointer: %s, %d", __FUNCTION__, __LINE__);
         jmethodID session_constructor = env->GetMethodID(
                 sd_class, "<init>",
                 "(Lorg/webrtc/SessionDescription$Type;Ljava/lang/String;)V"
         );
 
-        jclass sd_type_class = env->FindClass("org/webrtc/SessionDescription$Type");
+        auto sd_type_class = GetClass(env, "org/webrtc/SessionDescription$Type");
         jfieldID field_type_id = env->GetStaticFieldID(
-                sd_type_class, "OFFER",
+                sd_type_class.obj(), "OFFER",
                 "Lorg/webrtc/SessionDescription$Type;"
         );
-        jobject fieldType = env->GetStaticObjectField(sd_type_class, field_type_id);
 
+        jobject fieldType = env->GetStaticObjectField(sd_type_class.obj(), field_type_id);
         std::string sdp;
         desc->ToString(&sdp);
         jobject sd = env->NewObject(
                 sd_class, session_constructor, fieldType,
                 env->NewStringUTF(sdp.c_str()));
+        ASSERT(sd != nullptr, "Create SessionDescription failed: %s, %d", __FUNCTION__, __LINE__);
+        THREAD_CURRENT("SendSessionDescription");
         env->CallVoidMethod(j_signaling_client_, j_send_session_method, sd);
-        env->DeleteGlobalRef(fieldType);
-        env->DeleteGlobalRef(sd);
+        env->DeleteLocalRef(fieldType);
+        env->DeleteLocalRef(sd);
         delete desc;
     }
 
 
     void SignalingClientWrapper::SendIceCandidate(const IceCandidateInterface *candidate) {
-        AttachThreadScoped ats(jni::GetJVM());
-        JNIEnv *env = ats.env();
+        JNIEnv* env = AttachCurrentThreadIfNeeded();
         RTC_LOG(INFO) << __FUNCTION__ << " " << candidate->sdp_mline_index();
-        jclass j_ice_class = env->FindClass("org/webrtc/IceCandidate");
+        auto j_ice_class = GetClass(env, "org/webrtc/IceCandidate");
         jmethodID j_session_constructor = env->GetMethodID(
-                j_ice_class, "<init>",
+                j_ice_class.obj(), "<init>",
                 "(Ljava/lang/String;ILjava/lang/String;Ljava/lang/String;Lorg/webrtc/PeerConnection$AdapterType;)V"
         );
         // sdp_mic
@@ -87,23 +103,24 @@ namespace rtc_demo {
         // server_url
         jobject j_server_url = env->NewStringUTF(candidate->server_url().c_str());
         // adapter_type
-        jclass j_adapter_type_class = env->FindClass("org/webrtc/PeerConnection$AdapterType");
+        auto j_adapter_type_class = GetClass(env, "org/webrtc/PeerConnection$AdapterType");
         jfieldID j_adapter_type_id = env->GetStaticFieldID(
-                j_adapter_type_class, "UNKNOWN",
+                j_adapter_type_class.obj(), "UNKNOWN",
                 "Lorg/webrtc/PeerConnection$AdapterType;"
         );
-        jobject j_adapter_type = env->GetStaticObjectField(j_adapter_type_class, j_adapter_type_id);
+        jobject j_adapter_type = env->GetStaticObjectField(j_adapter_type_class.obj(), j_adapter_type_id);
 
         // ice
         jobject j_ice = env->NewObject(
-                j_ice_class, j_session_constructor,
+                j_ice_class.obj(), j_session_constructor,
                 j_sdp_mid, j_sdp_mline_index, j_sdp, j_server_url, j_adapter_type
         );
         env->CallVoidMethod(j_signaling_client_, j_send_ice_method, j_ice);
-        delete j_sdp_mid;
-        delete j_sdp;
-        delete j_server_url;
-        delete j_adapter_type;
-        delete j_ice;
+        env->DeleteLocalRef(j_sdp_mid);
+        env->DeleteLocalRef(j_sdp);
+        env->DeleteLocalRef(j_server_url);
+        env->DeleteLocalRef(j_adapter_type);
+        env->DeleteLocalRef(j_ice);
+        delete candidate;
     }
 }

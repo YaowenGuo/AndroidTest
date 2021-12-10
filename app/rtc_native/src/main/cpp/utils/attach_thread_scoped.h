@@ -2,6 +2,7 @@
 #define COMMON_ATTACH_THREAD_SCOPED_H_
 
 #include <jni.h>
+#include "jvm.h"
 
 namespace rtc_demo {
 
@@ -9,7 +10,7 @@ namespace rtc_demo {
 // attached.
     class AttachThreadScoped {
     public:
-        explicit AttachThreadScoped(JavaVM *jvm);
+        explicit AttachThreadScoped(JNIEnv *env);
 
         ~AttachThreadScoped();
 
