@@ -49,7 +49,8 @@ public:
 };
 
 
-Live::Live(JNIEnv *jni, jobject context, rtc_demo::SignalingClientWrapper *signaling) {
+Live::Live(JNIEnv *jni, jobject context, rtc_demo::SignalingClientWrapper *signaling)
+: peer_connection_factory_(nullptr), peer_connection_(nullptr) {
     /**
      * 1. 初始化
      */
@@ -100,8 +101,7 @@ void Live::createEngine() {
      */
     rtc::ThreadManager::Instance()->WrapCurrentThread();
 
-    std::unique_ptr<rtc::Thread> network_thread =
-            rtc::Thread::CreateWithSocketServer();
+    std::unique_ptr<rtc::Thread> network_thread = rtc::Thread::CreateWithSocketServer();
     network_thread->SetName("network_thread", nullptr);
     RTC_CHECK(network_thread->Start()) << "Failed to start thread";
 
@@ -113,72 +113,14 @@ void Live::createEngine() {
     signaling_thread->SetName("signaling_thread", NULL);
     RTC_CHECK(signaling_thread->Start()) << "Failed to start thread";
 
-//    PeerConnectionFactoryInterface::Options options;
-//
-//    PeerConnectionFactoryDependencies dependencies;
-//    // TODO(bugs.webrtc.org/13145): Also add socket_server.get() to the
-//    // dependencies.
-//    dependencies.network_thread = network_thread.get();
-//    dependencies.worker_thread = worker_thread.get();
-//    dependencies.signaling_thread = signaling_thread.get();
-//    dependencies.task_queue_factory = webrtc::CreateDefaultTaskQueueFactory();
-//    dependencies.call_factory = CreateCallFactory();
-//    dependencies.event_log_factory = std::make_unique<RtcEventLogFactory>(
-//            dependencies.task_queue_factory.get());
-//    dependencies.fec_controller_factory = nullptr;
-////    dependencies.network_controller_factory =
-////            std::move(network_controller_factory);
-////    dependencies.network_state_predictor_factory =
-////            std::move(network_state_predictor_factory);
-////    dependencies.neteq_factory = std::move(neteq_factory);
-////    if (!(options && options->disable_network_monitor)) {
-////        dependencies.network_monitor_factory =
-////                std::make_unique<AndroidNetworkMonitorFactory>();
-////    }
-//
-//    cricket::MediaEngineDependencies media_dependencies;
-//    media_dependencies.task_queue_factory = dependencies.task_queue_factory.get();
-//    media_dependencies.adm = nullptr;
-//    media_dependencies.audio_encoder_factory = webrtc::CreateBuiltinAudioEncoderFactory();
-//    media_dependencies.audio_decoder_factory = webrtc::CreateBuiltinAudioDecoderFactory();
-//    media_dependencies.audio_processing = AudioProcessingBuilder().Create();
-//    media_dependencies.video_encoder_factory = webrtc::CreateBuiltinVideoEncoderFactory();
-//    media_dependencies.video_decoder_factory = webrtc::CreateBuiltinVideoDecoderFactory();
-//    dependencies.media_engine =
-//            cricket::CreateMediaEngine(std::move(media_dependencies));
-//
-//    peer_connection_factory_ =
-//            CreateModularPeerConnectionFactory(std::move(dependencies));
-//
-//    RTC_CHECK(peer_connection_factory_) << "Failed to create the peer connection factory; "
-//                          "WebRTC/libjingle init likely failed on this device";
-//    // TODO(honghaiz): Maybe put the options as the argument of
-//    // CreatePeerConnectionFactory.
-//    peer_connection_factory_->SetOptions(options);
-
-
-
-//    auto network_p = network_thread.get();
-//    auto worker_p = worker_thread.get();
-//    auto signaling_p = signaling_thread.get();
-//    peer_connection_factory_ = webrtc::CreatePeerConnectionFactory(
-//            network_p /* network_thread */, worker_p /* worker_thread */,
-//            signaling_p /* signaling_thread */, nullptr /* default_adm */,
-//            webrtc::CreateBuiltinAudioEncoderFactory(),
-//            webrtc::CreateBuiltinAudioDecoderFactory(),
-//            webrtc::CreateBuiltinVideoEncoderFactory(),
-//            webrtc::CreateBuiltinVideoDecoderFactory(),
-//            nullptr /* audio_mixer */,
-//            nullptr /* audio_processing */
-//    );
-
+    // 不要使用 get(). 并没有转移所有权，会导致 unique_ptr 在函数退出时释放对象。
+    auto network_p = network_thread.release();
+    auto worker_p = worker_thread.release();
+    auto signaling_p = signaling_thread.release();
     // 线程启动后 attach Jni.
-//    PostThreadAttachTask(network_p, RTC_FROM_HERE);
-//    PostThreadAttachTask(worker_p, RTC_FROM_HERE);
-//    PostThreadAttachTask(signaling_p, RTC_FROM_HERE);
-    auto network_p = network_thread.get();
-    auto worker_p = worker_thread.get();
-    auto signaling_p = signaling_thread.get();
+    PostThreadAttachTask(network_p, RTC_FROM_HERE);
+    PostThreadAttachTask(worker_p, RTC_FROM_HERE);
+    PostThreadAttachTask(signaling_p, RTC_FROM_HERE);
     peer_connection_factory_ = webrtc::CreatePeerConnectionFactory(
             network_p /* network_thread */, worker_p /* worker_thread */,
             signaling_p /* signaling_thread */, nullptr /* default_adm */,
@@ -189,31 +131,7 @@ void Live::createEngine() {
             nullptr /* audio_mixer */,
             nullptr /* audio_processing */
     );
-
-    // 线程启动后 attach Jni.
-    PostThreadAttachTask(network_p, RTC_FROM_HERE);
-    PostThreadAttachTask(worker_p, RTC_FROM_HERE);
-    PostThreadAttachTask(signaling_p, RTC_FROM_HERE);
-
-
-    /**
-    * 3. 创建 PC
-    */
-    webrtc::PeerConnectionInterface::RTCConfiguration config;
-    config.sdp_semantics = webrtc::SdpSemantics::kUnifiedPlan;
-    config.enable_dtls_srtp = true;
-    webrtc::PeerConnectionInterface::IceServer server;
-    server.uri = "stun:stun.l.google.com:19302";
-    config.servers.push_back(server);
-    PeerConnectionDependencies peer_connection_dependencies(this);
-    auto result = peer_connection_factory_->CreatePeerConnectionOrError(
-            config, std::move(peer_connection_dependencies));
-
-    if (!result.ok()) {
-        LOGE("Create peer connection failed: %s", result.error().message());
-        return;
-    }
-    peer_connection_ = result.MoveValue();
+    CreatePeerConnection(false);
     // video source
     rtc::scoped_refptr<rtc_demo::AndroidVideoTrackSource> video_source =
             new rtc::RefCountedObject<rtc_demo::AndroidVideoTrackSource>(
@@ -233,16 +151,36 @@ void Live::createEngine() {
     } else {
         LOGW("image reader is null.");
     }
-
-    peer_connection_->CreateOffer(this, offerAnswerOption);
 }
 
 
 bool Live::CreatePeerConnection(bool dtls) {
     RTC_DCHECK(peer_connection_factory_);
     RTC_DCHECK(!peer_connection_);
+    /**
+       * 3. 创建 PC
+       */
+    webrtc::PeerConnectionInterface::RTCConfiguration config;
+    config.sdp_semantics = webrtc::SdpSemantics::kUnifiedPlan;
+    config.enable_dtls_srtp = true;
+    webrtc::PeerConnectionInterface::IceServer server;
+    server.uri = "stun:stun.l.google.com:19302";
+    config.servers.push_back(server);
+    PeerConnectionDependencies peer_connection_dependencies(this);
+    auto result = peer_connection_factory_->CreatePeerConnectionOrError(
+            config, std::move(peer_connection_dependencies));
 
+    if (!result.ok()) {
+        LOGE("Create peer connection failed: %s", result.error().message());
+        return false;
+    }
+    peer_connection_ = result.value();
     return peer_connection_ != nullptr;
+}
+
+
+void Live::connectToPeer() {
+    peer_connection_->CreateOffer(this, offerAnswerOption);
 }
 
 
@@ -277,12 +215,6 @@ Live::AddTracks(webrtc::VideoTrackSourceInterface *video_source) {
     }
 
     return video_track;
-}
-
-
-void Live::connectToPeer() {
-//    peer_connection_factory_->CreateAudioSource(cricket::AudioOptions());
-//    peer_connection_->CreateOffer(this, offerAnswerOption);
 }
 
 
@@ -325,7 +257,8 @@ void Live::OnDataChannel(rtc::scoped_refptr<DataChannelInterface> data_channel) 
 void Live::OnSuccess(SessionDescriptionInterface *desc) {
     THREAD_CURRENT("OnSuccess");
     // 可以在设置之前，对 SDP 做一些排序等操作，以设置某些编解码的优先级。
-    peer_connection_->SetLocalDescription(std::unique_ptr<SessionDescriptionInterface>(desc), this);
+    desc->description();
+    peer_connection_->SetLocalDescription(std::move(std::unique_ptr<SessionDescriptionInterface>(desc)),this);
     // 创建 session 成功后要发送到远端。
     signaling_->SendSessionDescription(desc);
 }
@@ -425,15 +358,14 @@ void Live::onIceCandidateReceived(const string &message) {
         return;
     }
     webrtc::SdpParseError error;
-    std::unique_ptr<webrtc::IceCandidateInterface> candidate(
-            webrtc::CreateIceCandidate(sdp_mid, sdp_mlineindex, sdp, &error));
-    if (!candidate.get()) {
+    webrtc::IceCandidateInterface *candidate = webrtc::CreateIceCandidate(sdp_mid, sdp_mlineindex, sdp, &error);
+    if (!candidate) {
         RTC_LOG(WARNING) << "Can't parse received candidate message. "
                             "SdpParseError was: "
                          << error.description;
         return;
     }
-    if (!peer_connection_->AddIceCandidate(candidate.get())) {
+    if (!peer_connection_->AddIceCandidate(candidate)) {
         RTC_LOG(WARNING) << "Failed to apply the received candidate";
         return;
     }

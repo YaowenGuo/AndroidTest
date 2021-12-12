@@ -80,7 +80,6 @@ namespace rtc_demo {
         env->CallVoidMethod(j_signaling_client_, j_send_session_method, sd);
         env->DeleteLocalRef(fieldType);
         env->DeleteLocalRef(sd);
-        delete desc;
     }
 
 
@@ -121,6 +120,7 @@ namespace rtc_demo {
         env->DeleteLocalRef(j_server_url);
         env->DeleteLocalRef(j_adapter_type);
         env->DeleteLocalRef(j_ice);
-        delete candidate;
+        // TODO 为什么不能删除？
+//        delete candidate;
     }
 }

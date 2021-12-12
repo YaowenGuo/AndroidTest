@@ -1,7 +1,6 @@
 package tech.yaowen.signaling
 
 import android.app.Application
-import android.content.Context
 import android.util.Log
 import io.socket.client.IO
 import io.socket.client.Socket
