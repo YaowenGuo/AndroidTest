@@ -1,0 +1,9 @@
+// 记录 RtcDemo 中使用到的类，这些类可以自己定义替换掉。其他是 WebRTC lib 中使用到的，不能删除。
+org.webrtc.IceCandidate
+org.webrtc.SessionDescription
+org.webrtc.SessionDescription
+org.webrtc.WebRtcClassLoader
+
+// 可以看到 WebRTC lib 中使用到的类只有连个目录
+src/modules/audio_device/android/java/src/org/webrtc/voiceengine
+src/rtc_base/java/src/org/webrtc

@@ -42,7 +42,6 @@ dependencies {
     implementation project(":android_lib:theme")
     implementation deps.appcompat
     implementation deps.constraintlayout
-    implementation deps.webrtc
     implementation project(":android_lib:socket_io_signaling")
 
 
