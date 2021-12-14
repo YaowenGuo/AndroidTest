@@ -30,11 +30,11 @@ namespace rtc_demo {
                             &g_org_webrtc_SessionDescription_clazz);
     }
 
-    SignalingClientWrapper::SignalingClientWrapper(JNIEnv *env, jobject &instance) {
+    JavaRTCEngine::JavaRTCEngine(JNIEnv *env, jobject &instance) {
         env = jni::GetEnv();
         j_signaling_client_ = env->NewGlobalRef(instance); // Java 函数调用结束后，JNI 参数中的 jObject 会被删除，所以要新创建一个全局的。
         jclass j_class_CoreDispatcher = env->FindClass(
-                "tech/yaowen/rtc_native/signaling/SignalingClient");
+                "tech/yaowen/rtc_native/rtc/RTCEngine");
         j_send_session_method = env->GetMethodID(j_class_CoreDispatcher, "sendSd",
                                                  "(Lorg/webrtc/SessionDescription;)V");
         j_send_ice_method = env->GetMethodID(j_class_CoreDispatcher, "sendIce",
@@ -48,12 +48,12 @@ namespace rtc_demo {
     }
 
 
-    SignalingClientWrapper::~SignalingClientWrapper() {
+    JavaRTCEngine::~JavaRTCEngine() {
         jni::GetEnv()->DeleteGlobalRef(j_signaling_client_);
     }
 
 
-    void SignalingClientWrapper::SendSessionDescription(const SessionDescriptionInterface *desc) {
+    void JavaRTCEngine::SendSessionDescription(const SessionDescriptionInterface *desc) {
         JNIEnv* env = AttachCurrentThreadIfNeeded();
 
         jclass sd_class = org_webrtc_SessionDescription_clazz(env);
@@ -83,7 +83,7 @@ namespace rtc_demo {
     }
 
 
-    void SignalingClientWrapper::SendIceCandidate(const IceCandidateInterface *candidate) {
+    void JavaRTCEngine::SendIceCandidate(const IceCandidateInterface *candidate) {
         JNIEnv* env = AttachCurrentThreadIfNeeded();
         RTC_LOG(INFO) << __FUNCTION__ << " " << candidate->sdp_mline_index();
         auto j_ice_class = GetClass(env, "org/webrtc/IceCandidate");
@@ -121,6 +121,6 @@ namespace rtc_demo {
         env->DeleteLocalRef(j_adapter_type);
         env->DeleteLocalRef(j_ice);
         // TODO 为什么不能删除？
-//        delete candidate;
+        // delete candidate;
     }
 }

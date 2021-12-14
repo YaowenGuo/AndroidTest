@@ -37,34 +37,34 @@ open class SignalingClient constructor(context: Application) {
             socket.on("created") { args: Array<Any?>? ->
                 threadCurrent("created")
                 // 房间创建者收到此回调
-                Log.e("webrtc_albert", "created")
+                Log.e("webrtc_lim", "created")
                 callback!!.onCreateRoom()
             }
 
             socket.on("joined") { args: Array<Any?>? ->
                 threadCurrent("joined")
-                Log.e("webrtc_albert", "joined")
+                Log.e("webrtc_lim", "joined")
                 callback!!.onJoinedRoom()
             }
 
             socket.on("join") { args: Array<Any?>? ->
                 // 其他用户加入的时候收到此回调
-                Log.e("webrtc_albert", "join")
+                Log.e("webrtc_lim", "join")
                 callback!!.onPeerJoined()
             }
 
             socket.on("full") { args: Array<Any?>? ->
-                Log.e("webrtc_albert", "room full")
+                Log.e("webrtc_lim", "room full")
             }
 
             socket.on("log") { args: Array<Any?>? ->
                 if (args == null) return@on
                 for (obj in args) {
-                    Log.e("webrtc_albert", "log: $obj")
+                    Log.e("webrtc_lim", "log: $obj")
                 }
             }
             socket.on("bye") { args: Array<Any> ->
-                Log.e("webrtc_albert", "bye")
+                Log.e("webrtc_lim", "bye")
                 callback!!.onPeerLeave(args[0] as String)
             }
             socket.on("message") { args: Array<Any?> ->
@@ -76,16 +76,16 @@ open class SignalingClient constructor(context: Application) {
                                 callback!!.onPeerReady();
                             }
                         }
-                        Log.e("webrtc_albert", "message $data")
+                        Log.e("webrtc_lim", "message $data")
                     }
                     is JSONObject -> {
-                        Log.e("webrtc_albert", "message $data")
+                        Log.e("webrtc_lim", "message $data")
                         when (data.optString("type")) {
                             "offer" -> {
-                                callback!!.onOfferReceived(data)
+                                callback!!.onOfferReceived(data.optString("sdp"))
                             }
                             "answer" -> {
-                                callback!!.onAnswerReceived(data)
+                                callback!!.onAnswerReceived(data.optString("sdp"))
                             }
                             "candidate" -> {
                                 callback!!.onIceCandidateReceived(data)
@@ -93,32 +93,22 @@ open class SignalingClient constructor(context: Application) {
                         }
                     }
                     else -> {
-                        Log.e("webrtc_albert", "message $args")
+                        Log.e("webrtc_lim", "message $args")
                     }
                 }
             }
-        } catch (e: URISyntaxException) {
-            e.printStackTrace()
-        } catch (e: NoSuchAlgorithmException) {
-            e.printStackTrace()
-        } catch (e: KeyManagementException) {
-            e.printStackTrace()
-        } catch (e: CertificateException) {
-            e.printStackTrace()
-        } catch (e: KeyStoreException) {
-            e.printStackTrace()
-        } catch (e: IOException) {
+        } catch (e: Exception) {
             e.printStackTrace()
         }
     }
 
-    fun join(room: String) {
-        Log.e("webrtc_albert", "create or join")
+    fun joinRoom(room: String) {
+        Log.e("webrtc_lim", "create or join")
         socket.emit("create or join", room)
     }
 
     fun leave() {
-        Log.e("webrtc_albert", "bye")
+        Log.e("webrtc_lim", "bye")
         socket.emit("bye")
     }
 
@@ -128,9 +118,9 @@ open class SignalingClient constructor(context: Application) {
         fun onPeerJoined()
         fun onPeerReady()
         fun onPeerLeave(msg: String?)
-        fun onOfferReceived(data: JSONObject?)
-        fun onAnswerReceived(data: JSONObject?)
-        fun onIceCandidateReceived(data: JSONObject?)
+        fun onOfferReceived(sd: String)
+        fun onAnswerReceived(sd: String)
+        fun onIceCandidateReceived(data: JSONObject)
     }
 
     @Throws(
@@ -166,12 +156,13 @@ open class SignalingClient constructor(context: Application) {
 
     // 一定要传 object, 传 String 在 js 端无法自动转换成对象。
     fun sendMessage(msg: Any) {
-        Log.e("webrtc_albert", "Sending message: $msg")
+        Log.e("webrtc_lim", "Sending message: $msg")
         socket.emit("message", msg)
     }
 
     companion object {
         var instance: SignalingClient? = null
+        @JvmStatic
         operator fun get(context: Application): SignalingClient {
             if (instance == null) {
                 synchronized(SignalingClient::class.java) {

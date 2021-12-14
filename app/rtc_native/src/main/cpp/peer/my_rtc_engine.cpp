@@ -26,11 +26,6 @@
 #include <api/task_queue/default_task_queue_factory.h>
 #include "utils/jvm.h"
 
-// Names used for a SessionDescription JSON object.
-const char kSessionDescriptionTypeName[] = "type";
-const char kSessionDescriptionSdpName[] = "sdp";
-
-
 class DummySetSessionDescriptionObserver
         : public webrtc::SetSessionDescriptionObserver {
 public:
@@ -48,22 +43,18 @@ public:
     }
 };
 
+/**
+  * 1. 初始化
+  */
+Live::Live(JNIEnv *jni, jobject context, rtc_demo::JavaRTCEngine *signaling)
+        : peer_connection_factory_(nullptr), peer_connection_(nullptr) {
 
-Live::Live(JNIEnv *jni, jobject context, rtc_demo::SignalingClientWrapper *signaling)
-: peer_connection_factory_(nullptr), peer_connection_(nullptr) {
-    /**
-     * 1. 初始化
-     */
     rtc::InitializeSSL();
 
     JavaVM *jvm = nullptr;
     jni->GetJavaVM(&jvm);
 
     webrtc::JVM::Initialize(jvm, context);
-    // InitFieldTrialsFromString stores the char*, so the char array must
-    // outlive the application.
-    const std::string field_trials /*absl::GetFlag(FLAGS_force_fieldtrials)*/;
-    webrtc::field_trial::InitFieldTrialsFromString(field_trials.c_str());
 //    rtc::PhysicalSocketServer socket = rtc::PhysicalSocketServer();
 //    rtc::AutoSocketServerThread thread(&socket);
     signaling_ = signaling;
@@ -94,11 +85,10 @@ void PostThreadAttachTask(rtc::Thread *queue, const rtc::Location &posted_from) 
     queue->Post(posted_from, new JavaAsyncCallback());
 }
 
-
+/**
+  * 2. 创建 PeerConnectionFactory, 因为 Webrtc 可以同时进行多个连接，以创建多个 PeerConnection (PC).
+  */
 void Live::createEngine() {
-    /**
-     * 2. 创建 PeerConnectionFactory, 因为 Webrtc 可以同时进行多个连接，以创建多个 PeerConnection (PC).
-     */
     rtc::ThreadManager::Instance()->WrapCurrentThread();
 
     std::unique_ptr<rtc::Thread> network_thread = rtc::Thread::CreateWithSocketServer();
@@ -137,15 +127,15 @@ void Live::createEngine() {
             new rtc::RefCountedObject<rtc_demo::AndroidVideoTrackSource>(
                     peer_connection_->signaling_thread(), false, false
             );
-
     // add audio and video track.
     rtc::scoped_refptr<webrtc::VideoTrackInterface> video_track = AddTracks(video_source);
 
     // add video sink， 用于本地显示。
-    auto videoSink = new rtc_demo::AndroidVideoSink(GetAppEngine()->app_->window);
-    video_track->AddOrUpdateSink(videoSink, rtc::VideoSinkWants());
+    // auto videoSink = new rtc_demo::AndroidVideoSink(GetAppEngine()->app_->window);
+    // video_track->AddOrUpdateSink(videoSink, rtc::VideoSinkWants());
 
     ImageReader *imageReader = GetAppEngine()->CreateCamera();
+    GetAppEngine()->StartPreview();
     if (imageReader) {
         imageReader->SetVideoSource(video_source);
     } else {
@@ -154,12 +144,12 @@ void Live::createEngine() {
 }
 
 
+/**
+ * 3. 创建 PC
+ */
 bool Live::CreatePeerConnection(bool dtls) {
     RTC_DCHECK(peer_connection_factory_);
     RTC_DCHECK(!peer_connection_);
-    /**
-       * 3. 创建 PC
-       */
     webrtc::PeerConnectionInterface::RTCConfiguration config;
     config.sdp_semantics = webrtc::SdpSemantics::kUnifiedPlan;
     config.enable_dtls_srtp = true;
@@ -179,8 +169,12 @@ bool Live::CreatePeerConnection(bool dtls) {
 }
 
 
-void Live::connectToPeer() {
-    peer_connection_->CreateOffer(this, offerAnswerOption);
+void Live::connectToPeer(bool offer) {
+    if (offer) {
+        peer_connection_->CreateOffer(this, offerAnswerOption);
+    } else {
+        peer_connection_->CreateAnswer(this, offerAnswerOption);
+    }
 }
 
 
@@ -258,7 +252,8 @@ void Live::OnSuccess(SessionDescriptionInterface *desc) {
     THREAD_CURRENT("OnSuccess");
     // 可以在设置之前，对 SDP 做一些排序等操作，以设置某些编解码的优先级。
     desc->description();
-    peer_connection_->SetLocalDescription(std::move(std::unique_ptr<SessionDescriptionInterface>(desc)),this);
+    peer_connection_->SetLocalDescription(
+            std::move(std::unique_ptr<SessionDescriptionInterface>(desc)), this);
     // 创建 session 成功后要发送到远端。
     signaling_->SendSessionDescription(desc);
 }
@@ -287,52 +282,18 @@ void Live::OnSetRemoteDescriptionComplete(RTCError error) {
 
 //「***************** SocketCallbackInterface *******************
 
-void Live::onSDPReceived(const string &message) {
-    THREAD_CURRENT("onSDPReceived");
-    Json::Reader reader;
-    Json::Value jmessage;
-    if (!reader.parse(message, jmessage)) {
-        RTC_LOG(WARNING) << "Received unknown message. " << message;
+void Live::onSDPReceived(const SdpType type, const string &sd) {
+    webrtc::SdpParseError error;
+    std::unique_ptr<webrtc::SessionDescriptionInterface> session_description =
+            webrtc::CreateSessionDescription(type, sd, &error);
+    if (!session_description) {
+        RTC_LOG(WARNING) << "Can't parse received session description message. SdpParseError was: "
+                         << error.description;
         return;
     }
-    std::string type_str;
-    std::string json_object;
-
-    rtc::GetStringFromJsonObject(jmessage, kSessionDescriptionTypeName,
-                                 &type_str);
-    if (!type_str.empty()) {
-        absl::optional<webrtc::SdpType> type_maybe =
-                webrtc::SdpTypeFromString(type_str);
-        if (!type_maybe) {
-            RTC_LOG(LS_ERROR) << "Unknown SDP type: " << type_str;
-            return;
-        }
-        webrtc::SdpType type = *type_maybe;
-        std::string sdp;
-        if (!rtc::GetStringFromJsonObject(jmessage, kSessionDescriptionSdpName,
-                                          &sdp)) {
-            RTC_LOG(WARNING) << "Can't parse received session description message.";
-            return;
-        }
-
-        webrtc::SdpParseError error;
-        std::unique_ptr<webrtc::SessionDescriptionInterface> session_description =
-                webrtc::CreateSessionDescription(type, sdp, &error);
-        if (!session_description) {
-            RTC_LOG(WARNING) << "Can't parse received session description message. "
-                                "SdpParseError was: "
-                             << error.description;
-            return;
-        }
-        RTC_LOG(INFO) << " Received session description :" << message;
-        peer_connection_->SetRemoteDescription(
-                DummySetSessionDescriptionObserver::Create(),
-                session_description.release());
-        if (type == webrtc::SdpType::kOffer) {
-            peer_connection_->CreateAnswer(
-                    this, webrtc::PeerConnectionInterface::RTCOfferAnswerOptions());
-        }
-    }
+    peer_connection_->SetRemoteDescription(
+            DummySetSessionDescriptionObserver::Create(),
+            session_description.release());
 }
 
 
@@ -358,7 +319,8 @@ void Live::onIceCandidateReceived(const string &message) {
         return;
     }
     webrtc::SdpParseError error;
-    webrtc::IceCandidateInterface *candidate = webrtc::CreateIceCandidate(sdp_mid, sdp_mlineindex, sdp, &error);
+    webrtc::IceCandidateInterface *candidate = webrtc::CreateIceCandidate(sdp_mid, sdp_mlineindex,
+                                                                          sdp, &error);
     if (!candidate) {
         RTC_LOG(WARNING) << "Can't parse received candidate message. "
                             "SdpParseError was: "

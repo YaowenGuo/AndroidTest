@@ -8,11 +8,12 @@
 #include <string>
 
 using std::string;
+using webrtc::SdpType;
 
 namespace rtc_demo {
     class SocketCallbackInterface {
     public:
-        virtual void onSDPReceived(string const &) = 0;
+        virtual void onSDPReceived(const SdpType type, const string &sd) = 0;
 
 
         virtual void onIceCandidateReceived(string const &) = 0;

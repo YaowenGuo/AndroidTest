@@ -48,6 +48,9 @@ public:
     void OnAppInitWindow(void);
 
 
+    void StartPreview();
+
+
     void DrawFrame(void);
 
 

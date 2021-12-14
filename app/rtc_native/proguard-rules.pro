@@ -21,5 +21,5 @@
 #-renamesourcefileattribute SourceFile
 
 -keep class org.webrtc.** { *; }
--keep class tech.yaowen.rtc_native.signaling.SignalingClient {*;}
+-keep class tech.yaowen.rtc_native.rtc.SignalingClient {*;}
 -keep class tech.yaowen.signaling.SignalingClient {*;}

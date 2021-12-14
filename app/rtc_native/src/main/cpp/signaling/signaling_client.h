@@ -17,12 +17,12 @@ using webrtc::SessionDescriptionInterface;
 
 namespace rtc_demo {
 
-    class SignalingClientWrapper {
+    class JavaRTCEngine {
     public:
-        SignalingClientWrapper(JNIEnv *jni, jobject &instance);
+        JavaRTCEngine(JNIEnv *jni, jobject &instance);
 
 
-        ~SignalingClientWrapper();
+        ~JavaRTCEngine();
 
 
         void SendIceCandidate(const IceCandidateInterface *candidate);
@@ -31,7 +31,7 @@ namespace rtc_demo {
         void SendSessionDescription(const SessionDescriptionInterface *desc);
 
 
-    private:
+    protected:
         jobject j_signaling_client_;
         jmethodID j_send_session_method;
         jmethodID j_send_ice_method;

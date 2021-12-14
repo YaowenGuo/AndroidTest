@@ -50,7 +50,7 @@ static void ProcessAndroidCmd(struct android_app *app, int32_t cmd) {
                 engine->SaveNativeWinRes(ANativeWindow_getWidth(app->window),
                                          ANativeWindow_getHeight(app->window),
                                          ANativeWindow_getFormat(app->window));
-//        engine->OnAppInitWindow();
+//                engine->OnAppInitWindow();
             }
             break;
         case APP_CMD_TERM_WINDOW:
@@ -110,13 +110,18 @@ extern "C" void android_main(struct android_app *state) {
 void CameraEngine::OnAppInitWindow() {
     rotation_ = GetDisplayRotation();
 
-//  CreateCamera();
+    CreateCamera();
     ASSERT(camera_, "CameraCreation Failed");
 
     EnableUI();
 
     // NativeActivity end is ready to display, start pulling images
     cameraReady_ = true;
+    camera_->StartPreview(true);
+}
+
+void CameraEngine::StartPreview() {
+    ASSERT(camera_, "Camera is not initialized");
     camera_->StartPreview(true);
 }
 

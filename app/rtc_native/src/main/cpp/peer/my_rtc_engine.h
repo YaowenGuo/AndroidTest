@@ -29,7 +29,7 @@ class Live : public PeerConnectionObserver,
              public SetRemoteDescriptionObserverInterface,
              public rtc_demo::SocketCallbackInterface {
 public:
-    Live(JNIEnv *jni, jobject context, rtc_demo::SignalingClientWrapper *);
+    Live(JNIEnv *jni, jobject context, rtc_demo::JavaRTCEngine *);
 
 
     ~Live();
@@ -45,7 +45,7 @@ public:
     AddTracks(webrtc::VideoTrackSourceInterface* videoSource);
 
 
-    void connectToPeer();
+    void connectToPeer(bool offer);
 
 
     //「***************** CreateSessionDescriptionObserver *******************
@@ -224,7 +224,7 @@ public:
 
     //「***************** SocketCallbackInterface *******************
 
-    void onSDPReceived(string const &) override;
+    void onSDPReceived(const SdpType type, const string &sd) override;
 
 
     void onIceCandidateReceived(string const &) override;
@@ -233,7 +233,7 @@ public:
 protected:
     rtc::scoped_refptr<webrtc::PeerConnectionFactoryInterface> peer_connection_factory_;
     rtc::scoped_refptr<webrtc::PeerConnectionInterface> peer_connection_;
-    rtc_demo::SignalingClientWrapper *signaling_;
+    rtc_demo::JavaRTCEngine *signaling_;
     webrtc::PeerConnectionInterface::RTCOfferAnswerOptions offerAnswerOption = webrtc::PeerConnectionInterface::RTCOfferAnswerOptions();
 };
 

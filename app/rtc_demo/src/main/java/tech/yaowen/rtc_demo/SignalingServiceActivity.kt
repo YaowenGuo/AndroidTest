@@ -34,16 +34,16 @@ class SignalingServiceActivity : AppCompatActivity(), SignalingClient.Callback {
         if (room == null || room.isEmpty()) {
             Toast.makeText(this, "请输入房间号", Toast.LENGTH_SHORT).show()
         } else {
-            SignalingClient[application].join(room.toString())
+            SignalingClient[application].joinRoom(room.toString())
         }
     }
 
     override fun onCreateRoom() {
-        Log.e("webrtc_albert", "room created")
+        Log.e("webrtc_lim", "room created")
     }
 
     override fun onPeerJoined() {
-        Log.e("webrtc_albert", "peer joined")
+        Log.e("webrtc_lim", "peer joined")
     }
 
     override fun onPeerReady() {
@@ -51,25 +51,25 @@ class SignalingServiceActivity : AppCompatActivity(), SignalingClient.Callback {
     }
 
     override fun onPeerLeave(msg: String?) {
-        Log.e("webrtc_albert", "bye $msg")
+        Log.e("webrtc_lim", "bye $msg")
     }
 
     override fun onJoinedRoom() {
-        Log.e("webrtc_albert", "self joined")
+        Log.e("webrtc_lim", "self joined")
     }
 
 
-    override fun onOfferReceived(data: JSONObject?) {
-        Log.e("webrtc_albert", "offer: $data")
+    override fun onOfferReceived(sd: String) {
+        Log.e("webrtc_lim", "offer: $sd")
     }
 
 
-    override fun onAnswerReceived(data: JSONObject?) {
-        Log.e("webrtc_albert", "answer: $data")
+    override fun onAnswerReceived(sd: String) {
+        Log.e("webrtc_lim", "answer: $sd")
     }
 
-    override fun onIceCandidateReceived(data: JSONObject?) {
-        Log.e("webrtc_albert", "Ice: $data")
+    override fun onIceCandidateReceived(data: JSONObject) {
+        Log.e("webrtc_lim", "Ice: $data")
     }
 
 

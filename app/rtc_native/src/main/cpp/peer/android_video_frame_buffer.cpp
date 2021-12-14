@@ -194,4 +194,8 @@ namespace rtc_demo {
         return rtc::make_ref_counted<AndroidVideoI420Buffer>(width_, height_, image_);
     }
 
+    const I420BufferInterface * AndroidVideoFrameBuffer::GetI420() const {
+        return new rtc::RefCountedObject<AndroidVideoI420Buffer>(width_, height_, image_);
+    }
+
 }  // namespace webrtc

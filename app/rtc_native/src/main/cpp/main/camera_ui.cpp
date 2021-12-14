@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 #include <modules/utility/include/helpers_android.h>
+#include <api/jsep.h>
 #include "camera/camera_engine.h"
 #include "utils/native_debug.h"
 
@@ -22,8 +23,8 @@
   Java_tech_yaowen_rtc_1native_view_home_CameraActivity_##func (__VA_ARGS__)
 
 
-#define SignalingClient(func, ...) \
-  Java_tech_yaowen_rtc_1native_signaling_SignalingClient_##func (__VA_ARGS__)
+#define RTCEngine(func, ...) \
+  Java_tech_yaowen_rtc_1native_rtc_RTCEngine_##func (__VA_ARGS__)
 
 /**
  * Retrieve current rotation from Java side
@@ -191,24 +192,39 @@ CameraActivity(release, JNIEnv *env, jobject activity) {
 
 
 extern "C" JNIEXPORT void JNICALL
-SignalingClient(joinRoom, JNIEnv *env, jclass clazz, jobject context, jobject jSignaling) {
-    THREAD_CURRENT("joinRoom");
-    if (pLiveObj == nullptr) {
-        auto signaling = new rtc_demo::SignalingClientWrapper(env, jSignaling);
-        pLiveObj = new Live(env, context, signaling);
-        pLiveObj->createEngine();
-        pLiveObj->connectToPeer();
-    }
+RTCEngine(captureVideoAndVideo, JNIEnv *env, jclass clazz) {
+
 }
 
 
 extern "C" JNIEXPORT void JNICALL
-SignalingClient(answer, JNIEnv *env, jclass clazz, jobject context, jobject jSignaling, jstring offer) {
-    THREAD_CURRENT("joinRoom");
+RTCEngine(call, JNIEnv *env, jclass clazz, jobject context, jobject jSignaling) {
+    THREAD_CURRENT("Call");
     if (pLiveObj == nullptr) {
-        auto signaling = new rtc_demo::SignalingClientWrapper(env, jSignaling);
+        auto signaling = new rtc_demo::JavaRTCEngine(env, jSignaling);
         pLiveObj = new Live(env, context, signaling);
         pLiveObj->createEngine();
     }
-    pLiveObj->onSDPReceived(jstring2str(env, offer));
+    pLiveObj->connectToPeer(true);
+}
+
+extern "C" JNIEXPORT void JNICALL
+RTCEngine(answer, JNIEnv *env, jclass clazz, jobject jSd) {
+    THREAD_CURRENT("Answer");
+    RTC_CHECK(pLiveObj) << "Live is null";
+    pLiveObj->connectToPeer(false);
+}
+
+
+extern "C" JNIEXPORT void JNICALL
+RTCEngine(setRemoteDescription, JNIEnv *env, jclass clazz, jint type, jstring jSd) {
+    RTC_CHECK(pLiveObj) << "Live is null";
+    pLiveObj->onSDPReceived((webrtc::SdpType)type, jstring2str(env, jSd));
+}
+
+
+extern "C" JNIEXPORT void JNICALL
+RTCEngine(setIce, JNIEnv *env, jclass jclazz, jstring offer) {
+    RTC_CHECK(pLiveObj) << "Live is null";
+    pLiveObj->onIceCandidateReceived(jstring2str(env, offer));
 }

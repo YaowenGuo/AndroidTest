@@ -10,7 +10,6 @@ import org.webrtc.*
 import tech.yaowen.rtc_demo.base.log
 import tech.yaowen.rtc_demo.lib.RtcEngine
 import tech.yaowen.signaling.SignalingClient
-import tech.yaowen.signaling.data.SessionDescriptionMsg
 
 /**
  * 1. 连接服务器，获取自己是发起者还是应答者
@@ -42,7 +41,7 @@ class PeerConnectionActivity : BaseActivity(), SignalingClient.Callback {
         JoinRoomDialog(this, JoinRoomDialog.OnSubmitListener {
             SignalingClient[application]
                 .setCallback(this)
-                .join(it)
+                .joinRoom(it)
 
         }).show()
     }
@@ -107,14 +106,14 @@ class PeerConnectionActivity : BaseActivity(), SignalingClient.Callback {
 
     }
 
-    override fun onOfferReceived(data: JSONObject?) {
+    override fun onOfferReceived(sd: String) {
         answer(
             videoTrack!!,
-            SessionDescription(SessionDescription.Type.OFFER, data!!.optString("sdp"))
+            SessionDescription(SessionDescription.Type.OFFER, sd)
         )
     }
 
-    override fun onAnswerReceived(data: JSONObject?) {
+    override fun onAnswerReceived(sd: String) {
         peerConnection.setRemoteDescription(
             object : SdpObserver {
                 override fun onCreateSuccess(sdp: SessionDescription) {}
@@ -122,14 +121,14 @@ class PeerConnectionActivity : BaseActivity(), SignalingClient.Callback {
                 override fun onCreateFailure(s: String) {}
                 override fun onSetFailure(s: String) {}
             },
-            SessionDescription(SessionDescription.Type.ANSWER, data!!.optString("sdp"))
+            SessionDescription(SessionDescription.Type.ANSWER, sd)
         )
     }
 
-    override fun onIceCandidateReceived(data: JSONObject?) {
+    override fun onIceCandidateReceived(data: JSONObject) {
         peerConnection.addIceCandidate(
             IceCandidate(
-                data!!.optString("id"),
+                data.optString("id"),
                 data.optInt("label"),
                 data.optString("candidate")
             )
@@ -207,7 +206,7 @@ class PeerConnectionActivity : BaseActivity(), SignalingClient.Callback {
 
     private fun hint(str: String) {
         Toast.makeText(this, str, Toast.LENGTH_SHORT).show()
-        Log.e("webrtc_albert", str)
+        Log.e("webrtc_lim", str)
     }
 
     fun sendIce(iceCandidate: IceCandidate) {

@@ -43,7 +43,7 @@ import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
 
 import tech.yaowen.rtc_native.R;
-import tech.yaowen.rtc_native.signaling.SignalingClient;
+import tech.yaowen.rtc_native.rtc.RTCEngine;
 
 class CameraSeekBar {
     int _progress;
@@ -214,7 +214,9 @@ public class CameraActivity extends NativeActivity
         }
         String[] accessPermissions = new String[]{
                 Manifest.permission.CAMERA,
-                Manifest.permission.WRITE_EXTERNAL_STORAGE
+                Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                Manifest.permission.RECORD_AUDIO,
+
         };
         boolean needRequire = false;
         for (String access : accessPermissions) {
@@ -231,7 +233,6 @@ public class CameraActivity extends NativeActivity
                     PERMISSION_REQUEST_CODE_CAMERA);
             return;
         }
-//        notifyCameraPermission(true, this);
         inputRoomName();
     }
 
@@ -255,8 +256,6 @@ public class CameraActivity extends NativeActivity
                     grantResults[1] == PackageManager.PERMISSION_GRANTED) {
                 inputRoomName();
             }
-//            notifyCameraPermission(grantResults[0] == PackageManager.PERMISSION_GRANTED &&
-//                    grantResults[1] == PackageManager.PERMISSION_GRANTED, this);
         }
     }
 
@@ -375,10 +374,8 @@ public class CameraActivity extends NativeActivity
 
     private void inputRoomName() {
         new JoinRoomDialog(this, roomName -> {
-            SignalingClient.threadCurrent("JoinRoomDialog");
-            SignalingClient.getInstance(getApplication())
-//                    .join(roomName);
-                    .onCreateRoom();
+            RTCEngine.getInstance(getApplication())
+                    .joinRoom(roomName);
         }).show();
     }
 

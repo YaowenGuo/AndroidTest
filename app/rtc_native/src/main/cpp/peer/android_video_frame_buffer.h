@@ -39,6 +39,7 @@ namespace rtc_demo {
                 int scale_width,
                 int scale_height) override;
 
+        virtual const webrtc::I420BufferInterface* GetI420() const override;
 
     protected:
         // Should not be called directly. Adopts the Java VideoFrame.Buffer. Use
