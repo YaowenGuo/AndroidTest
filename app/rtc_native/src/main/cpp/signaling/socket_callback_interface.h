@@ -16,7 +16,8 @@ namespace rtc_demo {
         virtual void onSDPReceived(const SdpType type, const string &sd) = 0;
 
 
-        virtual void onIceCandidateReceived(string const &) = 0;
+        virtual void onIceCandidateReceived(const std::string& sdp_mid, int sdp_mline_index,
+                                            const std::string& sdp) = 0;
     };
 
 }

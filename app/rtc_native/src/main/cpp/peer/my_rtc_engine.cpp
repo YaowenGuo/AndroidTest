@@ -18,12 +18,12 @@
 #include <api/video_codecs/builtin_video_decoder_factory.h>
 
 #include <modules/video_capture/video_capture_factory.h>
-#include <rtc_base/strings/json.h>
 #include <camera/camera_engine.h>
 #include <rtc_base/task_queue_gcd.h>
 #include <api/rtc_event_log/rtc_event_log_factory.h>
 #include <media/engine/webrtc_media_engine.h>
 #include <api/task_queue/default_task_queue_factory.h>
+#include <rtc_base/log_sinks.h>
 #include "utils/jvm.h"
 
 class DummySetSessionDescriptionObserver
@@ -34,11 +34,11 @@ public:
     }
 
 
-    virtual void OnSuccess() { RTC_LOG(INFO) << __FUNCTION__; }
+    virtual void OnSuccess() { RTC_LOG(LS_INFO) << __FUNCTION__; }
 
 
     virtual void OnFailure(webrtc::RTCError error) {
-        RTC_LOG(INFO) << __FUNCTION__ << " " << ToString(error.type()) << ": "
+        RTC_LOG(LS_INFO) << __FUNCTION__ << " " << ToString(error.type()) << ": "
                       << error.message();
     }
 };
@@ -59,7 +59,12 @@ Live::Live(JNIEnv *jni, jobject context, rtc_demo::JavaRTCEngine *signaling)
 //    rtc::AutoSocketServerThread thread(&socket);
     signaling_ = signaling;
 
-    // ------------------------
+    // 输出日志到文件
+    rtc::LogMessage::LogToDebug(rtc::LS_VERBOSE);
+    rtc::LogMessage::SetLogToStderr(true);
+    auto ff = new rtc::FileRotatingLogSink("/sdcard/Android/data/tech.yaowen.rtc_native/", "webrtc_log", 1024 * 1024 * 10, 100);
+    ff->Init();
+    rtc::LogMessage::AddLogToStream(ff, rtc::LS_VERBOSE);
 }
 
 
@@ -124,7 +129,7 @@ void Live::createEngine() {
     CreatePeerConnection(false);
     // video source
     rtc::scoped_refptr<rtc_demo::AndroidVideoTrackSource> video_source =
-            new rtc::RefCountedObject<rtc_demo::AndroidVideoTrackSource>(
+            rtc::make_ref_counted<rtc_demo::AndroidVideoTrackSource>(
                     peer_connection_->signaling_thread(), false, false
             );
     // add audio and video track.
@@ -198,7 +203,7 @@ Live::AddTracks(webrtc::VideoTrackSourceInterface *video_source) {
     }
 
 
-    // track
+    // video track
     rtc::scoped_refptr<webrtc::VideoTrackInterface> video_track =
             peer_connection_factory_->CreateVideoTrack(kVideoLabel, video_source);
 
@@ -253,7 +258,7 @@ void Live::OnSuccess(SessionDescriptionInterface *desc) {
     // 可以在设置之前，对 SDP 做一些排序等操作，以设置某些编解码的优先级。
     desc->description();
     peer_connection_->SetLocalDescription(
-            std::move(std::unique_ptr<SessionDescriptionInterface>(desc)), this);
+            std::move(std::unique_ptr<SessionDescriptionInterface>(desc)), rtc::scoped_refptr<SetLocalDescriptionObserverInterface>(this));
     // 创建 session 成功后要发送到远端。
     signaling_->SendSessionDescription(desc);
 }
@@ -287,7 +292,7 @@ void Live::onSDPReceived(const SdpType type, const string &sd) {
     std::unique_ptr<webrtc::SessionDescriptionInterface> session_description =
             webrtc::CreateSessionDescription(type, sd, &error);
     if (!session_description) {
-        RTC_LOG(WARNING) << "Can't parse received session description message. SdpParseError was: "
+        RTC_LOG(LS_WARNING) << "Can't parse received session description message. SdpParseError was: "
                          << error.description;
         return;
     }
@@ -297,40 +302,20 @@ void Live::onSDPReceived(const SdpType type, const string &sd) {
 }
 
 
-void Live::onIceCandidateReceived(const string &message) {
+void Live::onIceCandidateReceived(const std::string& sdp_mid, int sdp_mline_index, const std::string& sdp) {
     THREAD_CURRENT("onIceCandidateReceived");
-
-    Json::Reader reader;
-    Json::Value jmessage;
-    if (!reader.parse(message, jmessage)) {
-        RTC_LOG(WARNING) << "Received unknown message. " << message;
-        return;
-    }
-
-    std::string sdp_mid;
-    int sdp_mlineindex = 0;
-    std::string sdp;
-    if (!rtc::GetStringFromJsonObject(jmessage, kCandidateSdpMidName,
-                                      &sdp_mid) ||
-        !rtc::GetIntFromJsonObject(jmessage, kCandidateSdpMlineIndexName,
-                                   &sdp_mlineindex) ||
-        !rtc::GetStringFromJsonObject(jmessage, kCandidateSdpName, &sdp)) {
-        RTC_LOG(WARNING) << "Can't parse received message.";
-        return;
-    }
     webrtc::SdpParseError error;
-    webrtc::IceCandidateInterface *candidate = webrtc::CreateIceCandidate(sdp_mid, sdp_mlineindex,
+    webrtc::IceCandidateInterface *candidate = webrtc::CreateIceCandidate(sdp_mid, sdp_mline_index,
                                                                           sdp, &error);
     if (!candidate) {
-        RTC_LOG(WARNING) << "Can't parse received candidate message. "
+        RTC_LOG(LS_WARNING) << "Can't parse received candidate message. "
                             "SdpParseError was: "
                          << error.description;
         return;
     }
     if (!peer_connection_->AddIceCandidate(candidate)) {
-        RTC_LOG(WARNING) << "Failed to apply the received candidate";
+        RTC_LOG(LS_WARNING) << "Failed to apply the received candidate";
         return;
     }
-    RTC_LOG(INFO) << " Received candidate :" << message;
 }
 // L***************** SocketCallbackInterface *******************

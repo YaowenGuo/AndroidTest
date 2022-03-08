@@ -49,9 +49,7 @@ namespace rtc_demo {
             if (rtc::Thread::Current() == signaling_thread_) {
                 FireOnChanged();
             } else {
-                // TODO(sakal): Is this even necessary, does FireOnChanged have to be
-                // called from signaling thread?
-                signaling_thread_->PostTask(RTC_FROM_HERE, [this] { FireOnChanged(); });
+                signaling_thread_->PostTask([this] { FireOnChanged(); });
             }
         }
     }

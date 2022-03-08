@@ -101,7 +101,7 @@ public class RTCEngine implements tech.yaowen.signaling.SignalingClient.Callback
 
     @Override
     public void onIceCandidateReceived(@NonNull JSONObject data) {
-        setIce(data.toString());
+        setIce(data.optString("id"), data.optInt("label"), data.optString("candidate"));
     }
 
 
@@ -142,7 +142,5 @@ public class RTCEngine implements tech.yaowen.signaling.SignalingClient.Callback
 
     private native static void setRemoteDescription(int type, String sdp);
 
-    private native static void setIce(String ice);
-
-
+    private native static void setIce(String ice, int sdpMLineIndex, String sdp);
 }

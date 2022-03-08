@@ -142,17 +142,6 @@ public:
 
     // Gathering of an ICE candidate failed.
     // See https://w3c.github.io/webrtc-pc/#event-icecandidateerror
-    // |host_candidate| is a stringified socket address.
-    void OnIceCandidateError(
-            const std::string &host_candidate,
-            const std::string &url,
-            int error_code,
-            const std::string &error_text
-    ) override {}
-
-
-    // Gathering of an ICE candidate failed.
-    // See https://w3c.github.io/webrtc-pc/#event-icecandidateerror
     void OnIceCandidateError(
             const std::string &address,
             int port,
@@ -227,7 +216,7 @@ public:
     void onSDPReceived(const SdpType type, const string &sd) override;
 
 
-    void onIceCandidateReceived(string const &) override;
+    void onIceCandidateReceived(const std::string& sdp_mid, int sdp_mline_index, const std::string& sdp) override;
     // L***************** SocketCallbackInterface *******************
 
 protected:

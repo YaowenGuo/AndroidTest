@@ -20,7 +20,7 @@ pub unsafe extern "C"  fn Java_tech_yaowen_androidrust_Hello_stringFromJNI(env: 
 
 
     let output = env.new_string(format!("Hello, {}!", input))
-        .expect("Couldn't create java string!");
+        .expect("Couldn't create.create java string!");
     output.into_inner()
 }
 

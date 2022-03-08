@@ -24,7 +24,7 @@
 
 
 #define RTCEngine(func, ...) \
-  Java_tech_yaowen_rtc_1native_rtc_RTCEngine_##func (__VA_ARGS__)
+  Java_tech_yaowen_rtc_1native_rtc_RTCEngine_ ## func (__VA_ARGS__)
 
 /**
  * Retrieve current rotation from Java side
@@ -73,7 +73,6 @@ const int kInitDataLen = 6;
 
 void CameraEngine::EnableUI(void) {
     JNIEnv *jni = env_;
-//  app_->activity->vm->AttachCurrentThread(&jni, NULL);
     int64_t range[3];
 
     // Default class retrieval
@@ -95,7 +94,6 @@ void CameraEngine::EnableUI(void) {
     }
     jni->SetLongArrayRegion(initData, 3, 3, range);
     jni->CallVoidMethod(app_->activity->clazz, methodID, initData);
-//  app_->activity->vm->DetachCurrentThread();
 }
 
 
@@ -146,6 +144,7 @@ void CameraEngine::OnCameraPermission(JNIEnv *env, jboolean granted, jobject con
 std::string jstring2str(JNIEnv *jni, jstring jstr) {
     const char *charArr = jni->GetStringUTFChars(jstr, 0);
     std::string str(charArr);
+//    jni->ReleaseStringUTFChars(jstr, charArr);
     return str;
 }
 
@@ -200,6 +199,7 @@ RTCEngine(captureVideoAndVideo, JNIEnv *env, jclass clazz) {
 extern "C" JNIEXPORT void JNICALL
 RTCEngine(call, JNIEnv *env, jclass clazz, jobject context, jobject jSignaling) {
     THREAD_CURRENT("Call");
+    RTC_DLOG(LS_INFO) << "Lim webrtc start Call, yaowen.";
     if (pLiveObj == nullptr) {
         auto signaling = new rtc_demo::JavaRTCEngine(env, jSignaling);
         pLiveObj = new Live(env, context, signaling);
@@ -224,7 +224,7 @@ RTCEngine(setRemoteDescription, JNIEnv *env, jclass clazz, jint type, jstring jS
 
 
 extern "C" JNIEXPORT void JNICALL
-RTCEngine(setIce, JNIEnv *env, jclass jclazz, jstring offer) {
+RTCEngine(setIce, JNIEnv *env, jclass jclazz, jstring sdp_mid, jint sdp_mline_index, jstring sdp) {
     RTC_CHECK(pLiveObj) << "Live is null";
-    pLiveObj->onIceCandidateReceived(jstring2str(env, offer));
+    pLiveObj->onIceCandidateReceived(jstring2str(env, sdp_mid), sdp_mline_index, jstring2str(env, sdp));
 }

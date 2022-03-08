@@ -85,7 +85,7 @@ namespace rtc_demo {
 
     void JavaRTCEngine::SendIceCandidate(const IceCandidateInterface *candidate) {
         JNIEnv* env = AttachCurrentThreadIfNeeded();
-        RTC_LOG(INFO) << __FUNCTION__ << " " << candidate->sdp_mline_index();
+        RTC_LOG(LS_INFO) << __FUNCTION__ << " " << candidate->sdp_mline_index();
         auto j_ice_class = GetClass(env, "org/webrtc/IceCandidate");
         jmethodID j_session_constructor = env->GetMethodID(
                 j_ice_class.obj(), "<init>",
