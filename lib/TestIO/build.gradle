@@ -1,5 +1,0 @@
-apply from:"../java_lib_basic.gradle"
-
-dependencies {
-    implementation("com.squareup.okio:okio:2.6.0")
-}

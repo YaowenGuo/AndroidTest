@@ -32,11 +32,11 @@ dependencies {
     testImplementation deps.junit
     androidTestImplementation deps.runner
     androidTestImplementation deps.espresso
+    implementation project(':lib:lib_annotations')
 
 //    implementation project(path: ':test_annotation')
 //    annotationProcessor project(path: ':lib_butter_knife')
-    implementation project(':lib:33_lib_annotations')
     implementation project(':android_lib:lib_share')
-    kapt project(':lib:33_lib_processor')
+    kapt project(':lib:lib_processor')
 
 }

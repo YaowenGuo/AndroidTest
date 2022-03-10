@@ -1,6 +1,0 @@
-apply from:"../java_lib_basic.gradle"
-
-
-dependencies {
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
-}

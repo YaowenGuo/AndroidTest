@@ -7,7 +7,7 @@ android {
             cmake {
                 // Can also use system or none as ANDROID_STL, but not c++_static.
                 arguments "-DANDROID_STL=c++_shared"
-                cppFlags '-march=armv8.1-a'
+//                cppFlags '-march=armv8.1-a'
             }
         }
     }
@@ -22,7 +22,6 @@ android {
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
-    implementation project(":lib:lib_jni")
     implementation project(":android_lib:theme")
     implementation deps.appcompat
     implementation deps.constraintlayout

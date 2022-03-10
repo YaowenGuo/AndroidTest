@@ -1,5 +1,0 @@
-apply from:"../java_lib_basic.gradle"
-
-dependencies {
-    implementation deps.okhttp
-}

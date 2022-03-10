@@ -1,7 +1,0 @@
-apply from:"../java_lib_basic.gradle"
-
-
-dependencies {
-    implementation deps.javapoet
-    implementation project(path: ':lib:test_annotation')
-}

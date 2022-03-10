@@ -1,6 +1,0 @@
-apply from:"../java_lib_basic.gradle"
-
-dependencies {
-    implementation "io.reactivex.rxjava3:rxkotlin:3.0.0"
-    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.3.2"
-}
