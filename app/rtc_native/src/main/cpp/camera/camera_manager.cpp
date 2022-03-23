@@ -32,10 +32,10 @@ static const uint64_t kMinExposureTime = static_cast<uint64_t>(1000000);
 static const uint64_t kMaxExposureTime = static_cast<uint64_t>(250000000);
 
 
-NDKCamera::NDKCamera()
+NDKCamera::NDKCamera(uint32_t camera_facing)
         : cameraMgr_(nullptr),
           activeCameraId_(""),
-          cameraFacing_(ACAMERA_LENS_FACING_BACK),
+          cameraFacing_(camera_facing),
           cameraOrientation_(0),
           outputContainer_(nullptr),
           captureSessionState_(CaptureSessionState::MAX_STATE),
@@ -362,7 +362,7 @@ void NDKCamera::EnumerateCamera() {
                 cam.owner_ = false;
                 cam.device_ = nullptr;
                 cameras_[cam.id_] = cam;
-                if (cam.facing_ == ACAMERA_LENS_FACING_BACK) {
+                if (cam.facing_ == cameraFacing_) {
                     activeCameraId_ = cam.id_;
                 }
                 break;

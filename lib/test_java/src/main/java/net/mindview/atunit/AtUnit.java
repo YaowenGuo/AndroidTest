@@ -145,7 +145,7 @@ public class AtUnit implements ProcessFiles.Strategy {
       try {
         return testClass.newInstance();
       } catch(Exception e) {
-        throw new RuntimeException("Couldn't create.create a " +
+        throw new RuntimeException("Couldn't create a " +
           "test object. Try using a @TestObject method.");
       }
     }

@@ -106,7 +106,7 @@ private:
 
 
 public:
-    NDKCamera();
+    NDKCamera(uint32_t camera_facing);
 
 
     ~NDKCamera();
