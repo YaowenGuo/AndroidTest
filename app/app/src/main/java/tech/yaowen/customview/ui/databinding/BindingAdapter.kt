@@ -61,7 +61,7 @@ fun setListener(view: View, detach: OnViewDetachedFromWindow?, attach: OnViewAtt
     }
 
     val oldListener: View.OnAttachStateChangeListener? =
-        ListenerUtil.trackListener(view, newListener, R.id.onAttachStateChangeListener)
+        ListenerUtil.trackListener(view, newListener, androidx.databinding.library.baseAdapters.R.id.onAttachStateChangeListener)
     if (oldListener != null) {
         view.removeOnAttachStateChangeListener(oldListener)
     }

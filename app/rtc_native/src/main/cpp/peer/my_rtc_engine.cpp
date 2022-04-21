@@ -157,7 +157,6 @@ bool Live::CreatePeerConnection(bool dtls) {
     RTC_DCHECK(!peer_connection_);
     webrtc::PeerConnectionInterface::RTCConfiguration config;
     config.sdp_semantics = webrtc::SdpSemantics::kUnifiedPlan;
-    config.enable_dtls_srtp = true;
     webrtc::PeerConnectionInterface::IceServer server;
     server.uri = "stun:stun.l.google.com:19302";
     config.servers.push_back(server);
@@ -195,7 +194,7 @@ Live::AddTracks(webrtc::VideoTrackSourceInterface *video_source) {
                     kAudioLabel,
                     audioSource
             );
-
+    // TODO stream_ids 添加多个会导致对方接受不到。但是这里是允许传多个的。 Way?
     auto result_or_error = peer_connection_->AddTrack(audio_track, {kStreamId});
     if (!result_or_error.ok()) {
         RTC_LOG(LS_ERROR) << "Failed to add audio track to PeerConnection: "

@@ -8,6 +8,6 @@ class TransparentBgDialog: DialogFragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setStyle(DialogFragment.STYLE_NO_TITLE, R.style.MyDialog);
+        setStyle(DialogFragment.STYLE_NO_TITLE, tech.yaowen.theme.R.style.MyDialog);
     }
 }

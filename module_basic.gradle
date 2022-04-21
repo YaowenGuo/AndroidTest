@@ -35,4 +35,9 @@ android {
     buildFeatures {
         viewBinding true
     }
+
+    // Lint 分析任务就可以在各个模块中并行执行，从而显著提升 Lint 任务运行的速度
+    lintOptions {
+        checkDependencies true
+    }
 }

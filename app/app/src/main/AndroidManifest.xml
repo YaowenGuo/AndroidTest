@@ -13,28 +13,32 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.App">
-        <activity android:name=".dialog.TestDialogActivity">
+        <activity
+            android:name=".lifecycle.ViewLifeTestActivity"
+            android:exported="true" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+        </activity>
+        <activity android:name=".dialog.TestDialogActivity">
+
         </activity>
         <activity
             android:name=".lifecycle.ActivityB"
-            android:launchMode="singleTop"></activity>
+            android:launchMode="singleTop" />
         <activity
             android:name=".lifecycle.ActivityA"
             android:label="@string/title_activity_activity"
-            android:launchMode="singleTask"
-            android:theme="@style/AppTheme.NoActionBar">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
+            android:launchMode="singleTask">
+<!--            <intent-filter>-->
+<!--                <action android:name="android.intent.action.MAIN" />-->
 
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
+<!--                <category android:name="android.intent.category.LAUNCHER" />-->
+<!--            </intent-filter>-->
         </activity>
-        <activity android:name=".intercept.InterceptActivity"/>
+        <activity android:name=".intercept.InterceptActivity" />
         <activity android:name=".ui.TouchActivity" />
         <activity android:name=".ui.service.ServiceTestActivity" />
         <activity android:name=".ui.workmanager.JobQueueActivity">
