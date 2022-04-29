@@ -53,7 +53,8 @@ public class RTCEngine implements tech.yaowen.signaling.SignalingClient.Callback
 
     public void joinRoom(String roomName) {
         SignalingClient.threadCurrent("joinRoom");
-        signaling.joinRoom(roomName);
+//        signaling.joinRoom(roomName);
+        call(application.getBaseContext(), this);
     }
 
     @Override
@@ -136,7 +137,7 @@ public class RTCEngine implements tech.yaowen.signaling.SignalingClient.Callback
 
     private native static void captureVideoAndVideo();
 
-    private native static void call(Context context, RTCEngine signaling);
+    private native static void call(Context application_context, RTCEngine signaling);
 
     private native static void answer(String sd);
 

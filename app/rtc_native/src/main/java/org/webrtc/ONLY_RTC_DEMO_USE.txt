@@ -5,5 +5,6 @@ org.webrtc.SessionDescription
 org.webrtc.WebRtcClassLoader
 
 // 可以看到 WebRTC lib 中使用到的类只有连个目录
-src/modules/audio_device/android/java/src/org/webrtc/voiceengine
+src/sdk/android/api/org/webrtc/audio
+src/sdk/android/src/java/org/webrtc/audio
 src/rtc_base/java/src/org/webrtc

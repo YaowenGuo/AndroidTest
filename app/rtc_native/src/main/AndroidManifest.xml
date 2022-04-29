@@ -22,7 +22,8 @@
         <activity
             android:name=".view.home.CameraActivity"
             android:configChanges="orientation|keyboardHidden"
-            android:launchMode="singleTask">
+            android:launchMode="singleTask"
+            android:exported="true">
             <meta-data
                 android:name="android.app.lib_name"
                 android:value="rtc_demo" />

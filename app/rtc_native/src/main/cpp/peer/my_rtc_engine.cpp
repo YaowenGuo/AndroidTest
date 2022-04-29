@@ -24,6 +24,7 @@
 #include <media/engine/webrtc_media_engine.h>
 #include <api/task_queue/default_task_queue_factory.h>
 #include <rtc_base/log_sinks.h>
+#include <sdk/android/native_api/audio_device_module/audio_device_android.h>
 #include "utils/jvm.h"
 
 class DummySetSessionDescriptionObserver
@@ -46,18 +47,11 @@ public:
 /**
   * 1. 初始化
   */
-Live::Live(JNIEnv *jni, jobject context, rtc_demo::JavaRTCEngine *signaling)
+Live::Live(JNIEnv *env, jobject application_context, rtc_demo::JavaRTCEngine *signaling)
         : peer_connection_factory_(nullptr), peer_connection_(nullptr) {
-
-    rtc::InitializeSSL();
-
-    JavaVM *jvm = nullptr;
-    jni->GetJavaVM(&jvm);
-
-    webrtc::JVM::Initialize(jvm, context);
-//    rtc::PhysicalSocketServer socket = rtc::PhysicalSocketServer();
-//    rtc::AutoSocketServerThread thread(&socket);
     signaling_ = signaling;
+    j_context_ref = env->NewGlobalRef(application_context);
+    webrtc::JVM::Initialize(::jni::GetJVM(), j_context_ref);
 
     // 输出日志到文件
     rtc::LogMessage::LogToDebug(rtc::LS_VERBOSE);
@@ -70,6 +64,7 @@ Live::Live(JNIEnv *jni, jobject context, rtc_demo::JavaRTCEngine *signaling)
 
 Live::~Live() {
     delete signaling_;
+    jni::GetEnv()->DeleteGlobalRef(j_context_ref);
 }
 
 
@@ -93,7 +88,7 @@ void PostThreadAttachTask(rtc::Thread *queue, const rtc::Location &posted_from) 
 /**
   * 2. 创建 PeerConnectionFactory, 因为 Webrtc 可以同时进行多个连接，以创建多个 PeerConnection (PC).
   */
-void Live::createEngine() {
+void Live::createEngine(JNIEnv *jni, jobject application_context) {
     rtc::ThreadManager::Instance()->WrapCurrentThread();
 
     std::unique_ptr<rtc::Thread> network_thread = rtc::Thread::CreateWithSocketServer();

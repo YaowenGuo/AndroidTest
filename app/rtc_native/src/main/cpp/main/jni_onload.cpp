@@ -13,14 +13,17 @@
 #define JNIEXPORT __attribute__((visibility("default")))
 
 #include "rtc_base/ssl_adapter.h"
+#include <sdk/android/native_api/base/init.h>
 
-#include "jvm.h"
-#include "class_loader.h"
+#include "utils/jvm.h"
+#include "utils/class_loader.h"
 
 namespace jni {
 
 extern "C" jint JNIEXPORT JNICALL JNI_OnLoad(JavaVM* jvm, void* reserved) {
   jint ret = InitGlobalJniVariables(jvm);
+  rtc::InitializeSSL();
+  webrtc::InitAndroid(::jni::GetJVM());
   RTC_DCHECK_GE(ret, 0);
   if (ret < 0)
     return -1;

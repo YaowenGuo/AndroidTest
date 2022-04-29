@@ -16,6 +16,9 @@
  */
 #include <modules/utility/include/helpers_android.h>
 #include <api/jsep.h>
+#include <sdk/android/src/jni/audio_device/audio_device_module.h>
+#include <utils/jvm.h>
+#include <sdk/android/native_api/jni/class_loader.h>
 #include "camera/camera_engine.h"
 #include "utils/native_debug.h"
 
@@ -197,13 +200,13 @@ RTCEngine(captureVideoAndVideo, JNIEnv *env, jclass clazz) {
 
 
 extern "C" JNIEXPORT void JNICALL
-RTCEngine(call, JNIEnv *env, jclass clazz, jobject context, jobject jSignaling) {
+RTCEngine(call, JNIEnv *env, jclass clazz, jobject application_context, jobject jSignaling) {
     THREAD_CURRENT("Call");
     RTC_DLOG(LS_INFO) << "Lim webrtc start Call, yaowen.";
     if (pLiveObj == nullptr) {
         auto signaling = new rtc_demo::JavaRTCEngine(env, jSignaling);
-        pLiveObj = new Live(env, context, signaling);
-        pLiveObj->createEngine();
+        pLiveObj = new Live(env, application_context, signaling);
+        pLiveObj->createEngine(env, application_context);
     }
     pLiveObj->connectToPeer(true);
 }
