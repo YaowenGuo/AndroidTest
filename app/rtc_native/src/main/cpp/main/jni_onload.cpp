@@ -9,8 +9,6 @@
  */
 
 #include <jni.h>
-#undef JNIEXPORT
-#define JNIEXPORT __attribute__((visibility("default")))
 
 #include "rtc_base/ssl_adapter.h"
 #include <sdk/android/native_api/base/init.h>
@@ -22,7 +20,6 @@ namespace jni {
 
 extern "C" jint JNIEXPORT JNICALL JNI_OnLoad(JavaVM* jvm, void* reserved) {
   jint ret = InitGlobalJniVariables(jvm);
-  rtc::InitializeSSL();
   webrtc::InitAndroid(::jni::GetJVM());
   RTC_DCHECK_GE(ret, 0);
   if (ret < 0)
@@ -35,6 +32,7 @@ extern "C" jint JNIEXPORT JNICALL JNI_OnLoad(JavaVM* jvm, void* reserved) {
 
 extern "C" void JNIEXPORT JNICALL JNI_OnUnLoad(JavaVM* jvm, void* reserved) {
   RTC_CHECK(rtc::CleanupSSL()) << "Failed to CleanupSSL()";
+  ClearGlobalJniVariables();
 }
 
 }  // namespace jni

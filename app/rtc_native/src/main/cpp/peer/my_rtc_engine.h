@@ -42,7 +42,7 @@ public:
 
 
     rtc::scoped_refptr<webrtc::VideoTrackInterface>
-    AddTracks(webrtc::VideoTrackSourceInterface* videoSource);
+    AddTracks(rtc::scoped_refptr<rtc_demo::AndroidVideoTrackSource> videoSource);
 
 
     void connectToPeer(bool offer);
@@ -224,7 +224,6 @@ protected:
     rtc::scoped_refptr<webrtc::PeerConnectionInterface> peer_connection_;
     rtc_demo::JavaRTCEngine *signaling_;
     webrtc::PeerConnectionInterface::RTCOfferAnswerOptions offerAnswerOption = webrtc::PeerConnectionInterface::RTCOfferAnswerOptions();
-    jobject j_context_ref;
 };
 
 static Live *pLiveObj = nullptr;

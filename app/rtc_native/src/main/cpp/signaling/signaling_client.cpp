@@ -6,7 +6,6 @@
 #include <utils/native_debug.h>
 #include <iostream>
 #include <condition_variable>
-#include <utils/attach_thread_scoped.h>
 #include <peer/android_video_frame_buffer.h>
 
 #include "utils/class_loader.h"
@@ -44,7 +43,6 @@ namespace rtc_demo {
         ASSERT(j_pc_class != nullptr, "Find PeerConnection Class return null pointer: %s, %d", __FUNCTION__, __LINE__)
         j_pc_class = jni::GetEnv()->FindClass("org/webrtc/PeerConnection");
         ASSERT(j_pc_class != nullptr, "Find PeerConnection Class return null pointer: %s, %d", __FUNCTION__, __LINE__)
-
     }
 
 

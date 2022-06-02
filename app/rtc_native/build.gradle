@@ -25,6 +25,7 @@ android {
                 // Sets optional flags for the C++ compiler.
                 // cppFlags "-fexceptions", "-frtti"
 //                cppFlags '-fno-rtti'
+                cppFlags '-fvisibility=hidden'
             }
         }
         multiDexKeepProguard file('proguard-rules.pro')

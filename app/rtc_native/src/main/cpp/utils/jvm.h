@@ -17,6 +17,7 @@ namespace jni {
 
 jint InitGlobalJniVariables(JavaVM* jvm);
 
+void ClearGlobalJniVariables();
 // Return a |JNIEnv*| usable on this thread or NULL if this thread is detached.
 JNIEnv* GetEnv();
 

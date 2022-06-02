@@ -196,8 +196,7 @@ class WebRtcAudioTrack {
     // Note that this size doesn't guarantee a smooth playback under load.
     final int channelConfig = channelCountToConfiguration(channels);
     final int minBufferSizeInBytes = (int) (AudioTrack.getMinBufferSize(sampleRate, channelConfig,
-                                                AudioFormat.ENCODING_PCM_16BIT)
-        * bufferSizeFactor);
+                                                AudioFormat.ENCODING_PCM_16BIT) * bufferSizeFactor);
     Logging.d(TAG, "minBufferSizeInBytes: " + minBufferSizeInBytes);
     // For the streaming mode, data must be written to the audio sink in
     // chunks of size (given by byteBuffer.capacity()) less than or equal

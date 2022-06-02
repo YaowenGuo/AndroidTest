@@ -50,8 +50,7 @@ public:
 Live::Live(JNIEnv *env, jobject application_context, rtc_demo::JavaRTCEngine *signaling)
         : peer_connection_factory_(nullptr), peer_connection_(nullptr) {
     signaling_ = signaling;
-    j_context_ref = env->NewGlobalRef(application_context);
-    webrtc::JVM::Initialize(::jni::GetJVM(), j_context_ref);
+    webrtc::JVM::Initialize(::jni::GetJVM(), application_context);
 
     // 输出日志到文件
     rtc::LogMessage::LogToDebug(rtc::LS_VERBOSE);
@@ -64,7 +63,7 @@ Live::Live(JNIEnv *env, jobject application_context, rtc_demo::JavaRTCEngine *si
 
 Live::~Live() {
     delete signaling_;
-    jni::GetEnv()->DeleteGlobalRef(j_context_ref);
+    webrtc::JVM::Uninitialize();
 }
 
 
@@ -178,7 +177,7 @@ void Live::connectToPeer(bool offer) {
 
 
 rtc::scoped_refptr<webrtc::VideoTrackInterface>
-Live::AddTracks(webrtc::VideoTrackSourceInterface *video_source) {
+Live::AddTracks(rtc::scoped_refptr<rtc_demo::AndroidVideoTrackSource> video_source) {
     if (!peer_connection_->GetSenders().empty()) {
         return nullptr;  // Already added tracks.
     }
@@ -187,19 +186,19 @@ Live::AddTracks(webrtc::VideoTrackSourceInterface *video_source) {
     rtc::scoped_refptr<webrtc::AudioTrackInterface> audio_track =
             peer_connection_factory_->CreateAudioTrack(
                     kAudioLabel,
-                    audioSource
+                    audioSource.get()
             );
-    // TODO stream_ids 添加多个会导致对方接受不到。但是这里是允许传多个的。 Way?
+    // TODO 相同 stream_ids 的音视频用于关联到一个 MediaStream，从而保持音视频同步。添加多个会导致对方接受不到。
+    // 但是这里是允许传多个的。 Way?
     auto result_or_error = peer_connection_->AddTrack(audio_track, {kStreamId});
     if (!result_or_error.ok()) {
         RTC_LOG(LS_ERROR) << "Failed to add audio track to PeerConnection: "
                           << result_or_error.error().message();
     }
 
-
     // video track
     rtc::scoped_refptr<webrtc::VideoTrackInterface> video_track =
-            peer_connection_factory_->CreateVideoTrack(kVideoLabel, video_source);
+            peer_connection_factory_->CreateVideoTrack(kVideoLabel, video_source.get());
 
     result_or_error = peer_connection_->AddTrack(video_track, {kStreamId});
     if (!result_or_error.ok()) {
@@ -222,7 +221,7 @@ void Live::OnIceCandidate(const IceCandidateInterface *candidate) {
 // Triggered when media is received on a new stream from remote peer.
 void Live::OnAddStream(rtc::scoped_refptr<MediaStreamInterface> stream) {
     auto tracks = stream->GetVideoTracks();
-    if (tracks.size() > 0) {
+    if (!tracks.empty()) {
         auto videoSink = new rtc_demo::AndroidVideoSink(GetAppEngine()->app_->window);
         tracks[0]->AddOrUpdateSink(videoSink, rtc::VideoSinkWants());
     }
@@ -231,7 +230,7 @@ void Live::OnAddStream(rtc::scoped_refptr<MediaStreamInterface> stream) {
 
 // Triggered when a remote peer closes a stream.
 void Live::OnRemoveStream(rtc::scoped_refptr<MediaStreamInterface> stream) {
-    if (stream->GetVideoTracks().size() <= 0) {
+    if (stream->GetVideoTracks().empty()) {
 
     }
 }

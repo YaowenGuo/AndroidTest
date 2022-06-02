@@ -83,6 +83,10 @@ jint InitGlobalJniVariables(JavaVM* jvm) {
   return JNI_VERSION_1_6;
 }
 
+void ClearGlobalJniVariables() {
+  g_jvm = nullptr;
+}
+
 // Return thread ID as a string.
 static std::string GetThreadId() {
   char buf[21];  // Big enough to hold a kuint64max plus terminating NULL.
