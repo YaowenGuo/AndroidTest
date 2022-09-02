@@ -1,2 +1,0 @@
-apply plugin: 'com.android.application'
-apply from:"../../module_basic.gradle"

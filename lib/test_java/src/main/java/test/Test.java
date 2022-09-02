@@ -16,6 +16,5 @@ public class Test<T extends Arrays> {
                 "TypeParameters of myClass: "
                         + Arrays.toString(
                         myClass.getTypeParameters()));
-
     }
 }

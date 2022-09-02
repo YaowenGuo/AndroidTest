@@ -14,7 +14,8 @@
             android:label="HelloTriangle"
             android:theme="@style/Theme.AndroidTest"
             android:launchMode="singleTask"
-            android:configChanges="orientation|keyboardHidden">
+            android:configChanges="orientation|keyboardHidden"
+            android:exported="true">
             <meta-data android:name="android.app.lib_name"
                 android:value="gl_test" />
             <intent-filter>

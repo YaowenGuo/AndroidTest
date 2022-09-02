@@ -60,7 +60,6 @@ Live::Live(JNIEnv *env, jobject application_context, rtc_demo::JavaRTCEngine *si
     rtc::LogMessage::AddLogToStream(ff, rtc::LS_VERBOSE);
 }
 
-
 Live::~Live() {
     delete signaling_;
     webrtc::JVM::Uninitialize();

@@ -1,3 +1,27 @@
+pluginManagement {
+    repositories {
+        google()
+        gradlePluginPortal()
+        mavenCentral()
+        mavenLocal()
+        maven {
+            setUrl("https://plugins.gradle.org/m2/")
+        }
+    }
+}
+dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+    repositories {
+        google()
+        mavenCentral()
+        mavenLocal()
+        maven {
+            setUrl("https://plugins.gradle.org/m2/")
+        }
+    }
+}
+
+
 include(
     ":app:rtc_demo",
     ":app:rtc_native",
@@ -7,7 +31,6 @@ include(
     ":app:opengles3_native",
     ":app:lifecycle",
     ":app:app",
-    ":app:dagger2",
     ":app:provider",
     ":app:media",
     ":app:media_player",
@@ -40,3 +63,4 @@ include(
 
 enableFeaturePreview("VERSION_CATALOGS")
 enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
+includeBuild("VersionPlugin")

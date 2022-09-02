@@ -17,7 +17,8 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.App">
         <!-- 对等连接 -->
-        <activity android:name=".PeerConnectionActivity">
+        <activity android:name=".PeerConnectionActivity"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

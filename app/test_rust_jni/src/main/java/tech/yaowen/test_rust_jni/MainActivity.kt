@@ -13,6 +13,6 @@ class MainActivity : AppCompatActivity() {
         val binding =  ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-//        binding.text.text = Hello().stringFromJNI("Rust go go go !!!!")
+        binding.text.text = Hello().stringFromJNI("Rust go go go !!!!")
     }
 }

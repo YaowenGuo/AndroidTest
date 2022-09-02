@@ -9,7 +9,6 @@
  */
 
 
-#include "rtc_base/atomic_ops.h"
 #include "jni_generator_helper.h"
 #include "scoped_java_ref.h"
 #include "class_loader.h"

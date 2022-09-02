@@ -8,7 +8,6 @@ import android.view.MotionEvent
 import android.view.ScaleGestureDetector
 import android.view.View
 import android.widget.OverScroller
-import androidx.core.view.GestureDetectorCompat
 import kotlin.math.min
 
 class MultiPointsTouch : View {

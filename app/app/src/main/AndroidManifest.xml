@@ -14,17 +14,18 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.App">
         <activity
+            android:name=".ShadowTestActivity"
+            android:exported="false" />
+        <activity
             android:name=".lifecycle.ViewLifeTestActivity"
-            android:exported="true" >
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".dialog.TestDialogActivity">
-
-        </activity>
+        <activity android:name=".dialog.TestDialogActivity"></activity>
         <activity
             android:name=".lifecycle.ActivityB"
             android:launchMode="singleTop" />
@@ -32,11 +33,13 @@
             android:name=".lifecycle.ActivityA"
             android:label="@string/title_activity_activity"
             android:launchMode="singleTask">
-<!--            <intent-filter>-->
-<!--                <action android:name="android.intent.action.MAIN" />-->
 
-<!--                <category android:name="android.intent.category.LAUNCHER" />-->
-<!--            </intent-filter>-->
+            <!-- <intent-filter> -->
+            <!-- <action android:name="android.intent.action.MAIN" /> -->
+
+
+            <!-- <category android:name="android.intent.category.LAUNCHER" /> -->
+            <!-- </intent-filter> -->
         </activity>
         <activity android:name=".intercept.InterceptActivity" />
         <activity android:name=".ui.TouchActivity" />

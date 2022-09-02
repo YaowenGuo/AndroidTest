@@ -9,15 +9,11 @@ import tech.yaowen.customview.databinding.ActivityMainBinding
 import tech.yaowen.customview.databinding.ActivityViewLifeTestBinding
 
 class ViewLifeTestActivity : AppCompatActivity() {
-    val binding: ActivityViewLifeTestBinding by bindView()
+    lateinit var binding: ActivityViewLifeTestBinding
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_view_life_test)
+        binding = ActivityViewLifeTestBinding.inflate(layoutInflater)
+        setContentView(binding.root)
     }
 }
 
-
-fun <T: ViewBinding> ComponentActivity.bindView(): Lazy<T> {
-    ActivityViewLifeTestBinding.inflate()
-    return
-}
