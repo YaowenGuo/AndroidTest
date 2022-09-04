@@ -17,7 +17,6 @@ android {
 
 
 dependencies {
-    implementation(fileTree(mapOf("dir" to "libs", "include" to listOf("*.jar"))))
     implementation(project(":android_lib:theme"))
     implementation(project(":android_lib:androidRust"))
 
