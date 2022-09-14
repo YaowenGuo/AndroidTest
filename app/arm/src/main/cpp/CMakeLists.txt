@@ -38,9 +38,9 @@ find_library( # Sets the name of the path variable.
               # you want CMake to locate.
               log )
 
-
-target_compile_options(arm PUBLIC -fsanitize=hwaddress -fno-omit-frame-pointer)
-set_target_properties(arm PROPERTIES LINK_FLAGS -fsanitize=hwaddress)
+# clang++: error: unsupported option '-fsanitize=hwaddress' for target 'armv7-none-linux-android21'
+#target_compile_options(arm PUBLIC -fsanitize=hwaddress -fno-omit-frame-pointer)
+#set_target_properties(arm PROPERTIES LINK_FLAGS -fsanitize=hwaddress)
 
 
 # Specifies libraries CMake should link to your target library. You

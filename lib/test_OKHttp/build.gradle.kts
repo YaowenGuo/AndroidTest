@@ -10,5 +10,5 @@ java {
 }
 
 dependencies {
-    implementation(libs.squareup.okhttp)
+    implementation("org.javassist:javassist:3.29.1-GA'")
 }

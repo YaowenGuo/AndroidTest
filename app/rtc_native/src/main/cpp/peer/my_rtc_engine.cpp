@@ -98,7 +98,7 @@ void Live::createEngine(JNIEnv *jni, jobject application_context) {
     RTC_CHECK(worker_thread->Start()) << "Failed to start thread";
 
     std::unique_ptr<rtc::Thread> signaling_thread = rtc::Thread::Create();
-    signaling_thread->SetName("signaling_thread", NULL);
+    signaling_thread->SetName("signaling_thread", nullptr);
     RTC_CHECK(signaling_thread->Start()) << "Failed to start thread";
 
     // 不要使用 get(). 并没有转移所有权，会导致 unique_ptr 在函数退出时释放对象。
