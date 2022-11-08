@@ -1,6 +1,7 @@
 package tech.yaowen.signaling
 
 import android.app.Application
+import android.os.Handler
 import android.util.Log
 import io.socket.client.IO
 import io.socket.client.Socket
@@ -22,12 +23,14 @@ import kotlin.jvm.Throws
 open class SignalingClient constructor(context: Application) {
     private lateinit var socket: Socket
     private var callback: Callback? = null
-    fun setCallback(callback: Callback?): SignalingClient {
+    fun setCallback(callback: Callback): SignalingClient {
         this.callback = callback
         return this
     }
+    val handler = Handler(context.mainLooper)
 
     private fun init(context: Application) {
+
         try {
             // socket = IO.socket(Server.URL);
             // 或者
@@ -38,19 +41,25 @@ open class SignalingClient constructor(context: Application) {
                 threadCurrent("created")
                 // 房间创建者收到此回调
                 Log.e("webrtc_lim", "created")
-                callback!!.onCreateRoom()
+                handler.post {
+                    callback?.onCreateRoom()
+                }
             }
 
             socket.on("joined") { args: Array<Any?>? ->
                 threadCurrent("joined")
                 Log.e("webrtc_lim", "joined")
-                callback!!.onJoinedRoom()
+                handler.post {
+                    callback?.onJoinedRoom()
+                }
             }
 
             socket.on("join") { args: Array<Any?>? ->
                 // 其他用户加入的时候收到此回调
                 Log.e("webrtc_lim", "join")
-                callback!!.onPeerJoined()
+                handler.post {
+                    callback?.onPeerJoined()
+                }
             }
 
             socket.on("full") { args: Array<Any?>? ->
@@ -65,7 +74,9 @@ open class SignalingClient constructor(context: Application) {
             }
             socket.on("bye") { args: Array<Any> ->
                 Log.e("webrtc_lim", "bye")
-                callback!!.onPeerLeave(args[0] as String)
+                handler.post {
+                    callback?.onPeerLeave(args[0] as String)
+                }
             }
             socket.on("message") { args: Array<Any?> ->
                 threadCurrent("message")
@@ -73,7 +84,9 @@ open class SignalingClient constructor(context: Application) {
                     is String -> {
                         when (data) {
                             "got user media" -> {
-                                callback!!.onPeerReady();
+                                handler.post {
+                                    callback?.onPeerReady();
+                                }
                             }
                         }
                         Log.e("webrtc_lim", "message $data")
@@ -82,13 +95,19 @@ open class SignalingClient constructor(context: Application) {
                         Log.e("webrtc_lim", "message $data")
                         when (data.optString("type")) {
                             "offer" -> {
-                                callback!!.onOfferReceived(data.optString("sdp"))
+                                handler.post {
+                                    callback?.onOfferReceived(data.optString("sdp"))
+                                }
                             }
                             "answer" -> {
-                                callback!!.onAnswerReceived(data.optString("sdp"))
+                                handler.post {
+                                    callback?.onAnswerReceived(data.optString("sdp"))
+                                }
                             }
                             "candidate" -> {
-                                callback!!.onIceCandidateReceived(data)
+                                handler.post {
+                                    callback?.onIceCandidateReceived(data)
+                                }
                             }
                         }
                     }
@@ -138,7 +157,7 @@ open class SignalingClient constructor(context: Application) {
         sslContext.init(null, arrayOf(HttpsUtil.UnSafeTrustManager()), SecureRandom())
 
         val okHttpClient = OkHttpClient.Builder()
-            .hostnameVerifier(HostnameVerifier { s: String?, sslSession: SSLSession? -> true })
+            .hostnameVerifier { _: String?, _: SSLSession? -> true }
             .sslSocketFactory(sslParams.sSLSocketFactory, sslParams.trustManager)
             .sslSocketFactory(sslContext.socketFactory, HttpsUtil.UnSafeTrustManager())
             .addInterceptor(HttpLoggingInterceptor())

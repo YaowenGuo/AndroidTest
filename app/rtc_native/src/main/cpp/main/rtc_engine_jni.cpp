@@ -21,6 +21,7 @@
 #include <sdk/android/native_api/jni/class_loader.h>
 #include "camera/camera_engine.h"
 #include "utils/native_debug.h"
+#include <iostream>
 
 #define CameraActivity(func, ...) \
   Java_tech_yaowen_rtc_1native_view_home_CameraActivity_##func (__VA_ARGS__)
@@ -145,9 +146,11 @@ void CameraEngine::OnCameraPermission(JNIEnv *env, jboolean granted, jobject con
 
 
 std::string jstring2str(JNIEnv *jni, jstring jstr) {
-    const char *charArr = jni->GetStringUTFChars(jstr, 0);
+    jboolean copy = false;
+    const char *charArr = jni->GetStringUTFChars(jstr, &copy);
     std::string str(charArr);
-//    jni->ReleaseStringUTFChars(jstr, charArr);
+    jni->ReleaseStringUTFChars(jstr, charArr);
+
     return str;
 }
 
@@ -194,25 +197,25 @@ CameraActivity(release, JNIEnv *env, jobject activity) {
 
 
 extern "C" JNIEXPORT void JNICALL
-RTCEngine(captureVideoAndVideo, JNIEnv *env, jclass clazz) {
-
-}
-
-
-extern "C" JNIEXPORT void JNICALL
-RTCEngine(call, JNIEnv *env, jclass clazz, jobject application_context, jobject jSignaling) {
-    THREAD_CURRENT("Call");
-    RTC_DLOG(LS_INFO) << "Lim webrtc start Call, yaowen.";
+RTCEngine(captureAudioAndVideo, JNIEnv *env, jclass clazz, jobject application_context, jobject jSignaling) {
+    RTC_CHECK(pLiveObj == nullptr) << "Live is not null";
     if (pLiveObj == nullptr) {
         auto signaling = new rtc_demo::JavaRTCEngine(env, jSignaling);
         pLiveObj = new Live(env, application_context, signaling);
         pLiveObj->createEngine(env, application_context);
     }
+}
+
+
+extern "C" JNIEXPORT void JNICALL
+RTCEngine(call, JNIEnv *env, jclass clazz) {
+    RTC_CHECK(pLiveObj) << "Live is null";
+    RTC_DLOG(LS_INFO) << "Lim webrtc start Call, yaowen.";
     pLiveObj->connectToPeer(true);
 }
 
 extern "C" JNIEXPORT void JNICALL
-RTCEngine(answer, JNIEnv *env, jclass clazz, jobject jSd) {
+RTCEngine(answer, JNIEnv *env, jclass clazz) {
     THREAD_CURRENT("Answer");
     RTC_CHECK(pLiveObj) << "Live is null";
     pLiveObj->connectToPeer(false);
@@ -222,7 +225,8 @@ RTCEngine(answer, JNIEnv *env, jclass clazz, jobject jSd) {
 extern "C" JNIEXPORT void JNICALL
 RTCEngine(setRemoteDescription, JNIEnv *env, jclass clazz, jint type, jstring jSd) {
     RTC_CHECK(pLiveObj) << "Live is null";
-    pLiveObj->onSDPReceived((webrtc::SdpType)type, jstring2str(env, jSd));
+    pLiveObj->onSDPReceived((webrtc::SdpType)type, jstring2str(env, jSd););
+
 }
 
 

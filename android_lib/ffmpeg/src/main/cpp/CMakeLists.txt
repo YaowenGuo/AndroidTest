@@ -7,7 +7,7 @@ cmake_minimum_required(VERSION 3.4.1)
 
 
 #打印当前 cmakeLists 的路径
-message(AUTHOR_WARNING "当前 CMakeLists 路径: ${CMAKE_SOURCE_DIR} \n cpu架构：${CMAKE_ANDROID_ARCH_ABI}")
+#message(AUTHOR_WARNING "当前 CMakeLists 路径: ${CMAKE_SOURCE_DIR} \n cpu架构：${CMAKE_ANDROID_ARCH_ABI}")
 
 
 # Creates and names a library, sets it as either STATIC

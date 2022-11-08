@@ -62,8 +62,22 @@ namespace rtc_demo {
         );
 
         auto sd_type_class = GetClass(env, "org/webrtc/SessionDescription$Type");
+        const char* type;
+        switch (desc->GetType()) {
+            case webrtc::SdpType::kOffer:
+                type = "OFFER";
+                break;
+            case webrtc::SdpType::kPrAnswer:
+                type = "PRANSWER";
+                break;
+            case webrtc::SdpType::kAnswer:
+                type = "ANSWER";
+                break;
+            default:
+                type = "ROLLBACK";
+        }
         jfieldID field_type_id = env->GetStaticFieldID(
-                sd_type_class.obj(), "OFFER",
+                sd_type_class.obj(), type,
                 "Lorg/webrtc/SessionDescription$Type;"
         );
 

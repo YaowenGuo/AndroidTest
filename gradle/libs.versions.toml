@@ -15,14 +15,13 @@ junit_version = '4.13'
 ext_junit_version = '1.1.2'
 espresso_core_version = '3.3.0'
 
-camerax_version = "1.0.0-beta08"
-camerax_view_version = "1.0.0-alpha15"
-material_version = "1.4.0"
+camerax_version = "1.1.0"
+material_version = "1.7.0"
 
 
 
 [libraries]
-appcompat = "androidx.appcompat:appcompat:1.1.0"
+appcompat = "androidx.appcompat:appcompat:1.5.1"
 material = { module = "com.google.android.material:material", version.ref = "material_version" }
 constraintlayout = "androidx.constraintlayout:constraintlayout:2.0.1"
 concurrent = "androidx.concurrent:concurrent-futures:1.1.0-beta01"
@@ -43,7 +42,7 @@ navigation_dynamic = { module = "androidx.navigation:navigation-dynamic-features
 
 
 ktx-core = { module = "androidx.core:core-ktx", version.ref = "core_ktx_version" }
-ktx-viewmodel = "androidx.lifecycle:lifecycle-viewmodel-ktx:2.2.0"
+ktx-viewmodel = "androidx.lifecycle:lifecycle-viewmodel-ktx:2.5.1"
 ktx-work = "androidx.work:work-runtime-ktx:2.4.0"
 ktx-fragment = "androidx.navigation:navigation-fragment-ktx:2.3.0"
 ktx-navigation = "androidx.navigation:navigation-ui-ktx:2.3.0"
@@ -54,8 +53,8 @@ kotlin-coroutineAndroid = "org.jetbrains.kotlinx:kotlinx-coroutines-android:$cor
 
 camera2 = { module = "androidx.camera:camera-camera2", version.ref = "camerax_version" }
 camera-lifecycle = { module = "androidx.camera:camera-lifecycle", version.ref = "camerax_version" }
-camera-view = { module = "androidx.camera:camera-view", version.ref = "camerax_view_version" }
-camera-extensions = { module = "androidx.camera:camera-extensions", version.ref = "camerax_view_version" }
+camera-view = { module = "androidx.camera:camera-view", version.ref = "camerax_version" }
+camera-extensions = { module = "androidx.camera:camera-extensions", version.ref = "camerax_version" }
 
 navigation_test = "androidx.navigation:navigation-testing:$nav_version"
 rxjava-kotlin = "io.reactivex.rxjava3:rxkotlin:3.0.0"

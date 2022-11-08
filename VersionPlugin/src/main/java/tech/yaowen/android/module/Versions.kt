@@ -15,8 +15,8 @@ package tech.yaowen.android.module/*
  */
 
 object Versions {
-    const val COMPILE_SDK = 31
-    const val TARGET_SDK = 31
+    const val COMPILE_SDK = 32
+    const val TARGET_SDK = 32
     const val MIN_SDK = 21
 
     val VERSION_NAME = "1.0.15" // X.Y.Z; X = Major, Y = minor, Z = Patch level

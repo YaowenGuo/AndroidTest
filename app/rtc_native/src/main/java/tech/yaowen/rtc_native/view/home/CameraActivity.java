@@ -375,7 +375,7 @@ public class CameraActivity extends NativeActivity
     private void inputRoomName() {
         new JoinRoomDialog(this, roomName -> {
             RTCEngine.getInstance(getApplication())
-                    .joinRoom(roomName);
+                    .enterRoom(roomName);
         }).show();
     }
 

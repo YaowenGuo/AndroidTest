@@ -25,6 +25,8 @@
 #include <api/task_queue/default_task_queue_factory.h>
 #include <rtc_base/log_sinks.h>
 #include <sdk/android/native_api/audio_device_module/audio_device_android.h>
+#include <media/engine/internal_encoder_factory.h>
+#include <media/engine/internal_decoder_factory.h>
 #include "utils/jvm.h"
 
 class DummySetSessionDescriptionObserver
@@ -66,29 +68,10 @@ Live::~Live() {
 }
 
 
-// One-off message handler that calls the Java method on the specified Java
-// object before deleting itself.
-class JavaAsyncCallback : public rtc::MessageHandler {
-public:
-    void OnMessage(rtc::Message *) override {
-        jni::AttachCurrentThreadIfNeeded();
-        delete this;
-    }
-};
-
-
-// Post a message on the given thread that will call the Java method on the
-// given Java object.
-void PostThreadAttachTask(rtc::Thread *queue, const rtc::Location &posted_from) {
-    queue->Post(posted_from, new JavaAsyncCallback());
-}
-
 /**
   * 2. 创建 PeerConnectionFactory, 因为 Webrtc 可以同时进行多个连接，以创建多个 PeerConnection (PC).
   */
 void Live::createEngine(JNIEnv *jni, jobject application_context) {
-    rtc::ThreadManager::Instance()->WrapCurrentThread();
-
     std::unique_ptr<rtc::Thread> network_thread = rtc::Thread::CreateWithSocketServer();
     network_thread->SetName("network_thread", nullptr);
     RTC_CHECK(network_thread->Start()) << "Failed to start thread";
@@ -105,10 +88,6 @@ void Live::createEngine(JNIEnv *jni, jobject application_context) {
     auto network_p = network_thread.release();
     auto worker_p = worker_thread.release();
     auto signaling_p = signaling_thread.release();
-    // 线程启动后 attach Jni.
-    PostThreadAttachTask(network_p, RTC_FROM_HERE);
-    PostThreadAttachTask(worker_p, RTC_FROM_HERE);
-    PostThreadAttachTask(signaling_p, RTC_FROM_HERE);
     peer_connection_factory_ = webrtc::CreatePeerConnectionFactory(
             network_p /* network_thread */, worker_p /* worker_thread */,
             signaling_p /* signaling_thread */, nullptr /* default_adm */,
@@ -187,8 +166,7 @@ Live::AddTracks(rtc::scoped_refptr<rtc_demo::AndroidVideoTrackSource> video_sour
                     kAudioLabel,
                     audioSource.get()
             );
-    // TODO 相同 stream_ids 的音视频用于关联到一个 MediaStream，从而保持音视频同步。添加多个会导致对方接受不到。
-    // 但是这里是允许传多个的。 Way?
+    // streamId 只有第一个有用，a=msid:<stream id> <track id>
     auto result_or_error = peer_connection_->AddTrack(audio_track, {kStreamId});
     if (!result_or_error.ok()) {
         RTC_LOG(LS_ERROR) << "Failed to add audio track to PeerConnection: "
@@ -233,7 +211,6 @@ void Live::OnRemoveStream(rtc::scoped_refptr<MediaStreamInterface> stream) {
 
     }
 }
-
 
 // Triggered when a remote peer opens a data channel.
 void Live::OnDataChannel(rtc::scoped_refptr<DataChannelInterface> data_channel) {

@@ -27,7 +27,7 @@ public class RTCEngine implements tech.yaowen.signaling.SignalingClient.Callback
     // receiving this.
     private static final int kRollback = 3; // Resets any pending offers and sets signaling state back to
 
-    protected static RTCEngine instance;
+    protected static volatile RTCEngine instance;
     private Application application;
     private boolean joined;
     private boolean isInitiator;
@@ -51,17 +51,18 @@ public class RTCEngine implements tech.yaowen.signaling.SignalingClient.Callback
         application = context;
     }
 
-    public void joinRoom(String roomName) {
-        SignalingClient.threadCurrent("joinRoom");
+    public void enterRoom(String roomName) {
+        SignalingClient.threadCurrent("enterRoom");
         signaling.joinRoom(roomName);
-//        call(application.getBaseContext(), this);
+//        captureAudioAndVideo(application.getApplicationContext(), this);
+//        call();
     }
 
     @Override
     public void onCreateRoom() {
         joined = true;
         isInitiator = true;
-        captureVideoAndVideo();
+        captureAudioAndVideo(application.getApplicationContext(), this);
     }
 
 
@@ -69,7 +70,8 @@ public class RTCEngine implements tech.yaowen.signaling.SignalingClient.Callback
     public void onJoinedRoom() {
         isInitiator = false;
         joined = true;
-        captureVideoAndVideo();
+        captureAudioAndVideo(application.getApplicationContext(), this);
+        signaling.sendMessage("got user media");
     }
 
     @Override
@@ -80,7 +82,7 @@ public class RTCEngine implements tech.yaowen.signaling.SignalingClient.Callback
     public void onPeerReady() {
         // 接收方已经获取到音/视频，可以建立连接了。
         if (isInitiator) {
-            call(application.getApplicationContext(), this);
+            call();
         }
     }
 
@@ -92,7 +94,7 @@ public class RTCEngine implements tech.yaowen.signaling.SignalingClient.Callback
     @Override
     public void onOfferReceived(@NonNull String sd) {
         setRemoteDescription(kOffer, sd);
-        answer(sd);
+        answer();
     }
 
     @Override
@@ -135,11 +137,11 @@ public class RTCEngine implements tech.yaowen.signaling.SignalingClient.Callback
         }
     }
 
-    private native static void captureVideoAndVideo();
+    private native static void captureAudioAndVideo(Context application_context, RTCEngine signaling);
 
-    private native static void call(Context application_context, RTCEngine signaling);
+    private native static void call();
 
-    private native static void answer(String sd);
+    private native static void answer();
 
     private native static void setRemoteDescription(int type, String sdp);
 

@@ -14,9 +14,6 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.App">
         <activity
-            android:name=".ShadowTestActivity"
-            android:exported="false" />
-        <activity
             android:name=".lifecycle.ViewLifeTestActivity"
             android:exported="true">
             <intent-filter>

@@ -16,7 +16,9 @@ android {
         }
         externalNativeBuild {
             cmake {
-                arguments += "-DANDROID_STL=c++_static"
+//                arguments += "-DANDROID_STL=c++_static"
+
+//                cppFlags "-DANDROID_STL=c++_shared"
                 // https://developer.android.com/studio/projects/gradle-external-native-builds
                 // Passes optional arguments to CMake.
                 //arguments "-DANDROID_ARM_NEON=TRUE", "-DANDROID_TOOLCHAIN=clang"
@@ -31,6 +33,8 @@ android {
                 // cppFlags "-fexceptions", "-frtti"
 //                cppFlags "-fno-rtti"
                 cppFlags += "-fvisibility=hidden"
+                cppFlags += "-DANDROID_STL=c++_shared"
+
             }
         }
         multiDexEnabled = true
