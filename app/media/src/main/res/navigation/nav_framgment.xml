@@ -26,7 +26,7 @@
         <action
             android:id="@+id/action_selector_to_camera"
             app:launchSingleTop="true"
-            app:destination="@id/camera_fragment" />
+            app:destination="@id/camerax_fragment" />
 
     </fragment>
 

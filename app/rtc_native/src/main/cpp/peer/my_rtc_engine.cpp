@@ -18,7 +18,7 @@
 #include <api/video_codecs/builtin_video_decoder_factory.h>
 
 #include <modules/video_capture/video_capture_factory.h>
-#include <camera/camera_engine.h>
+#include <camera/camera_manager.h>
 #include <rtc_base/task_queue_gcd.h>
 #include <api/rtc_event_log/rtc_event_log_factory.h>
 #include <media/engine/webrtc_media_engine.h>
@@ -28,6 +28,10 @@
 #include <media/engine/internal_encoder_factory.h>
 #include <media/engine/internal_decoder_factory.h>
 #include "utils/jvm.h"
+#include "main/window_monitor.h"
+#include "android_video_sink.h"
+
+Live *pLiveObj = nullptr;
 
 class DummySetSessionDescriptionObserver
         : public webrtc::SetSessionDescriptionObserver {
@@ -42,9 +46,10 @@ public:
 
     virtual void OnFailure(webrtc::RTCError error) {
         RTC_LOG(LS_INFO) << __FUNCTION__ << " " << ToString(error.type()) << ": "
-                      << error.message();
+                         << error.message();
     }
 };
+
 
 /**
   * 1. 初始化
@@ -57,10 +62,12 @@ Live::Live(JNIEnv *env, jobject application_context, rtc_demo::JavaRTCEngine *si
     // 输出日志到文件
     rtc::LogMessage::LogToDebug(rtc::LS_VERBOSE);
     rtc::LogMessage::SetLogToStderr(true);
-    auto ff = new rtc::FileRotatingLogSink("/sdcard/Android/data/tech.yaowen.rtc_native/", "webrtc_log", 1024 * 1024 * 10, 100);
+    auto ff = new rtc::FileRotatingLogSink("/sdcard/Android/data/tech.yaowen.rtc_native/",
+                                           "webrtc_log", 1024 * 1024 * 10, 100);
     ff->Init();
     rtc::LogMessage::AddLogToStream(ff, rtc::LS_VERBOSE);
 }
+
 
 Live::~Live() {
     delete signaling_;
@@ -72,25 +79,22 @@ Live::~Live() {
   * 2. 创建 PeerConnectionFactory, 因为 Webrtc 可以同时进行多个连接，以创建多个 PeerConnection (PC).
   */
 void Live::createEngine(JNIEnv *jni, jobject application_context) {
-    std::unique_ptr<rtc::Thread> network_thread = rtc::Thread::CreateWithSocketServer();
-    network_thread->SetName("network_thread", nullptr);
-    RTC_CHECK(network_thread->Start()) << "Failed to start thread";
+    // 自己创建的 Thread 必须自己管理释放，内部默认创建的会由 PCFactory 释放。
+    network_thread_ = rtc::Thread::CreateWithSocketServer();
+    network_thread_->SetName("network_thread", nullptr);
+    RTC_CHECK(network_thread_->Start()) << "Failed to start thread";
 
-    std::unique_ptr<rtc::Thread> worker_thread = rtc::Thread::Create();
-    worker_thread->SetName("worker_thread", nullptr);
-    RTC_CHECK(worker_thread->Start()) << "Failed to start thread";
+    worker_thread_ = rtc::Thread::Create();
+    worker_thread_->SetName("worker_thread", nullptr);
+    RTC_CHECK(worker_thread_->Start()) << "Failed to start thread";
 
-    std::unique_ptr<rtc::Thread> signaling_thread = rtc::Thread::Create();
-    signaling_thread->SetName("signaling_thread", nullptr);
-    RTC_CHECK(signaling_thread->Start()) << "Failed to start thread";
+    signaling_thread_ = rtc::Thread::Create();
+    signaling_thread_->SetName("signaling_thread", nullptr);
+    RTC_CHECK(signaling_thread_->Start()) << "Failed to start thread";
 
-    // 不要使用 get(). 并没有转移所有权，会导致 unique_ptr 在函数退出时释放对象。
-    auto network_p = network_thread.release();
-    auto worker_p = worker_thread.release();
-    auto signaling_p = signaling_thread.release();
     peer_connection_factory_ = webrtc::CreatePeerConnectionFactory(
-            network_p /* network_thread */, worker_p /* worker_thread */,
-            signaling_p /* signaling_thread */, nullptr /* default_adm */,
+            network_thread_.get(), worker_thread_.get(),
+            signaling_thread_.get(), nullptr /* default_adm */,
             webrtc::CreateBuiltinAudioEncoderFactory(),
             webrtc::CreateBuiltinAudioDecoderFactory(),
             webrtc::CreateBuiltinVideoEncoderFactory(),
@@ -108,16 +112,13 @@ void Live::createEngine(JNIEnv *jni, jobject application_context) {
     rtc::scoped_refptr<webrtc::VideoTrackInterface> video_track = AddTracks(video_source);
 
     // add video sink， 用于本地显示。
-    // auto videoSink = new rtc_demo::AndroidVideoSink(GetAppEngine()->app_->window);
-    // video_track->AddOrUpdateSink(videoSink, rtc::VideoSinkWants());
+//    auto videoSink = new rtc_demo::AndroidVideoSink(WindowMonitor::GetInstance()->App()->window);
+//    video_track->AddOrUpdateSink(videoSink, rtc::VideoSinkWants());
 
-    ImageReader *imageReader = GetAppEngine()->CreateCamera();
-    GetAppEngine()->StartPreview();
-    if (imageReader) {
-        imageReader->SetVideoSource(video_source);
-    } else {
-        LOGW("image reader is null.");
-    }
+    camera_manager_ = std::make_unique<CameraManager>();
+    camera_ = camera_manager_->GetCamera(ACAMERA_LENS_FACING_FRONT);
+    ASSERT(camera_, "Camera is null");
+    camera_->StartCapture(video_source);
 }
 
 
@@ -199,7 +200,8 @@ void Live::OnIceCandidate(const IceCandidateInterface *candidate) {
 void Live::OnAddStream(rtc::scoped_refptr<MediaStreamInterface> stream) {
     auto tracks = stream->GetVideoTracks();
     if (!tracks.empty()) {
-        auto videoSink = new rtc_demo::AndroidVideoSink(GetAppEngine()->app_->window);
+        auto videoSink = new rtc_demo::AndroidVideoSink(
+                WindowMonitor::GetInstance()->App()->window);
         tracks[0]->AddOrUpdateSink(videoSink, rtc::VideoSinkWants());
     }
 }
@@ -211,6 +213,7 @@ void Live::OnRemoveStream(rtc::scoped_refptr<MediaStreamInterface> stream) {
 
     }
 }
+
 
 // Triggered when a remote peer opens a data channel.
 void Live::OnDataChannel(rtc::scoped_refptr<DataChannelInterface> data_channel) {
@@ -227,7 +230,8 @@ void Live::OnSuccess(SessionDescriptionInterface *desc) {
     // 可以在设置之前，对 SDP 做一些排序等操作，以设置某些编解码的优先级。
     desc->description();
     peer_connection_->SetLocalDescription(
-            std::move(std::unique_ptr<SessionDescriptionInterface>(desc)), rtc::scoped_refptr<SetLocalDescriptionObserverInterface>(this));
+            std::move(std::unique_ptr<SessionDescriptionInterface>(desc)),
+            rtc::scoped_refptr<SetLocalDescriptionObserverInterface>(this));
     // 创建 session 成功后要发送到远端。
     signaling_->SendSessionDescription(desc);
 }
@@ -261,8 +265,9 @@ void Live::onSDPReceived(const SdpType type, const string &sd) {
     std::unique_ptr<webrtc::SessionDescriptionInterface> session_description =
             webrtc::CreateSessionDescription(type, sd, &error);
     if (!session_description) {
-        RTC_LOG(LS_WARNING) << "Can't parse received session description message. SdpParseError was: "
-                         << error.description;
+        RTC_LOG(LS_WARNING)
+        << "Can't parse received session description message. SdpParseError was: "
+        << error.description;
         return;
     }
     peer_connection_->SetRemoteDescription(
@@ -271,20 +276,26 @@ void Live::onSDPReceived(const SdpType type, const string &sd) {
 }
 
 
-void Live::onIceCandidateReceived(const std::string& sdp_mid, int sdp_mline_index, const std::string& sdp) {
+void Live::onIceCandidateReceived(const std::string &sdp_mid, int sdp_mline_index,
+                                  const std::string &sdp) {
     THREAD_CURRENT("onIceCandidateReceived");
     webrtc::SdpParseError error;
     webrtc::IceCandidateInterface *candidate = webrtc::CreateIceCandidate(sdp_mid, sdp_mline_index,
                                                                           sdp, &error);
     if (!candidate) {
         RTC_LOG(LS_WARNING) << "Can't parse received candidate message. "
-                            "SdpParseError was: "
-                         << error.description;
+                               "SdpParseError was: "
+                            << error.description;
         return;
     }
     if (!peer_connection_->AddIceCandidate(candidate)) {
         RTC_LOG(LS_WARNING) << "Failed to apply the received candidate";
         return;
     }
+}
+
+
+std::weak_ptr<Camera> Live::GetCamera() {
+    return camera_;
 }
 // L***************** SocketCallbackInterface *******************

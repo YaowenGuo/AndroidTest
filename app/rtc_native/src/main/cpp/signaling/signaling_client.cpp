@@ -4,7 +4,6 @@
 
 #include <string>
 #include <utils/native_debug.h>
-#include <iostream>
 #include <condition_variable>
 #include <peer/android_video_frame_buffer.h>
 

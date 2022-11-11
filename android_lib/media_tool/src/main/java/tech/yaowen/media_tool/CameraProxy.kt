@@ -93,13 +93,8 @@ class CameraProxy private constructor(private val context: Context) {
      * - Starts the preview by dispatching a repeating capture request
      * - Sets up the still image capture listeners
      */
-    protected fun initializeCamera(lensFacing: Int, surfaceList: List<Surface>): CameraProxy {
+    protected fun initializeCamera(cameraId: String, surfaceList: List<Surface>): CameraProxy {
         MainScope().launch(Dispatchers.Main) {
-            val cameraId = if (lensFacingMap.containsKey(lensFacing)) {
-                lensFacingMap[lensFacing]!!
-            } else {
-                throw Exception("No camera facing to: $lensFacing")
-            }
             // Open the selected camera
             camera = openCamera(cameraId, cameraHandler)
             characteristics = cameraManager.getCameraCharacteristics(cameraId)
@@ -205,16 +200,11 @@ class CameraProxy private constructor(private val context: Context) {
         }, handler)
     }
 
-    public class Builder {
-        private var appContext: Context? = null
+    public class Builder(private val appContext: Context) {
         private var surfaceList: List<Surface>? = null
         private var selectLensFacing: (types: IntArray) -> Int = { CameraMetadata.LENS_FACING_BACK }
         private var lensFacing: Int = 0
-
-        public fun with(context: Context): Builder {
-            appContext = context.applicationContext
-            return this
-        }
+        private var cameraId: String? = null
 
         public fun surface(surfaces: List<Surface>): Builder {
             surfaceList = surfaces
@@ -226,20 +216,36 @@ class CameraProxy private constructor(private val context: Context) {
             return this
         }
 
+        public fun camera(cameraId: String): Builder {
+            this.cameraId = cameraId
+            return this
+        }
+
 
         public fun build(): CameraProxy {
-            if (appContext == null) throw Exception("Must set the context")
+            surfaceList = if (surfaceList == null) {
+                listOf(Surface(SurfaceTexture(0)))
+            } else {
+                surfaceList
+            }
+            val manager = cameraManager(appContext)
+            if (cameraId == null) {
+                lensFacing = selectLensFacing(getLensFacing(manager))
 
-            lensFacing = selectLensFacing(getLensFacing(appContext!!))
+                for (id in manager.cameraIdList) {
+                    val characteristics = manager.getCameraCharacteristics(id)
+                    if (lensFacing == characteristics.get(CameraCharacteristics.LENS_FACING)) {
+                        cameraId = id
+                        break
+                    }
+                }
 
-            surfaceList =
-                if (surfaceList == null) listOf(Surface(SurfaceTexture(0))) else surfaceList
-
-
-            return instance(appContext!!)
-                .initializeCamera(lensFacing, surfaceList!!)
-
-
+                if (cameraId == null) {
+                    throw Exception("No camera facing to: $lensFacing")
+                }
+            }
+            return instance(appContext)
+                .initializeCamera(cameraId!!, surfaceList!!)
         }
 
         public fun size(selectSize: (StreamConfigurationMap) -> Size): Builder {
@@ -247,8 +253,7 @@ class CameraProxy private constructor(private val context: Context) {
             return this
         }
 
-        fun getLensFacing(context: Context): IntArray {
-            val manager = cameraManager(context)
+        private fun getLensFacing(manager: CameraManager): IntArray {
             val set: MutableSet<Int> = HashSet()
             for (id in manager.cameraIdList) {
                 val characteristics = manager.getCameraCharacteristics(id)

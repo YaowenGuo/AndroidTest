@@ -13,7 +13,7 @@ android {
     externalNativeBuild {
         cmake {
             path = file("src/main/cpp/CMakeLists.txt")
-            version = "3.10.2"
+            version = tech.yaowen.android.module.Versions.CMAKE_VERSION
         }
     }
     // 导致 java.lang.ClassNotFoundException: Didn't find class "androidx.lifecycle.ProcessLifecycleOwnerInitializer" on path: DexPathList ...

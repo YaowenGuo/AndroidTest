@@ -55,7 +55,7 @@ class LocalPeerConnectionActivity : BaseActivity() {
     }
 
     private fun call(videoTrack: VideoTrack) {
-        peerConnectionLocal = RtcEngine.INSTANCE.connection(videoTrack, null, object :
+        peerConnectionLocal = RtcEngine.INSTANCE.connection(null, videoTrack, null, object :
             RtcEngine.DspAndIdeObserver {
             override fun onSdCreate(sdp: SessionDescription) {
                 // 通过 Singling 服务器发送 offer。对方接收到后设置。
@@ -83,7 +83,7 @@ class LocalPeerConnectionActivity : BaseActivity() {
 
 
     private fun answer(videoTrack: VideoTrack, sdp: SessionDescription) {
-        peerConnectionRemote = RtcEngine.INSTANCE.connection(videoTrack, sdp, object :
+        peerConnectionRemote = RtcEngine.INSTANCE.connection(null, videoTrack, sdp, object :
             RtcEngine.DspAndIdeObserver {
             override fun onSdCreate(sdp: SessionDescription) {
                 // 应答方通过 Singling 服务器发送 answer。对方接收到后设置。

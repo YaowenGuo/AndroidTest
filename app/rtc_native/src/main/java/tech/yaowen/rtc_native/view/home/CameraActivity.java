@@ -126,7 +126,6 @@ public class CameraActivity extends NativeActivity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Log.i(DBG_TAG, "OnCreate()");
         // new initialization here... request for permission
         _savedInstance = this;
 
@@ -172,7 +171,7 @@ public class CameraActivity extends NativeActivity
     protected void onResume() {
         super.onResume();
         setImmersiveSticky();
-        RequestCamera();
+        requestCamera();
     }
 
 
@@ -193,13 +192,13 @@ public class CameraActivity extends NativeActivity
             _popupWindow.dismiss();
             _popupWindow = null;
         }
-        release();
         super.onPause();
     }
 
 
     @Override
     protected void onDestroy() {
+        Log.e("WindowMonitor", "OnDestroy java");
         super.onDestroy();
     }
 
@@ -207,7 +206,7 @@ public class CameraActivity extends NativeActivity
     private static final int PERMISSION_REQUEST_CODE_CAMERA = 1;
 
 
-    public void RequestCamera() {
+    public void requestCamera() {
         if (!isCamera2Device()) {
             Log.e(DBG_TAG, "Found legacy camera Device, this sample needs camera2 device");
             return;
@@ -227,13 +226,10 @@ public class CameraActivity extends NativeActivity
             }
         }
         if (needRequire) {
-            ActivityCompat.requestPermissions(
-                    this,
-                    accessPermissions,
-                    PERMISSION_REQUEST_CODE_CAMERA);
-            return;
+            ActivityCompat.requestPermissions(this, accessPermissions, PERMISSION_REQUEST_CODE_CAMERA);
+        } else {
+            inputRoomName();
         }
-        inputRoomName();
     }
 
 
@@ -269,6 +265,7 @@ public class CameraActivity extends NativeActivity
      * 4: sensitivity max
      * 5: sensitivity val
      */
+/*
     @SuppressLint("InflateParams")
     public void EnableUI(final long[] params) {
         // make our own copy
@@ -358,6 +355,7 @@ public class CameraActivity extends NativeActivity
             }
         });
     }
+*/
 
 
     /**
@@ -380,20 +378,13 @@ public class CameraActivity extends NativeActivity
     }
 
 
-    native static void notifyCameraPermission(boolean granted, Context context);
-
-
-    native static void TakePhoto();
-
-
-    native void OnExposureChanged(long exposure);
-
-
-    native void OnSensitivityChanged(long sensitivity);
-
-
-    native void release();
-
+    native static void takePhoto();
+//
+//
+//    native void OnExposureChanged(long exposure);
+//
+//
+//    native void OnSensitivityChanged(long sensitivity);
 
     static {
         System.loadLibrary("rtc_demo");

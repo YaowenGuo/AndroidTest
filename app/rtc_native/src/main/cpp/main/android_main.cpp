@@ -14,69 +14,59 @@
  * limitations under the License.
  */
 
-#include "camera/camera_engine.h"
+#include <android/native_window.h>
+#include <android_native_app_glue.h>
 #include "utils/native_debug.h"
 #include "testthread/test_thread.h"
-
-/*
- * SampleEngine global object
- */
-static CameraEngine *pEngineObj = nullptr;
-extern Live *pLiveObj;
-
-
-CameraEngine *GetAppEngine() {
-    ASSERT(pEngineObj, "AppEngine has not initialized");
-    return pEngineObj;
-}
-
-
-Live *GetLive() {
-    ASSERT(pLiveObj, "Live has not initialized");
-    return pLiveObj;
-}
-
+#include "window_monitor.h"
 
 /**
  * Teamplate function for NativeActivity derived applications
  *   Create/Delete camera object with
  *   INIT_WINDOW/TERM_WINDOW command, ignoring other event.
  */
-static void ProcessAndroidCmd(struct android_app *app, int32_t cmd) {
-    auto *engine = reinterpret_cast<CameraEngine *>(app->userData);
+void ProcessAndroidCmd(struct android_app *app, int32_t cmd) {
+    auto monitor = reinterpret_cast<WindowMonitor *>(app->userData);
     switch (cmd) {
-        case APP_CMD_INIT_WINDOW:
-            if (engine->AndroidApp()->window != nullptr) {
-                engine->SaveNativeWinRes(ANativeWindow_getWidth(app->window),
-                                         ANativeWindow_getHeight(app->window),
-                                         ANativeWindow_getFormat(app->window));
-//                engine->OnAppInitWindow();
-            }
+        case APP_CMD_START: // 1
+            monitor->OnStart();
             break;
-        case APP_CMD_TERM_WINDOW:
-            engine->OnAppTermWindow();
-            ANativeWindow_setBuffersGeometry(
-                    app->window, engine->GetSavedNativeWinWidth(),
-                    engine->GetSavedNativeWinHeight(), engine->GetSavedNativeWinFormat());
+        case APP_CMD_RESUME: // 2
+            monitor->OnResume();
             break;
-        case APP_CMD_CONFIG_CHANGED:
-            engine->OnAppConfigChange();
+        case APP_CMD_INIT_WINDOW: // 3 INIT_WINDOW 在 RESUME 之后
+            monitor->OnInitWindow();
             break;
-        case APP_CMD_LOST_FOCUS:
+        case APP_CMD_WINDOW_RESIZED: // 4 接着有一个 WINDOW_RESIZED
+            monitor->OnWindowSizeChange();
+            break;
+        case APP_CMD_PAUSE: // 5
+            monitor->OnPause();
+            break;
+        case APP_CMD_TERM_WINDOW: // 6 TERM_WINDOW 和 INIT_WINDOW 并不对称
+            monitor->OnTermWindow();
+            break;
+        case APP_CMD_STOP: // 7
+            monitor->OnStop();
+            break;
+        case APP_CMD_DESTROY: // 8
+            monitor->OnDestroy();
+            break;
+        case APP_CMD_CONFIG_CHANGED: // ?
+            monitor->OnAppConfigChange();
+            break;
         default:
             break;
     }
 }
 
 
-extern "C" void android_main(struct android_app *state) {
-//    test_thread();
-//  CameraEngine engine(state);
-    pEngineObj = new CameraEngine(state);
-
-    state->userData = reinterpret_cast<void *>(pEngineObj);
-    state->onAppCmd = ProcessAndroidCmd;
-
+// 旋转屏幕会重新走一边，相当于 OnCreate 的回调。
+extern "C" void android_main(struct android_app *app) {
+    auto window_monitor = WindowMonitor::GetInstance();
+    window_monitor->SetAndroidApp(app);
+    app->userData = reinterpret_cast<void *>(window_monitor);
+    app->onAppCmd = ProcessAndroidCmd;
     // loop waiting for stuff to do.
     while (true) {
         // Read all pending events.
@@ -86,105 +76,16 @@ extern "C" void android_main(struct android_app *state) {
         while (ALooper_pollAll(0, nullptr, &events, (void **) &source) >= 0) {
             // Process this event.
             if (source != nullptr) {
-                source->process(state, source);
+                source->process(app, source);
             }
 
             // Check if we are exiting.
-            if (state->destroyRequested != 0) {
+            // 在 APP_CMD_DESTROY 之后会成立
+            if (app->destroyRequested != 0) {
                 LOGI("CameraEngine thread destroy requested!");
-                pEngineObj->DeleteCamera();
-                pEngineObj = nullptr;
                 return;
             }
         }
-        pEngineObj->DrawFrame();
+        WindowMonitor::GetInstance()->DrawFrame();
     }
-}
-
-
-/**
- * Handle Android System APP_CMD_INIT_WINDOW message
- *   Request camera persmission from Java side
- *   Create camera object if camera has been granted
- */
-void CameraEngine::OnAppInitWindow() {
-    rotation_ = GetDisplayRotation();
-
-    CreateCamera();
-    ASSERT(camera_, "CameraCreation Failed");
-
-    EnableUI();
-
-    // NativeActivity end is ready to display, start pulling images
-    cameraReady_ = true;
-    camera_->StartPreview(true);
-}
-
-void CameraEngine::StartPreview() {
-    ASSERT(camera_, "Camera is not initialized");
-    camera_->StartPreview(true);
-}
-
-
-/**
- * Handle APP_CMD_TEMR_WINDOW
- */
-void CameraEngine::OnAppTermWindow() {
-    cameraReady_ = false;
-    DeleteCamera();
-}
-
-
-/**
- * Handle APP_CMD_CONFIG_CHANGED
- */
-void CameraEngine::OnAppConfigChange() {
-    int newRotation = GetDisplayRotation();
-
-    if (newRotation != rotation_) {
-        OnAppTermWindow();
-
-        rotation_ = newRotation;
-        OnAppInitWindow();
-    }
-}
-
-
-/**
- * Retrieve saved native window width.
- * @return width of native window
- */
-int32_t CameraEngine::GetSavedNativeWinWidth() const {
-    return savedNativeWinRes_.width;
-}
-
-
-/**
- * Retrieve saved native window height.
- * @return height of native window
- */
-int32_t CameraEngine::GetSavedNativeWinHeight() const {
-    return savedNativeWinRes_.height;
-}
-
-
-/**
- * Retrieve saved native window format
- * @return format of native window
- */
-int32_t CameraEngine::GetSavedNativeWinFormat() const {
-    return savedNativeWinRes_.format;
-}
-
-
-/**
- * Save original NativeWindow Resolution
- * @param w width of native window in pixel
- * @param h height of native window in pixel
- * @param format
- */
-void CameraEngine::SaveNativeWinRes(int32_t w, int32_t h, int32_t format) {
-    savedNativeWinRes_.width = w;
-    savedNativeWinRes_.height = h;
-    savedNativeWinRes_.format = format;
 }

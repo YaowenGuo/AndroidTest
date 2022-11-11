@@ -39,7 +39,7 @@ class SelectorFragment : Fragment() {
             inflater: LayoutInflater,
             container: ViewGroup?,
             savedInstanceState: Bundle?
-    ): View? = RecyclerView(requireContext())
+    ): View = RecyclerView(requireContext())
 
     @SuppressLint("MissingPermission")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -89,12 +89,6 @@ class SelectorFragment : Fragment() {
                 val characteristics = cameraManager.getCameraCharacteristics(it)
                 val capabilities = characteristics.get(
                         CameraCharacteristics.REQUEST_AVAILABLE_CAPABILITIES)
-                val level = characteristics.get(CameraCharacteristics.INFO_SUPPORTED_HARDWARE_LEVEL)
-
-//                val capture = characteristics.get(CameraCharacteristics.)
-
-
-                val keys = characteristics.getKeys()
                 capabilities?.contains(
                         CameraMetadata.REQUEST_AVAILABLE_CAPABILITIES_BACKWARD_COMPATIBLE) ?: false
             }

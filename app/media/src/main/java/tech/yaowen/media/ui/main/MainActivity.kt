@@ -5,7 +5,6 @@ import android.content.pm.PackageManager
 import android.os.Bundle
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import tech.yaowen.media.R
 
@@ -28,26 +27,27 @@ class MainActivity : AppCompatActivity() {
         ) == PackageManager.PERMISSION_GRANTED
     }
 
-    override fun onRequestPermissionsResult(
-        requestCode: Int, permissions: Array<String>, grantResults: IntArray
-    ) {
-        if (requestCode == MainActivity.REQUEST_CODE_PERMISSIONS) {
-            if (allPermissionsGranted()) {
-                goToCamera()
-            } else {
-                Toast.makeText(
-                    this,
-                    "Permissions not granted by the user.",
-                    Toast.LENGTH_SHORT
-                ).show()
-                finish()
-            }
-        }
-    }
-
-    fun goToCamera() {
-
-    }
+//    override fun onRequestPermissionsResult(
+//        requestCode: Int, permissions: Array<String>, grantResults: IntArray
+//    ) {
+//        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+//        if (requestCode == MainActivity.REQUEST_CODE_PERMISSIONS) {
+//            if (allPermissionsGranted()) {
+//                goToCamera()
+//            } else {
+//                Toast.makeText(
+//                    this,
+//                    "Permissions not granted by the user.",
+//                    Toast.LENGTH_SHORT
+//                ).show()
+//                finish()
+//            }
+//        }
+//    }
+//
+//    private fun goToCamera() {
+//
+//    }
 
 }
 

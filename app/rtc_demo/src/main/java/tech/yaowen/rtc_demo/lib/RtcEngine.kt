@@ -128,6 +128,7 @@ enum class RtcEngine {
 
 
     public fun connection(
+        audioTrack: AudioTrack?,
         videoTrack: VideoTrack?,
         sdp: SessionDescription?,
         observer: DspAndIdeObserver
@@ -164,12 +165,13 @@ enum class RtcEngine {
                 }
             })!!
 
-        // SdpSemantics.UNIFIED_PLAN. 模式被废弃
-        // 创建 MediaStream 对象。
-        // val mediaStream = peerConnectionFactory.createLocalMediaStream(if (sdp == null)  "offerMediaStream" else "answerMediaStream")
-        // mediaStream.addTrack(videoTrack)
         // 添加 MediaStream.
-        peerConnection.addTrack(videoTrack)
+        audioTrack?.let {
+            peerConnection.addTrack(it)
+        }
+        videoTrack?.let {
+            peerConnection.addTrack(it)
+        }
         // 用户创建 Offer 或者 Answer 的回调。
         val sdpObserver = object : SdpObserver {
             override fun onCreateSuccess(sdp: SessionDescription) {
@@ -180,8 +182,12 @@ enum class RtcEngine {
             }
 
             override fun onSetSuccess() {}
-            override fun onCreateFailure(s: String) {}
-            override fun onSetFailure(s: String) {}
+            override fun onCreateFailure(s: String) {
+
+            }
+            override fun onSetFailure(s: String) {
+
+            }
         }
 
         // 如果是连接发起者，要创建 offer.

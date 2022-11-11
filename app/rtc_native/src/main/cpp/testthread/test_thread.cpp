@@ -5,7 +5,6 @@
 #include <rtc_base/platform_thread.h>
 #include <absl/base/config.h>
 
-#include <iostream>
 #include "test_thread.h"
 #include "utils/native_debug.h"
 

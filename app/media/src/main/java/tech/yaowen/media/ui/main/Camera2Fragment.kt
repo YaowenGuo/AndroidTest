@@ -55,9 +55,10 @@ class Camera2Fragment : Fragment() {
 
     lateinit var cameraProxy: CameraProxy
 
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
-        viewModel = ViewModelProvider(this).get(MainViewModel::class.java)
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        viewModel = ViewModelProvider(this)[MainViewModel::class.java]
 
         binding.viewFinder.holder.addCallback(object : SurfaceHolder.Callback {
             override fun surfaceDestroyed(holder: SurfaceHolder) = Unit
@@ -100,15 +101,11 @@ class Camera2Fragment : Fragment() {
         // Creates list of Surfaces where the camera will output frames
         val targets = listOf(binding.viewFinder.holder.surface)
 
-        cameraProxy = CameraProxy.Builder()
-            .with(requireContext())
+        cameraProxy = CameraProxy.Builder(requireContext())
             .surface(targets)
-            .camera {
-                if (it.contains(CameraMetadata.LENS_FACING_BACK)) CameraMetadata.LENS_FACING_BACK
-                else CameraMetadata.LENS_FACING_FRONT
-            }
-            .size {
-                it.getOutputSizes(ImageFormat.YUV_420_888).maxByOrNull { it.height * it.width }!!
+            .camera(args.cameraId)
+            .size { config ->
+                config.getOutputSizes(ImageFormat.YUV_420_888).maxByOrNull { it.height * it.width }!!
             }
             .build()
 

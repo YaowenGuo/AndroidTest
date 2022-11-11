@@ -17,7 +17,8 @@ package tech.yaowen.android.module/*
 object Versions {
     const val COMPILE_SDK = 32
     const val TARGET_SDK = 32
-    const val MIN_SDK = 21
+    //camera2ndk only can be use above android api 24
+    const val MIN_SDK = 24
 
     val VERSION_NAME = "1.0.15" // X.Y.Z; X = Major, Y = minor, Z = Patch level
     val VERSION_CODE = 1
@@ -36,4 +37,5 @@ object Versions {
     //  "org.threeten:threetenbp:${tech.yaowen.android.module.Versions.threetenbp}:no-tzdb" using java-platform in the
     //  depconstraints/build.gradle.kts is defined
     const val THREETENBP = "1.3.6"
+    const val CMAKE_VERSION = "3.18.1"
 }

@@ -23,6 +23,7 @@ class PeerConnectionActivity : BaseActivity(), SignalingClient.Callback {
     lateinit var peerConnectionFactory: PeerConnectionFactory
     val eglBaseContext = EglBase.create().eglBaseContext
     var videoTrack: VideoTrack? = null
+    var audioTrack: AudioTrack? = null
     private var joined = false
     private var isInitiator = false
     private var videoCapturer: VideoCapturer? = null
@@ -33,6 +34,33 @@ class PeerConnectionActivity : BaseActivity(), SignalingClient.Callback {
         setContentView(R.layout.local_peer_connection_activity)
     }
 
+    lateinit var peerConnection: PeerConnection
+
+
+    private fun captureVideoAndVideo() {
+        peerConnectionFactory = RtcEngine.INSTANCE.createPeerConnection(eglBaseContext, this)
+        videoCapturer =
+            RtcEngine.INSTANCE.createCameraCapturer(this, CameraMetadata.LENS_FACING_FRONT)
+        if (videoCapturer != null) {
+            // id 不能有空白符，虽然能生成 sdp，但解析会出错。
+            videoTrack = RtcEngine.INSTANCE.createVideoTrack(
+                peerConnectionFactory, "videoId", videoCapturer!!, this, eglBaseContext, "FrontCapture"
+            )
+
+            audioTrack = RtcEngine.INSTANCE.createAudioTrack(peerConnectionFactory, "audioId")
+            runOnUiThread {
+                RtcEngine.INSTANCE.displayVideo(
+                    videoTrack!!,
+                    findViewById(R.id.localView),
+                    eglBaseContext
+                )
+            }
+        } else {
+            hint("获取摄像头失败")
+        }
+    }
+
+
     override fun onHaveCameraPermission() {
         joinRoom()
     }
@@ -42,41 +70,9 @@ class PeerConnectionActivity : BaseActivity(), SignalingClient.Callback {
             SignalingClient[application]
                 .setCallback(this)
                 .joinRoom(it)
-
+//            captureVideoAndVideo()
         }).show()
     }
-
-    lateinit var peerConnection: PeerConnection
-
-
-    private fun captureVideoAndVideo() {
-        peerConnectionFactory = RtcEngine.INSTANCE.createPeerConnection(eglBaseContext, this)
-        videoCapturer = RtcEngine.INSTANCE.createCameraCapturer(this, CameraMetadata.LENS_FACING_FRONT)
-        if (videoCapturer != null) {
-            val id = "front"
-            videoTrack = RtcEngine.INSTANCE.createVideoTrack(
-                peerConnectionFactory, id, videoCapturer!!, this, eglBaseContext, "FrontCapture"
-            )
-
-            val localAudioTrack = RtcEngine.INSTANCE.createAudioTrack(peerConnectionFactory, id)
-            runOnUiThread {
-                RtcEngine.INSTANCE.displayVideo(
-                    videoTrack!!,
-                    findViewById(R.id.localView),
-                    eglBaseContext
-                )
-            }
-            if (videoTrack != null) {
-                SignalingClient[application]
-                    .sendMessage("got user media")
-            } else {
-                hint("创建视频轨失败")
-            }
-        } else {
-            hint("获取摄像头失败")
-        }
-    }
-
 
     override fun onCreateRoom() {
         joined = true
@@ -88,12 +84,17 @@ class PeerConnectionActivity : BaseActivity(), SignalingClient.Callback {
         isInitiator = false
         joined = true
         captureVideoAndVideo()
+        SignalingClient[application]
+            .sendMessage("got user media")
+
     }
 
     override fun onPeerReady() {
         // 接收方已经获取到音/视频，可以建立连接了。
-        if (isInitiator && videoTrack != null) {
-            call(videoTrack!!)
+        if (isInitiator) {
+            videoTrack?.let {
+                call(it)
+            }
         }
     }
 
@@ -138,7 +139,7 @@ class PeerConnectionActivity : BaseActivity(), SignalingClient.Callback {
 
     private fun call(videoTrack: VideoTrack) {
         log("Start to call")
-        peerConnection = RtcEngine.INSTANCE.connection(videoTrack, null, object :
+        peerConnection = RtcEngine.INSTANCE.connection(audioTrack, videoTrack, null, object :
             RtcEngine.DspAndIdeObserver {
             override fun onSdCreate(sdp: SessionDescription) {
                 sendSd(sdp)
@@ -171,7 +172,7 @@ class PeerConnectionActivity : BaseActivity(), SignalingClient.Callback {
 
     private fun answer(videoTrack: VideoTrack, sdp: SessionDescription) {
         log("Start to answer")
-        peerConnection = RtcEngine.INSTANCE.connection(videoTrack, sdp, object :
+        peerConnection = RtcEngine.INSTANCE.connection(audioTrack, videoTrack, sdp, object :
             RtcEngine.DspAndIdeObserver {
             override fun onSdCreate(sdp: SessionDescription) {
                 sendSd(sdp)

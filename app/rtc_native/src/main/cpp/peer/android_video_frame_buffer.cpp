@@ -88,7 +88,6 @@ namespace rtc_demo {
             AImage_getPlaneRowStride(image, 0, &yStride);
             AImage_getPlaneRowStride(image, 1, &uvStride);
 
-
             AImage_getPlaneData(image, 0, &yPixel, &yLen);
             AImage_getPlaneData(image, 1, &vPixel, &vLen);
             AImage_getPlaneData(image, 2, &uPixel, &uLen);

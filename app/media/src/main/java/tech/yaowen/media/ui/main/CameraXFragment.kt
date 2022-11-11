@@ -1,15 +1,13 @@
 package tech.yaowen.media.ui.main
 
-import android.graphics.ImageFormat
 import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import android.view.*
 import android.widget.Toast
 import androidx.camera.core.*
-import androidx.camera.extensions.BokehImageCaptureExtender
+import androidx.camera.extensions.ExtensionsManager
 import androidx.camera.lifecycle.ProcessCameraProvider
-import androidx.camera.view.PreviewView
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
@@ -22,6 +20,9 @@ import java.text.SimpleDateFormat
 import java.util.*
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
+import kotlin.math.abs
+import kotlin.math.max
+import kotlin.math.min
 
 /** Helper type alias used for analysis use case callbacks */
 typealias LumaListener = (luma: Double) -> Unit
@@ -29,17 +30,28 @@ typealias LumaListener = (luma: Double) -> Unit
 class CameraXFragment : Fragment() {
 
     private val args: CameraXFragmentArgs by navArgs()
+
     companion object {
         fun newInstance() = CameraXFragment()
         private const val TAG = "CameraXBasic"
         private const val FILENAME_FORMAT = "yyyy-MM-dd-HH-mm-ss-SSS"
+        private const val PHOTO_EXTENSION = ".jpg"
+        private const val RATIO_4_3_VALUE = 4.0 / 3.0
+        private const val RATIO_16_9_VALUE = 16.0 / 9.0
+
+        /** Helper function used to create a timestamped file */
+        private fun createFile(baseFolder: File, format: String, extension: String) =
+            File(
+                baseFolder, SimpleDateFormat(format, Locale.US)
+                    .format(System.currentTimeMillis()) + extension
+            )
     }
+
 
     private var imageCapture: ImageCapture? = null
 
     private lateinit var outputDirectory: File
     private lateinit var cameraExecutor: ExecutorService
-    private lateinit var viewfinder: PreviewView
 
     private lateinit var viewModel: MainViewModel
     private lateinit var binding: MainFragmentBinding
@@ -49,15 +61,13 @@ class CameraXFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         binding = MainFragmentBinding.inflate(inflater)
-        viewfinder = binding.viewfinder
 
         return binding.root
     }
 
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
         viewModel = ViewModelProvider(this).get(MainViewModel::class.java)
-
         // Set up the listener for take photo button
         binding.cameraCaptureButton.setOnClickListener { takePhoto() }
 
@@ -66,9 +76,9 @@ class CameraXFragment : Fragment() {
         cameraExecutor = Executors.newSingleThreadExecutor()
 
         val orientationEventListener = object : OrientationEventListener(requireContext()) {
-            override fun onOrientationChanged(orientation : Int) {
+            override fun onOrientationChanged(orientation: Int) {
                 // Monitors orientation values to determine the target rotation value
-                val rotation : Int = when (orientation) {
+                val rotation: Int = when (orientation) {
                     in 45..134 -> Surface.ROTATION_270
                     in 135..224 -> Surface.ROTATION_180
                     in 225..314 -> Surface.ROTATION_90
@@ -123,48 +133,64 @@ class CameraXFragment : Fragment() {
     private fun startCamera() {
         val cameraProviderFuture = ProcessCameraProvider.getInstance(requireContext())
 
-
-        cameraProviderFuture.addListener(Runnable {
+        cameraProviderFuture.addListener({
             // Used to bind the lifecycle of cameras to the lifecycle owner
             val cameraProvider: ProcessCameraProvider = cameraProviderFuture.get()
+            // Get screen metrics used to setup camera for full screen resolution
+            val width = binding.viewfinder.width
+            val height = binding.viewfinder.height
+            Log.d(TAG, "Screen metrics: $width x $height")
 
-            // Preview
-            val preview = Preview.Builder()
-                .build()
-            preview.setSurfaceProvider(viewfinder.createSurfaceProvider())
+            val screenAspectRatio = aspectRatio(width, height)
 
-            // Image Capture
-            // Create an Extender object which can be used to apply extension
-            // configurations.
-            val bokehImageCapture = BokehImageCaptureExtender.create(ImageCapture.Builder())
-            // Select the camera
-            //val cameraSelector = CameraSelector.DEFAULT_BACK_CAMERA
+            // CameraSelector
             val cameraSelector = CameraSelector.Builder()
                 .requireLensFacing(if ("0" == args.cameraId) CameraSelector.LENS_FACING_BACK else CameraSelector.LENS_FACING_FRONT)
                 .build()
 
-            // Query if extension is available (optional).
-            if (bokehImageCapture.isExtensionAvailable(cameraSelector)) {
-                // Enable the extension if available.
-                bokehImageCapture.enableExtension(cameraSelector)
-            }
-            imageCapture = ImageCapture.Builder()
+            // Preview
+            val preview = Preview.Builder()
+                .setTargetAspectRatio(screenAspectRatio)
+                .setTargetRotation(binding.viewfinder.display.rotation)
+                .build()
+            preview.setSurfaceProvider(binding.viewfinder.surfaceProvider)
+
+            // Image Capture
+            // Create an Extender object which can be used to apply extension
+            // configurations.
+            val imageCapture = ImageCapture.Builder()
+                .setCaptureMode(ImageCapture.CAPTURE_MODE_MINIMIZE_LATENCY)
+                // We request aspect ratio but no resolution to match preview config, but letting
+                // CameraX optimize for whatever specific resolution best fits our use cases
+                .setTargetAspectRatio(screenAspectRatio)
+                // Set initial target rotation, we will have to call this again if rotation changes
+                // during the lifecycle of this use case
+                .setTargetRotation(binding.viewfinder.display.rotation)
                 .build()
 
 
-            // Analyzer
+            // ImageAnalysis
             val imageAnalyzer = ImageAnalysis.Builder()
+                // We request aspect ratio but no resolution
+                .setTargetAspectRatio(screenAspectRatio)
+                // Set initial target rotation, we will have to call this again if rotation changes
+                // during the lifecycle of this use case
+                .setTargetRotation(binding.viewfinder.display.rotation)
                 .build()
-            imageAnalyzer.setAnalyzer(
-                cameraExecutor,
-                LuminosityAnalyzer { /*luma -> Log.d(TAG, "Average luminosity: $luma")*/ })
+                // The analyzer can then be assigned to the instance
+                .also {
+                    it.setAnalyzer(cameraExecutor, LuminosityAnalyzer { luma ->
+                        // Values returned from our analyzer are passed to the attached listener
+                        // We log image analysis results here - you should do something useful
+                        // instead!
+                        Log.d(TAG, "Average luminosity: $luma")
+                    })
+                }
 
+            // Must unbind the use-cases before rebinding them
+            cameraProvider.unbindAll()
             try {
-                // Unbind use cases before rebinding
-                cameraProvider.unbindAll()
-
                 // Bind use cases to camera
-//                cameraProvider.bindToLifecycle(this, cameraSelector, preview)
                 cameraProvider.bindToLifecycle(
                     this,
                     cameraSelector,
@@ -182,8 +208,24 @@ class CameraXFragment : Fragment() {
 
     }
 
-
-
+    /**
+     *  [androidx.camera.core.ImageAnalysis.Builder] requires enum value of
+     *  [androidx.camera.core.AspectRatio]. Currently it has values of 4:3 & 16:9.
+     *
+     *  Detecting the most suitable ratio for dimensions provided in @params by counting absolute
+     *  of preview ratio to one of the provided values.
+     *
+     *  @param width - preview width
+     *  @param height - preview height
+     *  @return suitable aspect ratio
+     */
+    private fun aspectRatio(width: Int, height: Int): Int {
+        val previewRatio = max(width, height).toDouble() / min(width, height)
+        if (abs(previewRatio - RATIO_4_3_VALUE) <= abs(previewRatio - RATIO_16_9_VALUE)) {
+            return AspectRatio.RATIO_4_3
+        }
+        return AspectRatio.RATIO_16_9
+    }
 
 
     private fun getOutputDirectory(): File {

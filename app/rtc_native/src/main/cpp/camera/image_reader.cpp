@@ -1,18 +1,3 @@
-/*
- * Copyright (C) 2017 The Android Open Source Project
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 #include <string>
 #include <functional>
 #include <thread>
@@ -63,8 +48,8 @@ ImageReader::ImageReader(ImageFormat *res, enum AIMAGE_FORMATS format)
         : presentRotation_(0), reader_(nullptr) {
     callback_ = nullptr;
     callbackCtx_ = nullptr;
-    media_status_t status = AImageReader_new(res->width, res->height, format,
-                                             MAX_BUF_COUNT, &reader_);
+    auto status = AImageReader_new(res->width, res->height, format,
+                                   MAX_BUF_COUNT, &reader_);
     ASSERT(reader_ && status == AMEDIA_OK, "Failed to create AImageReader");
     AImageReader_ImageListener listener{
             .context = this,
@@ -110,7 +95,7 @@ void ImageReader::ImageCallback(AImageReader *reader) {
 }
 
 
-ANativeWindow *ImageReader::GetNativeWindow(void) {
+ANativeWindow *ImageReader::GetNativeWindow() {
     if (!reader_) return nullptr;
     ANativeWindow *nativeWindow;
     media_status_t status = AImageReader_getWindow(reader_, &nativeWindow);
@@ -125,7 +110,7 @@ ANativeWindow *ImageReader::GetNativeWindow(void) {
  *   Retrieve the next image in ImageReader's bufferQueue, NOT the last image so
  * no image is skipped. Recommended for batch/background processing.
  */
-AImage *ImageReader::GetNextImage(void) {
+AImage *ImageReader::GetNextImage() {
     AImage *image;
     media_status_t status = AImageReader_acquireNextImage(reader_, &image);
     if (status != AMEDIA_OK) {
@@ -140,7 +125,7 @@ AImage *ImageReader::GetNextImage(void) {
  *   Retrieve the last image in ImageReader's bufferQueue, deleting images in
  * in front of it on the queue. Recommended for real-time processing.
  */
-AImage *ImageReader::GetLatestImage(void) {
+AImage *ImageReader::GetLatestImage() {
     AImage *image;
     media_status_t status = AImageReader_acquireLatestImage(reader_, &image);
     if (status != AMEDIA_OK) {
@@ -170,8 +155,8 @@ void ImageReader::DeleteImage(AImage *image) {
  *            it will be deleted via {@link AImage_delete}
  */
 bool ImageReader::DisplayImage(ANativeWindow_Buffer *buf, AImage *image) {
-    ASSERT(buf->format == WINDOW_FORMAT_RGBX_8888 ||
-           buf->format == WINDOW_FORMAT_RGBA_8888,
+    ASSERT(buf->format == AHARDWAREBUFFER_FORMAT_R8G8B8X8_UNORM ||
+           buf->format == AHARDWAREBUFFER_FORMAT_R8G8B8A8_UNORM,
            "Not supported buffer format");
 
     int32_t srcFormat = -1;
@@ -180,7 +165,6 @@ bool ImageReader::DisplayImage(ANativeWindow_Buffer *buf, AImage *image) {
     int32_t srcPlanes = 0;
     AImage_getNumberOfPlanes(image, &srcPlanes);
     ASSERT(srcPlanes == 3, "Is not 3 planes");
-
     switch (presentRotation_) {
         case 0:
             PresentImage(buf, image);
@@ -203,6 +187,56 @@ bool ImageReader::DisplayImage(ANativeWindow_Buffer *buf, AImage *image) {
     return true;
 }
 
+//bool ImageReader::DisplayImage(ANativeWindow_Buffer *buf, AImage *image) {
+//    ASSERT(buf->format == AHARDWAREBUFFER_FORMAT_Y8Cb8Cr8_420,
+//           "Not supported buffer format");
+//
+//    int32_t srcFormat = -1;
+//    AImage_getFormat(image, &srcFormat);
+//    ASSERT(AIMAGE_FORMAT_YUV_420_888 == srcFormat, "Failed to get format");
+//    int32_t srcPlanes = 0;
+//    AImage_getNumberOfPlanes(image, &srcPlanes);
+//    ASSERT(srcPlanes == 3, "Is not 3 planes");
+//
+//    AImageCropRect srcRect;
+//    AImage_getCropRect(image, &srcRect);
+//
+//    int32_t yStride, uvStride;
+//    uint8_t *yPixel, *uPixel, *vPixel;
+//    int32_t yLen, uLen, vLen;
+//    AImage_getPlaneRowStride(image, 0, &yStride);
+//    AImage_getPlaneRowStride(image, 1, &uvStride);
+//    AImage_getPlaneData(image, 0, &yPixel, &yLen);
+//    AImage_getPlaneData(image, 1, &vPixel, &vLen);
+//    AImage_getPlaneData(image, 2, &uPixel, &uLen);
+//    int32_t uvPixelStride;
+//    AImage_getPlanePixelStride(image, 1, &uvPixelStride);
+//
+//    int32_t height = MIN(buf->height, (srcRect.bottom - srcRect.top));
+//    int32_t width = MIN(buf->width, (srcRect.right - srcRect.left));
+//
+//    auto *out = static_cast<uint32_t *>(buf->bits);
+//    for (int32_t y = 0; y < height; ++y) {
+//        const uint8_t *pY = yPixel + yStride * (y + srcRect.top) + srcRect.left;
+//        memcpy(out, pY, width);
+//        out += buf->stride;
+//    }
+//    for (int32_t u = 0; u < (height >> 1); ++u) {
+//        int32_t uv_row_start = uvStride * u + (srcRect.top >> 1);
+//        const uint8_t *pU = uPixel + uv_row_start + (srcRect.left >> 1);
+//        memcpy(out, pU, width >> 1);
+//        out += buf->stride >> 1;
+//    }
+//    for (int32_t v = 0; (v < height >> 1); ++v) {
+//        int32_t uv_row_start = uvStride * v + (srcRect.top >> 1);
+//        const uint8_t *pV = vPixel + uv_row_start + (srcRect.left >> 1);
+//        memcpy(out, pV, width >> 1);
+//        out += buf->stride >> 1;
+//    }
+//    AImage_delete(image);
+//    return true;
+//}
+//
 
 /*
  * PresentImage()
@@ -229,7 +263,7 @@ void ImageReader::PresentImage(ANativeWindow_Buffer *buf, AImage *image) {
     int32_t height = MIN(buf->height, (srcRect.bottom - srcRect.top));
     int32_t width = MIN(buf->width, (srcRect.right - srcRect.left));
 
-    uint32_t *out = static_cast<uint32_t *>(buf->bits);
+    auto *out = static_cast<uint32_t *>(buf->bits);
     for (int32_t y = 0; y < height; y++) {
         const uint8_t *pY = yPixel + yStride * (y + srcRect.top) + srcRect.left;
 
@@ -269,7 +303,7 @@ void ImageReader::PresentImage90(ANativeWindow_Buffer *buf, AImage *image) {
     int32_t height = MIN(buf->width, (srcRect.bottom - srcRect.top));
     int32_t width = MIN(buf->height, (srcRect.right - srcRect.left));
 
-    uint32_t *out = static_cast<uint32_t *>(buf->bits);
+    auto *out = static_cast<uint32_t *>(buf->bits);
     out += height - 1;
     for (int32_t y = 0; y < height; y++) {
         const uint8_t *pY = yPixel + yStride * (y + srcRect.top) + srcRect.left;
@@ -311,7 +345,7 @@ void ImageReader::PresentImage180(ANativeWindow_Buffer *buf, AImage *image) {
     int32_t height = MIN(buf->height, (srcRect.bottom - srcRect.top));
     int32_t width = MIN(buf->width, (srcRect.right - srcRect.left));
 
-    uint32_t *out = static_cast<uint32_t *>(buf->bits);
+    auto *out = static_cast<uint32_t *>(buf->bits);
     out += (height - 1) * buf->stride;
     for (int32_t y = 0; y < height; y++) {
         const uint8_t *pY = yPixel + yStride * (y + srcRect.top) + srcRect.left;
@@ -354,7 +388,7 @@ void ImageReader::PresentImage270(ANativeWindow_Buffer *buf, AImage *image) {
     int32_t height = MIN(buf->width, (srcRect.bottom - srcRect.top));
     int32_t width = MIN(buf->height, (srcRect.right - srcRect.left));
 
-    uint32_t *out = static_cast<uint32_t *>(buf->bits);
+    auto *out = static_cast<uint32_t *>(buf->bits);
     for (int32_t y = 0; y < height; y++) {
         const uint8_t *pY = yPixel + yStride * (y + srcRect.top) + srcRect.left;
 
@@ -373,13 +407,20 @@ void ImageReader::PresentImage270(ANativeWindow_Buffer *buf, AImage *image) {
 
 
 void ImageReader::SetPresentRotation(int32_t angle) {
-    presentRotation_ = angle;
+    if (angle < 45) {
+        presentRotation_ = 0;
+    } else if (angle < 135) {
+        presentRotation_ = 90;
+    } else if (angle < 225) {
+        presentRotation_ = 180;
+    } else {
+        presentRotation_ = 270;
+    }
 }
 
 
 void ImageReader::SetVideoSource(
-        rtc::scoped_refptr<rtc_demo::AndroidVideoTrackSource> &video_source
-) {
+        rtc::scoped_refptr<rtc_demo::AndroidVideoTrackSource> &video_source) {
     video_source_ = video_source;
 }
 
@@ -411,7 +452,7 @@ void ImageReader::WriteFile(AImage *image) {
             0, 0
     };
     clock_gettime(CLOCK_REALTIME, &ts);
-    struct tm localTime;
+    struct tm localTime {};
     localtime_r(&ts.tv_sec, &localTime);
 
     std::string fileName = kDirName;

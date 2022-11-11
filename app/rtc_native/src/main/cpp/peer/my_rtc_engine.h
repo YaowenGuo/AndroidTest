@@ -11,6 +11,7 @@
 #include <jni.h>
 #include "android_video_track_source.h"
 #include "signaling/signaling_client.h"
+#include "camera/camera_manager.h"
 
 const char kAudioLabel[] = "audio_label";
 const char kVideoLabel[] = "video_label";
@@ -219,12 +220,23 @@ public:
     void onIceCandidateReceived(const std::string& sdp_mid, int sdp_mline_index, const std::string& sdp) override;
     // L***************** SocketCallbackInterface *******************
 
+
+    std::weak_ptr<Camera> GetCamera();
+
 protected:
+    std::unique_ptr<rtc::Thread> network_thread_;
+    std::unique_ptr<rtc::Thread> worker_thread_;
+    std::unique_ptr<rtc::Thread> signaling_thread_;
+
+    std::unique_ptr<CameraManager> camera_manager_;
+    std::shared_ptr<Camera> camera_;
+
+
     rtc::scoped_refptr<webrtc::PeerConnectionFactoryInterface> peer_connection_factory_;
     rtc::scoped_refptr<webrtc::PeerConnectionInterface> peer_connection_;
     rtc_demo::JavaRTCEngine *signaling_;
     webrtc::PeerConnectionInterface::RTCOfferAnswerOptions offerAnswerOption = webrtc::PeerConnectionInterface::RTCOfferAnswerOptions();
 };
 
-static Live *pLiveObj = nullptr;
+extern  Live *pLiveObj;
 #endif //ANDROIDTEST_MY_RTC_ENGINE_H
