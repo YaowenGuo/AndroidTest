@@ -22,7 +22,8 @@ dependencies {
     implementation(libs.kotlin.std)
     implementation(libs.ktx.core)
     implementation(libs.ktx.viewmodel)
-    implementation(libs.exoplayer)
+    implementation(libs.media3.player)
+    implementation(libs.media3.ui)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.test.ext)

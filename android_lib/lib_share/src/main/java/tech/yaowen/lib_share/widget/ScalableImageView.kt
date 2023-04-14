@@ -11,7 +11,6 @@ import android.view.ScaleGestureDetector
 import android.widget.OverScroller
 import androidx.appcompat.widget.AppCompatImageView
 import androidx.core.view.GestureDetectorCompat
-import androidx.core.view.ScaleGestureDetectorCompat
 import kotlin.math.min
 
 
@@ -53,8 +52,8 @@ class ScalableImageView : AppCompatImageView, Runnable {
         gestureDetector =
             GestureDetectorCompat(context, object : GestureDetector.SimpleOnGestureListener() {
                 override fun onScroll(
-                    e1: MotionEvent?,
-                    e2: MotionEvent?,
+                    e1: MotionEvent,
+                    e2: MotionEvent,
                     distanceX: Float,
                     distanceY: Float
                 ): Boolean {
@@ -68,9 +67,10 @@ class ScalableImageView : AppCompatImageView, Runnable {
                     return true
                 }
 
+
                 override fun onFling(
-                    down: MotionEvent?,
-                    current: MotionEvent?,
+                    down: MotionEvent,
+                    current: MotionEvent,
                     velocityX: Float,
                     velocityY: Float
                 ): Boolean {
@@ -93,7 +93,7 @@ class ScalableImageView : AppCompatImageView, Runnable {
                     }
                 }
 
-                override fun onDoubleTap(e: MotionEvent?): Boolean {
+                override fun onDoubleTap(e: MotionEvent): Boolean {
                     isBigScale = !isBigScale
                     if (isBigScale) {
                         scaleAnimator.start()
@@ -104,12 +104,12 @@ class ScalableImageView : AppCompatImageView, Runnable {
                 }
 
                 // 第二次点击按下的时候触发
-                override fun onDoubleTapEvent(e: MotionEvent?): Boolean {
+                override fun onDoubleTapEvent(e: MotionEvent): Boolean {
                     return true
                 }
 
                 // 第二次点击按下后的后继移动会触发
-                override fun onSingleTapConfirmed(e: MotionEvent?): Boolean {
+                override fun onSingleTapConfirmed(e: MotionEvent): Boolean {
                     return performClick()
                 }
 
@@ -118,15 +118,15 @@ class ScalableImageView : AppCompatImageView, Runnable {
         gestureDetector.setIsLongpressEnabled(false)
         scaleDetector = ScaleGestureDetector(context, object:
             ScaleGestureDetector.OnScaleGestureListener {
-            override fun onScaleBegin(detector: ScaleGestureDetector?): Boolean {
+            override fun onScaleBegin(detector: ScaleGestureDetector): Boolean {
                 return true
             }
 
-            override fun onScaleEnd(detector: ScaleGestureDetector?) {
+            override fun onScaleEnd(detector: ScaleGestureDetector) {
                 TODO("Not yet implemented")
             }
 
-            override fun onScale(detector: ScaleGestureDetector?): Boolean {
+            override fun onScale(detector: ScaleGestureDetector): Boolean {
                 TODO("Not yet implemented")
             }
 

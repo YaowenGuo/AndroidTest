@@ -64,3 +64,4 @@ include(
 enableFeaturePreview("VERSION_CATALOGS")
 enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 includeBuild("VersionPlugin")
+include(":android_lib:device")
