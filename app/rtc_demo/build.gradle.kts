@@ -13,6 +13,7 @@ android {
     buildFeatures {
         viewBinding = true
     }
+    namespace = "tech.yaowen.rtc_demo"
 }
 
 
@@ -26,6 +27,6 @@ dependencies {
     implementation(fileTree(mapOf("dir" to "libs", "include" to listOf("*.aar"))))
 //    implementation(libs.webrtc)
     testImplementation(libs.junit)
-    androidTestImplementation(libs.test.ext)
-    androidTestImplementation(libs.espresso)
+    androidTestImplementation(libs.androidx.junit)
+    androidTestImplementation(libs.androidx.espresso)
 }

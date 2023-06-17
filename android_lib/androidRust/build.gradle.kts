@@ -1,9 +1,12 @@
 plugins {
     id("com.android.library")
     id("tech.yaowen.android.module")
-    id("org.mozilla.rust-android-gradle.rust-android")
+//    id("org.mozilla.rust-android-gradle.rust-android")
     id("kotlin-android")
     id("kotlin-kapt")
+}
+android {
+    namespace = "tech.yaowen.androidrust"
 }
 
 

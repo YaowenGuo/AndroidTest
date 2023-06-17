@@ -1,84 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    package="tech.yaowen.customview">
+    xmlns:tools="http://schemas.android.com/tools">
 
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
 
     <application
-        android:name=".base.CustomApplication"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.App">
-        <activity
-            android:name=".lifecycle.ViewLifeTestActivity"
+        <activity android:name=".MainActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".dialog.TestDialogActivity"></activity>
-        <activity
-            android:name=".lifecycle.ActivityB"
-            android:launchMode="singleTop" />
-        <activity
-            android:name=".lifecycle.ActivityA"
-            android:label="@string/title_activity_activity"
-            android:launchMode="singleTask">
-
-            <!-- <intent-filter> -->
-            <!-- <action android:name="android.intent.action.MAIN" /> -->
-
-
-            <!-- <category android:name="android.intent.category.LAUNCHER" /> -->
-            <!-- </intent-filter> -->
-        </activity>
-        <activity android:name=".intercept.InterceptActivity" />
-        <activity android:name=".ui.TouchActivity" />
-        <activity android:name=".ui.service.ServiceTestActivity" />
-        <activity android:name=".ui.workmanager.JobQueueActivity">
-
-            <!-- <intent-filter> -->
-            <!-- <action android:name="android.intent.action.MAIN" /> -->
-
-
-            <!-- <category android:name="android.intent.category.LAUNCHER" /> -->
-            <!-- </intent-filter> -->
-        </activity>
-        <activity android:name=".ui.databinding.BindingActivity">
-
-            <!--
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-            -->
-        </activity>
-        <activity android:name=".MainActivity" />
-
-        <provider
-            android:name="androidx.work.impl.WorkManagerInitializer"
-            android:authorities="tech.yaowen.customview.workmanager-init"
-            tools:node="remove" /> <!-- <activity android:name=".ui.jobservice.JobServiceActivity"> -->
-        <!-- </activity> -->
-        <!-- <activity android:name=".ui.transition.TransitionActivity"> -->
-        <!-- <intent-filter> -->
-        <!-- <action android:name="android.intent.action.MAIN" /> -->
-        <!-- <category android:name="android.intent.category.LAUNCHER" /> -->
-        <!-- </intent-filter> -->
-        <!-- </activity> -->
-        <service
-            android:name=".service.NotificationJobService"
-            android:permission="android.permission.BIND_JOB_SERVICtech.yaowen.customview.serviceE" />
-        <service android:name=".service.TestService" />
-        <service android:name=".ui.service.MessengerService" />
-        <service android:name=".service.AIDLService" />
     </application>
 
 </manifest>

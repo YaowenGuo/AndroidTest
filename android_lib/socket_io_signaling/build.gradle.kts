@@ -13,3 +13,6 @@ dependencies {
     implementation(libs.squareup.okhttplog)
     implementation(libs.socket.io)
 }
+android {
+    namespace = "tech.signaling"
+}

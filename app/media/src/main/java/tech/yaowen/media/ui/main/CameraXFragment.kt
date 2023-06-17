@@ -53,7 +53,6 @@ class CameraXFragment : Fragment() {
     private lateinit var outputDirectory: File
     private lateinit var cameraExecutor: ExecutorService
 
-    private lateinit var viewModel: MainViewModel
     private lateinit var binding: MainFragmentBinding
 
     override fun onCreateView(
@@ -67,7 +66,6 @@ class CameraXFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        viewModel = ViewModelProvider(this).get(MainViewModel::class.java)
         // Set up the listener for take photo button
         binding.cameraCaptureButton.setOnClickListener { takePhoto() }
 

@@ -18,3 +18,6 @@ dependencies {
     // If you want to additionally use the CameraX Extensions library
     implementation(libs.camera.extensions)
 }
+android {
+    namespace = "tech.yaowen.media_tool"
+}

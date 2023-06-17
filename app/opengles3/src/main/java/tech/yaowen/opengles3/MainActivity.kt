@@ -3,12 +3,9 @@ package tech.yaowen.opengles3
 import android.opengl.GLSurfaceView
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
-import tech.yaowen.opengles3.databinding.ActivityMainBinding
 import tech.yaowen.opengles3.renderer.SimpleRenderer
 
 class MainActivity : AppCompatActivity() {
-
-    lateinit var binding: ActivityMainBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

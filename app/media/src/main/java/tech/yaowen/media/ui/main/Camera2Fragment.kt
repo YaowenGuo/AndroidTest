@@ -9,7 +9,6 @@ import android.os.HandlerThread
 import android.util.Log
 import android.view.*
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.navArgs
 import kotlinx.coroutines.Dispatchers
@@ -27,7 +26,6 @@ class Camera2Fragment : Fragment() {
         fun newInstance() = CameraXFragment()
     }
 
-    private lateinit var viewModel: MainViewModel
     private lateinit var binding: FragmentCamera2Binding
     private val cameraManager: CameraManager by lazy { cameraManager(requireActivity().applicationContext) }
 
@@ -58,7 +56,6 @@ class Camera2Fragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        viewModel = ViewModelProvider(this)[MainViewModel::class.java]
 
         binding.viewFinder.holder.addCallback(object : SurfaceHolder.Callback {
             override fun surfaceDestroyed(holder: SurfaceHolder) = Unit

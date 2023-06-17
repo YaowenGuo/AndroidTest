@@ -19,11 +19,11 @@ android {
 
         }*/
 
-        externalNativeBuild() {
-            cmake {
-                abiFilters += listOf("armeabi-v7a", "arm64-v8a"/*, "x86", "x86_64"*/) //指定编译为 armeabi-v7a
-            }
-        }
+//        externalNativeBuild() {
+//            cmake {
+//                abiFilters += listOf("armeabi-v7a", "arm64-v8a"/*, "x86", "x86_64"*/) //指定编译为 armeabi-v7a
+//            }
+//        }
     }
 
     externalNativeBuild {
@@ -32,4 +32,5 @@ android {
             version = tech.yaowen.android.module.Versions.CMAKE_VERSION
         }
     }
+    namespace = "tech.yaowen.ffmpeg"
 }

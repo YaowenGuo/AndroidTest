@@ -1,23 +1,16 @@
 plugins {
-    id("com.android.application")
+    alias(libs.plugins.android.application)
+    alias(libs.plugins.kotlin.android)
+    alias(libs.plugins.kotlin.kapt)
     id("tech.yaowen.android.module")
-    id("kotlin-android")
-    id("kotlin-kapt")
 }
 
-//apply plugin: "org.jetbrains.kotlin.android"
 
 android {
     defaultConfig {
         applicationId = "tech.yaowen.customview"
     }
-    kotlinOptions {
-        jvmTarget = "1.8"
-    }
-    buildFeatures {
-        dataBinding = true
-        viewBinding = true
-    }
+    namespace = "tech.yaowen.customview"
 }
 
 dependencies {
@@ -36,14 +29,12 @@ dependencies {
     implementation(libs.lifecycle.process)
     implementation(libs.lifecycle.common)
 
-    testImplementation(libs.junit)
-    androidTestImplementation(libs.runner)
-    androidTestImplementation(libs.espresso)
-    implementation(project(":lib:lib_annotations"))
+    implementation(libs.androidx.compose.activity)
 
-//    implementation project(path: ":test_annotation")
-//    annotationProcessor project(path: ":lib_butter_knife")
+    testImplementation(libs.junit)
+    androidTestImplementation(libs.androidx.junit)
+    androidTestImplementation(libs.androidx.espresso)
+
     implementation(project(":android_lib:lib_share"))
-    kapt(project(":lib:lib_processor"))
 
 }

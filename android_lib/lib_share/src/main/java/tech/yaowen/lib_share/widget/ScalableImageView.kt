@@ -160,10 +160,6 @@ class ScalableImageView : AppCompatImageView, Runnable {
     }
 
 
-//    override fun onDraw(canvas: Canvas?) {
-//        super.onDraw(canvas)
-//    }
-
     fun refreshFling() {
 
     }

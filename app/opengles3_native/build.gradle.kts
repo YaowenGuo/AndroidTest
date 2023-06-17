@@ -16,6 +16,7 @@ android {
             version = tech.yaowen.android.module.Versions.CMAKE_VERSION
         }
     }
+    namespace = "tech.yaowen.opengles3_native"
     // 导致 java.lang.ClassNotFoundException: Didn't find class "androidx.lifecycle.ProcessLifecycleOwnerInitializer" on path: DexPathList ...
 //    dataBinding {
 //        enabled = true
@@ -27,6 +28,6 @@ dependencies {
     implementation(libs.appcompat)
     implementation(libs.constraintlayout)
     testImplementation(libs.junit)
-    androidTestImplementation(libs.test.ext)
-    androidTestImplementation(libs.espresso)
+    androidTestImplementation(libs.androidx.junit)
+    androidTestImplementation(libs.androidx.espresso)
 }

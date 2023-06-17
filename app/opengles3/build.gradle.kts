@@ -13,6 +13,7 @@ android {
     buildFeatures {
         viewBinding = true
     }
+    namespace = "tech.yaowen.opengles3"
 }
 
 
@@ -27,6 +28,6 @@ dependencies {
     implementation(libs.ktx.fragment)
     implementation(libs.ktx.navigation)
     testImplementation(libs.junit)
-    androidTestImplementation(libs.test.ext)
-    androidTestImplementation(libs.espresso)
+    androidTestImplementation(libs.androidx.junit)
+    androidTestImplementation(libs.androidx.espresso)
 }

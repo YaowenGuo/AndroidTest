@@ -1,14 +1,8 @@
 package tech.yaowen.lib_share.widget
 
 import android.content.Context
-import android.graphics.Matrix
 import android.util.AttributeSet
-import android.view.GestureDetector
-import android.view.MotionEvent
-import android.view.ScaleGestureDetector
 import android.view.View
-import android.widget.OverScroller
-import kotlin.math.min
 
 class MultiPointsTouch : View {
 

@@ -13,57 +13,58 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ProcessLifecycleOwner
 import androidx.work.Configuration
 import tech.yaowen.customview.MainActivity
-import tech.yaowen.customview.R
 import java.util.concurrent.Executors
 
+/**
+ *  每个进程创建都会调用一次 application，如果一个应用创建了多个进程，就会调用多次。
+ */
 class CustomApplication : Application(), Configuration.Provider {
 
     companion object {
-        private val channelId = "1"//消息通道的ID，以后可以通过该ID找到该消息通道
+        private val channelId = "1" //消息通道的ID，以后可以通过该ID找到该消息通道
         private val channelName = "igDownload"//消息通道的名字
-//        private val lifecycleObserver = object : DefaultLifecycleObserver {
-//            override fun onCreate(owner: LifecycleOwner) {
-//                Log.e("CustomApplication", "onCreate")
-//
-//            }
-//
-//            override fun onResume(owner: LifecycleOwner) {
-//                Log.e("CustomApplication", "onResume")
-//
-//            }
-//
-//            override fun onPause(owner: LifecycleOwner) {
-//                Log.e("CustomApplication", "onPause")
-//
-//            }
-//
-//            override fun onStart(owner: LifecycleOwner) {
-//                Log.e("CustomApplication", "onStart")
-//
-//            }
-//
-//            override fun onStop(owner: LifecycleOwner) {
-//                Log.e("CustomApplication", "onStop")
-//
-//            }
-//
-//            override fun onDestroy(owner: LifecycleOwner) {
-//                Log.e("CustomApplication", "onDestroy")
-//
-//            }
-//
-//        }
+        private val lifecycleObserver = object : DefaultLifecycleObserver {
+
+            override fun onCreate(owner: LifecycleOwner) {
+                Log.e("CustomApplication", "onCreate")
+
+            }
+
+            override fun onResume(owner: LifecycleOwner) {
+                Log.e("CustomApplication", "onResume")
+
+            }
+
+            override fun onPause(owner: LifecycleOwner) {
+                Log.e("CustomApplication", "onPause")
+
+            }
+
+            override fun onStart(owner: LifecycleOwner) {
+                Log.e("CustomApplication", "onStart")
+
+            }
+
+            override fun onStop(owner: LifecycleOwner) {
+                Log.e("CustomApplication", "onStop")
+
+            }
+
+            override fun onDestroy(owner: LifecycleOwner) {
+                Log.e("CustomApplication", "onDestroy")
+
+            }
+
+        }
     }
 
-    /**
-     *  每个进程创建都会调用一次 application，如果一个应用创建了多个进程，就会调用多次。
-     */
+
     override fun onCreate() {
         super.onCreate()
 
-//        ProcessLifecycleOwner.get().lifecycle.addObserver(lifecycleObserver)
-//
-//        val clipboardManager = getSystemService(CLIPBOARD_SERVICE) as ClipboardManager
+        ProcessLifecycleOwner.get().lifecycle.addObserver(lifecycleObserver)
+
+        val clipboardManager = getSystemService(CLIPBOARD_SERVICE) as ClipboardManager
 //        clipboardManager.addPrimaryClipChangedListener {
 //            try {
 //                val cb = getSystemService(CLIPBOARD_SERVICE) as ClipboardManager
@@ -79,7 +80,7 @@ class CustomApplication : Application(), Configuration.Provider {
 //            }
 //
 //        }
-//
+
 
     }
 
@@ -94,9 +95,9 @@ class CustomApplication : Application(), Configuration.Provider {
         resultIntent.data = Uri.parse(contents)
         val pendingIntent =
             PendingIntent.getActivity(this, 0, resultIntent, PendingIntent.FLAG_UPDATE_CURRENT)
+
         val notificationBuilder = Notification.Builder(this)
             //.setAutoCancel(true)
-            .setSmallIcon(R.drawable.ic_menu_send)
             .setContentIntent(pendingIntent)
             .setDefaults(Notification.DEFAULT_LIGHTS or Notification.DEFAULT_VIBRATE)
             .setContentTitle(notification)
@@ -120,7 +121,6 @@ class CustomApplication : Application(), Configuration.Provider {
             notificationBuilder.setDefaults(Notification.DEFAULT_ALL)
         }
         mNotificationManager.notify(1, notificationBuilder.build())
-
 
     }
 

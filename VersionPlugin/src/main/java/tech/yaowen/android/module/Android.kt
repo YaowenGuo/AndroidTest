@@ -6,6 +6,7 @@ import org.gradle.api.Project
 
 internal fun Project.configureAndroid() = this.extensions.getByType(BaseExtension::class.java).run {
     compileSdkVersion(Versions.COMPILE_SDK)
+    buildToolsVersion("34.0.0")
     defaultConfig {
         minSdk = Versions.MIN_SDK
         targetSdk = Versions.TARGET_SDK
@@ -26,20 +27,12 @@ internal fun Project.configureAndroid() = this.extensions.getByType(BaseExtensio
     }
 
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
 
-//    kotlinOptions {
-//        jvmTarget = JavaVersion.VERSION_1_8
-//    }
 
-//    buildFeatures {
-//        viewBinding = true
-//    }
-//
-//    // Lint 分析任务就可以在各个模块中并行执行，从而显著提升 Lint 任务运行的速度
-//    lintOptions {
-//        checkDependencies = true
-//    }
+    buildFeatures.compose = true
+    composeOptions.kotlinCompilerExtensionVersion = "1.4.7"
+
 }

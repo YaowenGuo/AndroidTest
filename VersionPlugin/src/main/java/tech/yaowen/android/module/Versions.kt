@@ -37,5 +37,5 @@ object Versions {
     //  "org.threeten:threetenbp:${tech.yaowen.android.module.Versions.threetenbp}:no-tzdb" using java-platform in the
     //  depconstraints/build.gradle.kts is defined
     const val THREETENBP = "1.3.6"
-    const val CMAKE_VERSION = "3.18.1"
+    const val CMAKE_VERSION = "3.22.1"
 }

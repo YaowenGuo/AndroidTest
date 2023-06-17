@@ -13,6 +13,7 @@ android {
     buildFeatures {
         viewBinding = true
     }
+    namespace = "tech.yaowen.test_rust_jni"
 }
 
 
@@ -26,6 +27,6 @@ dependencies {
     implementation(libs.constraintlayout)
 
     testImplementation(libs.junit)
-    androidTestImplementation(libs.test.ext)
-    androidTestImplementation(libs.espresso)
+    androidTestImplementation(libs.androidx.junit)
+    androidTestImplementation(libs.androidx.espresso)
 }
