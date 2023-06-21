@@ -1,10 +1,11 @@
 plugins {
-    id("com.android.application")
+    alias(libs.plugins.android.application)
+    alias(libs.plugins.kotlin.android)
+    alias(libs.plugins.kotlin.kapt)
     id("tech.yaowen.android.module")
-    id("kotlin-android")
-    id("kotlin-kapt")
     id("androidx.navigation.safeargs")
 }
+
 
 android {
     defaultConfig {

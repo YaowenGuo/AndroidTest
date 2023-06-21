@@ -1,6 +1,5 @@
 package tech.yaowen.test_glide
 
-import androidx.annotation.NonNull
 import com.bumptech.glide.RequestBuilder
 import com.bumptech.glide.annotation.GlideExtension
 import com.bumptech.glide.annotation.GlideOption
@@ -24,7 +23,6 @@ public class MyAppExtension private constructor() {
 
 
         @JvmStatic
-        @NonNull
         @GlideOption
         fun miniThumb(options: BaseRequestOptions<*>): BaseRequestOptions<*>? {
             return options
@@ -33,11 +31,9 @@ public class MyAppExtension private constructor() {
         }
 
 
-
         @JvmStatic
-        @NonNull
         @GlideType(GifDrawable::class)
-        fun asMyGif(requestBuilder: RequestBuilder<GifDrawable?>): RequestBuilder<GifDrawable?>? {
+        fun asMyGif(requestBuilder: RequestBuilder<GifDrawable?>): RequestBuilder<GifDrawable?> {
             return requestBuilder
                 .transition(DrawableTransitionOptions())
                 .apply(DECODE_TYPE_GIF)

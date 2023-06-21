@@ -1,11 +1,12 @@
 plugins {
-    id("com.android.library")
+    alias(libs.plugins.android.library)
+    alias(libs.plugins.kotlin.android)
     id("tech.yaowen.android.module")
-    id("kotlin-android")
-    id("kotlin-kapt")
 }
 
 dependencies {
+    implementation(project(":android_lib:theme"))
+
     // EXIF Interface
     implementation(libs.exifinterface)
     implementation(libs.kotlin.coroutines)

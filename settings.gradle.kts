@@ -41,8 +41,6 @@ include(
     ":android_lib:theme",
 
     ":lib:test_rust",
-    ":lib:test_reflection",
-    ":lib:test_annotation",
     ":lib:TestIO",
     ":lib:TestRxJava",
     ":lib:algorithm",

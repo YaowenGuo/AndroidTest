@@ -8,6 +8,8 @@ dependencies {
     api(libs.androidx.compose.material3)
     api(libs.androidx.compose.ui)
     api(libs.androidx.compose.ui.googlefonts)
+
+    api(libs.androidx.compose.runtime)//specify the version
 }
 android {
     namespace = "tech.yaowen.theme"

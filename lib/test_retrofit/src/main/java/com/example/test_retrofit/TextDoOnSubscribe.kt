@@ -18,16 +18,16 @@ fun main() {
         }
 
         .subscribe(object : SingleObserver<Int> {
-            override fun onSuccess(t: Int?) {
+            override fun onSuccess(t: Int) {
                printThread("onSuccess")
             }
 
-            override fun onSubscribe(d: Disposable?) {
+            override fun onSubscribe(d: Disposable) {
                 printThread("onSubscribe")
 
             }
 
-            override fun onError(e: Throwable?) {
+            override fun onError(e: Throwable) {
                 printThread("onError")
 
             }

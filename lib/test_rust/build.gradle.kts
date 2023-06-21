@@ -9,11 +9,6 @@ dependencies {
     implementation(libs.kotlin.std)
 }
 
-java {
-    sourceCompatibility = JavaVersion.VERSION_1_8
-    targetCompatibility = JavaVersion.VERSION_1_8
-}
-
 //val nativeLibsToJar by tasks.creating(Jar::class.java) {
 //    destinationDir = file("$buildDir/native-libs")
 //    baseName = "native-libs"

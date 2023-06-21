@@ -12,11 +12,7 @@ private val PERMISSIONS_REQUIRED = arrayOf(Manifest.permission.CAMERA, Manifest.
 abstract class BaseActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
-            requestPermissions(PERMISSIONS_REQUIRED, PERMISSIONS_REQUEST_CODE)
-        } else {
-            Toast.makeText(this, "Android Api must not less 23", Toast.LENGTH_LONG).show()
-        }
+        requestPermissions(PERMISSIONS_REQUIRED, PERMISSIONS_REQUEST_CODE)
     }
 
     override fun onRequestPermissionsResult(

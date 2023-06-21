@@ -88,8 +88,8 @@ class CameraSeekBar {
         _progress = progress;
         _absVal = (progress * (_max - _min)) / _seekBar.getMax() + _min;
         int val = (progress * (_seekBar.getWidth() - 2 * _seekBar.getThumbOffset())) / _seekBar.getMax();
-        _sliderPrompt.setText("" + _absVal);
-        _sliderPrompt.setX(_seekBar.getX() + val + _seekBar.getThumbOffset() / 2);
+        _sliderPrompt.setText(String.valueOf(_absVal));
+        _sliderPrompt.setX(_seekBar.getX() + val + (_seekBar.getThumbOffset() >> 1));
     }
 
 
@@ -140,15 +140,13 @@ public class CameraActivity extends NativeActivity
         boolean camera2Dev = true;
         try {
             String[] cameraIds = camMgr.getCameraIdList();
-            if (cameraIds.length != 0) {
-                for (String id : cameraIds) {
-                    CameraCharacteristics characteristics = camMgr.getCameraCharacteristics(id);
-                    int deviceLevel = characteristics.get(CameraCharacteristics.INFO_SUPPORTED_HARDWARE_LEVEL);
-                    int facing = characteristics.get(CameraCharacteristics.LENS_FACING);
-                    if (deviceLevel == CameraCharacteristics.INFO_SUPPORTED_HARDWARE_LEVEL_LEGACY &&
-                            facing == LENS_FACING_BACK) {
-                        camera2Dev = false;
-                    }
+            for (String id : cameraIds) {
+                CameraCharacteristics characteristics = camMgr.getCameraCharacteristics(id);
+                int deviceLevel = characteristics.get(CameraCharacteristics.INFO_SUPPORTED_HARDWARE_LEVEL);
+                int facing = characteristics.get(CameraCharacteristics.LENS_FACING);
+                if (deviceLevel == CameraCharacteristics.INFO_SUPPORTED_HARDWARE_LEVEL_LEGACY &&
+                        facing == LENS_FACING_BACK) {
+                    camera2Dev = false;
                 }
             }
         } catch (CameraAccessException e) {

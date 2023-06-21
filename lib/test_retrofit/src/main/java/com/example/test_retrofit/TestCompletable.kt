@@ -67,12 +67,12 @@ fun main() {
                 println("complete")
             }
 
-            override fun onSubscribe(d: Disposable?) {
+            override fun onSubscribe(d: Disposable) {
                 println("subscribe")
 
             }
 
-            override fun onError(e: Throwable?) {
+            override fun onError(e: Throwable) {
                 println("onError")
             }
 

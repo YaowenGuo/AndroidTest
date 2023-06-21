@@ -7,7 +7,7 @@ import io.reactivex.rxjava3.disposables.Disposable
 fun main() {
     Maybe.empty<Int>()
         .subscribe(object: MaybeObserver<Int> {
-            override fun onSuccess(t: Int?) {
+            override fun onSuccess(t: Int) {
                 println("onSuccess $t")
             }
 
@@ -15,11 +15,11 @@ fun main() {
                 println("onComplete")
             }
 
-            override fun onSubscribe(d: Disposable?) {
+            override fun onSubscribe(d: Disposable) {
                 println("onSubscribe")
             }
 
-            override fun onError(e: Throwable?) {
+            override fun onError(e: Throwable) {
                 println("onSubscribe")
             }
 

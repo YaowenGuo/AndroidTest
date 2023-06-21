@@ -58,12 +58,12 @@ class RetrofitBug {
                     println("onComplete")
                 }
 
-                override fun onSubscribe(d: Disposable?) {
+                override fun onSubscribe(d: Disposable) {
                     println("onSubscribe")
 
                 }
 
-                override fun onError(e: Throwable?) {
+                override fun onError(e: Throwable) {
                     println("onError")
                 }
 

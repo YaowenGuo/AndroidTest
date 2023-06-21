@@ -42,15 +42,15 @@ fun main() {
     Client.getServerApi()
         .testCodeNoIntercept()
         .subscribe(object : SingleObserver<BaseRsp<Void>> {
-            override fun onSuccess(t: BaseRsp<Void>?) {
+            override fun onSuccess(t: BaseRsp<Void>) {
                 println(t)
             }
 
-            override fun onSubscribe(d: Disposable?) {
+            override fun onSubscribe(d: Disposable) {
             }
 
-            override fun onError(e: Throwable?) {
-                println(e?.message)
+            override fun onError(e: Throwable) {
+                println(e.message)
             }
 
         })

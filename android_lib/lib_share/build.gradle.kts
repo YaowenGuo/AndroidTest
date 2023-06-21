@@ -7,7 +7,6 @@ plugins {
 
 dependencies {
     implementation(libs.android.material)
-    implementation(libs.androidx.compose.runtime)//specify the version
 
     // exo player
     implementation(libs.media3.player)
