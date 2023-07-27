@@ -1,0 +1,18 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="JNI Test" type="Application" factoryName="Application">
+    <option name="ALTERNATIVE_JRE_PATH" value="/opt/jdk-17.0.7/Contents/Home" />
+    <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="true" />
+    <option name="MAIN_CLASS_NAME" value="tech.yaowen.jni.MyClass" />
+    <module name="AndroidTest.lib.test_jni.main" />
+    <option name="VM_PARAMETERS" value="-Djava.library.path=lib/jni_native/build/lib/main/debug" />
+    <extension name="coverage">
+      <pattern>
+        <option name="PATTERN" value="tech.yaowen.jni.*" />
+        <option name="ENABLED" value="true" />
+      </pattern>
+    </extension>
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>

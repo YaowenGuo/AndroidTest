@@ -1,6 +1,5 @@
 package tech.yaowen.testrxjava;
 
-import com.sun.tools.javac.util.Pair;
 
 import java.util.ArrayList;
 import java.util.List;

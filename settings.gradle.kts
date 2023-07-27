@@ -48,9 +48,10 @@ include(
     ":lib:test_retrofit",
     ":lib:lib_annotations",
     ":lib:test_java",
-    ":lib:tools"
+    ":lib:tools",
+    ":lib:test_jni",
+    ":lib:jni_native"
 )
 
 enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 includeBuild("VersionPlugin")
-include(":android_lib:device")

@@ -1,13 +1,15 @@
 package tech.yaowen.testrxjava
 
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
-import java.util.concurrent.TimeUnit
+import kotlinx.coroutines.launch
 
 
 fun main() {
     val job = CoroutineScope(Dispatchers.Default)
     val channel = Channel<Int>()
+
     job.launch {
 //        delay(1000)
         for (i in 0 .. Int.MAX_VALUE) {

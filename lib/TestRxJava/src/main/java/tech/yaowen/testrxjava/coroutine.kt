@@ -2,7 +2,6 @@ package tech.yaowen.testrxjava
 
 
 import kotlinx.coroutines.*
-import kotlinx.coroutines.channels.Channel
 
 
 val threadLocal = ThreadLocal<String?>() // 声明线程局部变量

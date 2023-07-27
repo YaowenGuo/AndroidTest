@@ -34,3 +34,7 @@ android {
     }
     namespace = "tech.yaowen.ffmpeg"
 }
+
+dependencies {
+    testImplementation(libs.junit)
+}

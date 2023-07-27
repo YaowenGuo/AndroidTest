@@ -29,7 +29,7 @@ object Versions {
     const val FIREBASE_CRASHLYTICS = "2.3.0"
     const val GOOGLE_SERVICES = "4.3.3"
     const val HILT_AGP = "2.40.5"
-    const val KOTLIN = "1.6.10"
+    const val KOTLIN = "1.9.0"
     const val NAVIGATION = "2.4.1"
     const val PROFILE_INSTALLER = "1.2.0-beta01"
 

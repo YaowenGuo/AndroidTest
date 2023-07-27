@@ -10,6 +10,8 @@ dependencies {
     api(libs.androidx.compose.ui.googlefonts)
 
     api(libs.androidx.compose.runtime)//specify the version
+
+    testImplementation(libs.junit)
 }
 android {
     namespace = "tech.yaowen.theme"

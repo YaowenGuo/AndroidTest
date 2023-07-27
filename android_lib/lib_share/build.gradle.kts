@@ -6,11 +6,12 @@ plugins {
 
 
 dependencies {
-    implementation(libs.android.material)
-
-    // exo player
+    implementation(project(":android_lib:theme"))
+    // media player
     implementation(libs.media3.player)
     implementation(libs.media3.ui)
+
+    testImplementation(libs.junit)
 }
 
 android {
