@@ -3,7 +3,7 @@ set(CMAKE_CXX_STANDARD 20)
 
 project("rtc_demo")
 add_definitions("-DWEBRTC_POSIX")
-
+add_definitions("-DABSL_OPTION_USE_STD_STRING_VIEW=0")
 
 add_library(
         native_app_glue STATIC

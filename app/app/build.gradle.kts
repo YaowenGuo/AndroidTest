@@ -5,12 +5,22 @@ plugins {
     id("tech.yaowen.android.module")
 }
 
-
 android {
     defaultConfig {
         applicationId = "tech.yaowen.customview"
+        externalNativeBuild {
+            cmake {
+                arguments += "-DANDROID_STL=c++_shared"
+            }
+        }
     }
     namespace = "tech.yaowen.customview"
+    externalNativeBuild {
+        cmake {
+            path = file("src/main/cpp/CMakeLists.txt")
+            version = "3.22.1"
+        }
+    }
 }
 
 dependencies {
@@ -30,6 +40,7 @@ dependencies {
     implementation(libs.lifecycle.common)
 
     implementation(libs.androidx.compose.activity)
+    implementation(libs.android.material)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

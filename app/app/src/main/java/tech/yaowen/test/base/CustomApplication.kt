@@ -1,4 +1,4 @@
-package tech.yaowen.customview.base
+package tech.yaowen.test.base
 
 import android.app.*
 import android.content.ClipboardManager
@@ -12,7 +12,7 @@ import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ProcessLifecycleOwner
 import androidx.work.Configuration
-import tech.yaowen.customview.MainActivity
+import tech.yaowen.test.MainActivity
 import java.util.concurrent.Executors
 
 /**

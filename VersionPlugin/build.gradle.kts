@@ -6,8 +6,8 @@ plugins {
 dependencies {
     implementation(gradleApi())
     implementation("org.jetbrains.kotlin:kotlin-gradle-plugin:1.7.10")
-    implementation("com.android.tools.build:gradle-api:7.2.2")
-    implementation("com.android.tools.build:gradle:7.2.2")
+    implementation("com.android.tools.build:gradle-api:8.0.1")
+    implementation("com.android.tools.build:gradle:8.0.1")
 }
 
 val pluginId = "tech.yaowen.android.module"

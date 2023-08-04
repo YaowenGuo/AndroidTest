@@ -1,4 +1,4 @@
-package tech.yaowen.customview
+package tech.yaowen.test
 
 import org.junit.Test
 

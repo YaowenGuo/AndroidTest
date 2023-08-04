@@ -49,8 +49,6 @@ include(
     ":lib:lib_annotations",
     ":lib:test_java",
     ":lib:tools",
-    ":lib:test_jni",
-    ":lib:jni_native"
 )
 
 enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")

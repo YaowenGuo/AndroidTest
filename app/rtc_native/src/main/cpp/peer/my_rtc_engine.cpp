@@ -30,6 +30,7 @@
 #include "utils/jvm.h"
 #include "main/window_monitor.h"
 #include "android_video_sink.h"
+#include "absl/strings/string_view.h"
 
 Live *pLiveObj = nullptr;
 
@@ -62,8 +63,8 @@ Live::Live(JNIEnv *env, jobject application_context, rtc_demo::JavaRTCEngine *si
     // 输出日志到文件
     rtc::LogMessage::LogToDebug(rtc::LS_VERBOSE);
     rtc::LogMessage::SetLogToStderr(true);
-    auto ff = new rtc::FileRotatingLogSink("/sdcard/Android/data/tech.yaowen.rtc_native/",
-                                           "webrtc_log", 1024 * 1024 * 10, 100);
+    auto ff = new rtc::FileRotatingLogSink(absl::string_view("/sdcard/Android/data/tech.yaowen.rtc_native/"),
+    absl::string_view("webrtc_log"), 1024 * 1024 * 10, 100);
     ff->Init();
     rtc::LogMessage::AddLogToStream(ff, rtc::LS_VERBOSE);
 }
