@@ -51,8 +51,9 @@ class ScalableImageView : AppCompatImageView, Runnable {
         scoller = OverScroller(context)
         gestureDetector =
             GestureDetectorCompat(context, object : GestureDetector.SimpleOnGestureListener() {
+
                 override fun onScroll(
-                    e1: MotionEvent,
+                    e1: MotionEvent?,
                     e2: MotionEvent,
                     distanceX: Float,
                     distanceY: Float
@@ -67,23 +68,20 @@ class ScalableImageView : AppCompatImageView, Runnable {
                     return true
                 }
 
-
                 override fun onFling(
-                    down: MotionEvent,
-                    current: MotionEvent,
+                    e1: MotionEvent?,
+                    e2: MotionEvent,
                     velocityX: Float,
                     velocityY: Float
                 ): Boolean {
-
                     return if (isBigScale) {
                         scoller.fling(offsetX.toInt(), offsetY.toInt(), velocityX.toInt(), velocityY.toInt(),
                             - (drawable.intrinsicWidth * bigScale - width).toInt() shr 1,
-                             (drawable.intrinsicWidth * bigScale - width).toInt() shr 1,
+                            (drawable.intrinsicWidth * bigScale - width).toInt() shr 1,
                             - (drawable.intrinsicWidth * bigScale - width).toInt() shr 1,
                             - (drawable.intrinsicWidth * bigScale - width).toInt() shr 1)
 
                         postOnAnimation(this@ScalableImageView)
-//                        post()
                         for (i in 10 until 100 step 10) {
                             postDelayed({ refreshFling() }, i.toLong())
                         }
