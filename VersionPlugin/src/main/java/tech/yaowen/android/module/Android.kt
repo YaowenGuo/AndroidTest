@@ -34,6 +34,5 @@ internal fun Project.configureAndroid() = this.extensions.getByType(BaseExtensio
 
     buildFeatures.compose = true
     composeOptions.kotlinCompilerExtensionVersion = "1.4.7"
-    ndkVersion = "26.0.10404224"
-
+//    ndkVersion = "26.0.10404224"
 }

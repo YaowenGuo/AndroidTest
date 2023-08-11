@@ -47,5 +47,4 @@ dependencies {
     androidTestImplementation(libs.androidx.espresso)
 
     implementation(project(":android_lib:lib_share"))
-
 }

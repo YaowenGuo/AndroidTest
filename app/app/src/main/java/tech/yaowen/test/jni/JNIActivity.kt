@@ -19,8 +19,8 @@ class JNIActivity : AppCompatActivity() {
       Column(modifier = Modifier.fillMaxWidth().background(Color.Gray)) { Text("JNI test") }
     }
     val jni = TestEntry()
-    jni.printValue("Hello 耀文")
-    jni.stringFromJNI()
+//    jni.printValue("Hello 耀文")
+//    jni.stringFromJNI()
   }
 
 

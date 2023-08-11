@@ -79,10 +79,10 @@ struct Bar: Foo{
 extern "C" JNIEXPORT jstring JNICALL
 TestEntry(stringFromJNI, JNIEnv* env, jobject /* this */) {
     // Use-after-free error, caught by asan and hwasan.
-//    int* foo = new int;
-//    *foo = 3;
-//    delete foo;
-//    *foo = 4;
+    int* foo = new int;
+    *foo = 3;
+    delete foo;
+    *foo = 4;
 
     // Signed integer overflow. Undefined behavior caught by ubsan.
 //    int k = 0x7fffffff;

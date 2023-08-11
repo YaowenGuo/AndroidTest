@@ -23,8 +23,8 @@ find_library(log-lib log)
 #endif()
 
 # Use UBAsan
-# Grab libclang_rt.ubsan_standalone-${ARCH_STR}-android.so from the NDK.
-#file(GLOB UBSAN_GLOB "${HINT_PATH}/../lib64/clang/*/lib/linux")
+# Grab libclang_rt.-${ARCH_STR}-android.so from the NDK.
+#file(GLOB UBSANubsan_standalone_GLOB "${HINT_PATH}/../lib64/clang/*/lib/linux")
 #find_file(UBSAN
 #        NAMES libclang_rt.ubsan_standalone-${ARCH_STR}-android.so
 #        PATHS ${UBSAN_GLOB})
