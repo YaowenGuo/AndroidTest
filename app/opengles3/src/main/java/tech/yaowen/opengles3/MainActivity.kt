@@ -2,7 +2,10 @@ package tech.yaowen.opengles3
 
 import android.opengl.GLSurfaceView
 import android.os.Bundle
+import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.runtime.Composable
+import tech.yaowen.opengles3.compose.OpenGLES3Composable
 import tech.yaowen.opengles3.renderer.SimpleRenderer
 
 class MainActivity : AppCompatActivity() {
@@ -10,6 +13,14 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         init()
+//        setContent {
+//            OpenGLES3Screen()
+//        }
+    }
+
+    @Composable
+    fun OpenGLES3Screen() {
+        OpenGLES3Composable()
     }
 
     private fun init() {
@@ -34,6 +45,4 @@ class MainActivity : AppCompatActivity() {
 //        val renderer = NativeColorRenderer(Color.RED)
 //        textureView.setRenderer(renderer)
     }
-
-
 }

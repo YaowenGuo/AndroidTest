@@ -20,5 +20,6 @@ dependencyResolutionManagement {
 }
 
 rootProject.name = "AndroidInAction"
+include(":app:opengles3")
 include(":app:custom_view")
 include(":app:camera")

@@ -12,6 +12,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -47,31 +48,13 @@ class MainActivity : AppCompatActivity() {
         canvas.drawBitmap(cover, 0f, 0f, null)
 
         setContent {
-            Column(modifier = Modifier.fillMaxWidth().background(Color.Gray)) {
+            Column(Modifier.background(Color.Gray)) {
                 BasicText(text = "Hello, world!")
                 Image(
                     bitmap = bitmap.asImageBitmap(),
                     contentDescription = "some useful description",
+                    modifier = Modifier.fillMaxWidth().fillMaxHeight()
                 )
-
-
-                val padding = 16.dp
-                Column(
-                    Modifier
-                        .clickable(onClick = {
-
-                        })
-                        .padding(padding)
-                        .fillMaxWidth()
-                        .width(50.dp)
-                        .height(50.dp)
-                        .background(Color.Red)
-
-                ) {
-                    // rest of the implementation
-
-                }
-
 
             }
         }
