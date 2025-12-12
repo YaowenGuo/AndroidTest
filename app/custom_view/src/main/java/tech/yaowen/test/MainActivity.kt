@@ -5,25 +5,29 @@ import android.graphics.BitmapFactory
 import android.graphics.Canvas
 import android.graphics.Matrix
 import android.os.Bundle
+import android.widget.Button
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.unit.TextUnit
+import androidx.compose.ui.unit.dp
 import kotlin.math.min
 
 class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val mp4file = assets.open("cook-live-96.mp4")
-        val mp3file = assets.open("cook_live_bg_musitc1.mp3")
-
         val imgFile = assets.open("image.jpg")
         val img = BitmapFactory.decodeStream(imgFile)
         val coverFile = assets.open("cover.png")
@@ -49,6 +53,26 @@ class MainActivity : AppCompatActivity() {
                     bitmap = bitmap.asImageBitmap(),
                     contentDescription = "some useful description",
                 )
+
+
+                val padding = 16.dp
+                Column(
+                    Modifier
+                        .clickable(onClick = {
+
+                        })
+                        .padding(padding)
+                        .fillMaxWidth()
+                        .width(50.dp)
+                        .height(50.dp)
+                        .background(Color.Red)
+
+                ) {
+                    // rest of the implementation
+
+                }
+
+
             }
         }
     }
