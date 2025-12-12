@@ -11,6 +11,8 @@ activityCompose = "1.12.0"
 ui = "1.4.0"
 lifecycleRuntimeKtx = "2.10.0"
 
+okhttp_version = '4.8.1'
+
 
 [libraries]
 # Android
@@ -45,8 +47,16 @@ androidx-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit
 androidx-material3 = { group = "androidx.compose.material3", name = "material3" }
 
 
+socket_io = "io.socket:socket.io-client:2.0.0"
+squareup-okio = "com.squareup.okio:okio:3.0.0"
+squareup-javapoet = "com.squareup:javapoet:1.11.1"
+squareup-okhttp = { module = "com.squareup.okhttp3:okhttp", version.ref = "okhttp_version" }
+squareup-okhttplog = { module = "com.squareup.okhttp3:logging-interceptor", version.ref = "okhttp_version" }
+
+
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
+android-library = { id = "com.android.library", version.ref = "agp" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
+kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
-

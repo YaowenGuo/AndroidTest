@@ -545,8 +545,9 @@ void android_main(struct android_app *state) {
         // If not animating, we will block forever waiting for events.
         // If animating, we loop until all events are read, then continue
         // to draw the next frame of animation.
-        while ((ident = ALooper_pollAll(engine.animating ? 0 : -1, nullptr, &events,
-                                        (void **) &source)) >= 0) {
+        // Use ALooper_pollOnce instead of deprecated ALooper_pollAll
+        while ((ident = ALooper_pollOnce(engine.animating ? 0 : -1, nullptr, &events,
+                                         (void **) &source)) >= 0) {
 
             // Process this event.
             if (source != nullptr) {

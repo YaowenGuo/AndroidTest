@@ -1,33 +1,56 @@
 plugins {
-    id("com.android.application")
-    id("tech.yaowen.android.module")
-    id("kotlin-android")
-    id("kotlin-kapt")
+    alias(libs.plugins.android.application)
+    alias(libs.plugins.kotlin.android)
 }
 
 android {
+    namespace = "tech.yaowen.opengles3_native"
+    compileSdk {
+        version = release(36) {
+            minorApiLevel = 1
+        }
+    }
+
     defaultConfig {
         applicationId = "tech.yaowen.opengles3_native"
+        minSdk = 24
+        targetSdk = 36
+        versionCode = 1
+        versionName = "1.0"
+
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
     externalNativeBuild {
         cmake {
             path = file("src/main/cpp/CMakeLists.txt")
-            version = tech.yaowen.android.module.Versions.CMAKE_VERSION
+            version = "4.1.2"
         }
     }
-    namespace = "tech.yaowen.opengles3_native"
-    // 导致 java.lang.ClassNotFoundException: Didn't find class "androidx.lifecycle.ProcessLifecycleOwnerInitializer" on path: DexPathList ...
-//    dataBinding {
-//        enabled = true
-//    }
+
+    buildTypes {
+        release {
+            isMinifyEnabled = false
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
+        }
+    }
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_11
+        targetCompatibility = JavaVersion.VERSION_11
+    }
+    kotlinOptions {
+        jvmTarget = "11"
+    }
+    buildToolsVersion = "36.1.0"
 }
 
 dependencies {
-    implementation(project(":android_lib:theme"))
-    implementation(libs.appcompat)
-    implementation(libs.constraintlayout)
+    implementation(libs.androidx.appcompat)
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
-    androidTestImplementation(libs.androidx.espresso)
+    androidTestImplementation(libs.androidx.espresso.core)
 }
