@@ -39,9 +39,6 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.annotation.NonNull;
-import androidx.core.app.ActivityCompat;
-
 import tech.yaowen.rtc_native.R;
 import tech.yaowen.rtc_native.rtc.RTCEngine;
 
@@ -112,8 +109,7 @@ class CameraSeekBar {
 }
 
 
-public class CameraActivity extends NativeActivity
-        implements ActivityCompat.OnRequestPermissionsResultCallback {
+public class CameraActivity extends NativeActivity {
     volatile CameraActivity _savedInstance;
     PopupWindow _popupWindow;
     ImageButton _takePhoto;
@@ -201,7 +197,27 @@ public class CameraActivity extends NativeActivity
     }
 
 
+    // Permission request callback interface
+    private interface PermissionRequestCallback {
+        void onAllPermissionsGranted();
+        void onPermissionsDenied();
+    }
+
+    // Permission request data holder
+    private static class PermissionRequest {
+        final int requestCode;
+        final String[] permissions;
+        final PermissionRequestCallback callback;
+
+        PermissionRequest(int requestCode, String[] permissions, PermissionRequestCallback callback) {
+            this.requestCode = requestCode;
+            this.permissions = permissions;
+            this.callback = callback;
+        }
+    }
+
     private static final int PERMISSION_REQUEST_CODE_CAMERA = 1;
+    private PermissionRequest pendingPermissionRequest;
 
 
     public void requestCamera() {
@@ -209,47 +225,81 @@ public class CameraActivity extends NativeActivity
             Log.e(DBG_TAG, "Found legacy camera Device, this sample needs camera2 device");
             return;
         }
+
         String[] accessPermissions = new String[]{
                 Manifest.permission.CAMERA,
                 Manifest.permission.WRITE_EXTERNAL_STORAGE,
                 Manifest.permission.RECORD_AUDIO,
-
         };
-        boolean needRequire = false;
-        for (String access : accessPermissions) {
-            int curPermission = ActivityCompat.checkSelfPermission(this, access);
-            if (curPermission != PackageManager.PERMISSION_GRANTED) {
-                needRequire = true;
+
+        requestPermissionsIfNeeded(accessPermissions, PERMISSION_REQUEST_CODE_CAMERA,
+                new PermissionRequestCallback() {
+                    @Override
+                    public void onAllPermissionsGranted() {
+                        inputRoomName();
+                    }
+
+                    @Override
+                    public void onPermissionsDenied() {
+                        Log.e(DBG_TAG, "Required permissions were denied");
+                    }
+                });
+    }
+
+    /**
+     * Request permissions if needed, with callback for result handling.
+     * This method encapsulates both the request and result checking logic.
+     */
+    private void requestPermissionsIfNeeded(String[] permissions, int requestCode,
+                                            PermissionRequestCallback callback) {
+        // Check if all permissions are already granted
+        boolean allGranted = true;
+        for (String permission : permissions) {
+            if (checkSelfPermission(permission) != PackageManager.PERMISSION_GRANTED) {
+                allGranted = false;
                 break;
             }
         }
-        if (needRequire) {
-            ActivityCompat.requestPermissions(this, accessPermissions, PERMISSION_REQUEST_CODE_CAMERA);
+
+        if (allGranted) {
+            // All permissions already granted, call callback immediately
+            callback.onAllPermissionsGranted();
         } else {
-            inputRoomName();
+            // Store callback for later use in onRequestPermissionsResult
+            pendingPermissionRequest = new PermissionRequest(requestCode, permissions, callback);
+            requestPermissions(permissions, requestCode);
         }
     }
 
-
     @Override
     public void onRequestPermissionsResult(int requestCode,
-                                           @NonNull String[] permissions,
-                                           @NonNull int[] grantResults) {
-        /*
-         * if any permission failed, the sample could not play
-         */
-        if (PERMISSION_REQUEST_CODE_CAMERA != requestCode) {
-            super.onRequestPermissionsResult(requestCode,
-                    permissions,
-                    grantResults);
-            return;
-        }
-
-        if (grantResults.length == 2) {
-            if (grantResults[0] == PackageManager.PERMISSION_GRANTED &&
-                    grantResults[1] == PackageManager.PERMISSION_GRANTED) {
-                inputRoomName();
+                                           String[] permissions,
+                                           int[] grantResults) {
+        // Handle our permission request
+        if (pendingPermissionRequest != null && pendingPermissionRequest.requestCode == requestCode) {
+            // Verify all permissions were granted
+            boolean allGranted = grantResults.length == pendingPermissionRequest.permissions.length;
+            if (allGranted) {
+                for (int result : grantResults) {
+                    if (result != PackageManager.PERMISSION_GRANTED) {
+                        allGranted = false;
+                        break;
+                    }
+                }
             }
+
+            // Call appropriate callback
+            if (allGranted) {
+                pendingPermissionRequest.callback.onAllPermissionsGranted();
+            } else {
+                pendingPermissionRequest.callback.onPermissionsDenied();
+            }
+
+            // Clear pending request
+            pendingPermissionRequest = null;
+        } else {
+            // Not our request, pass to super
+            super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         }
     }
 
@@ -388,4 +438,3 @@ public class CameraActivity extends NativeActivity
         System.loadLibrary("rtc_demo");
     }
 }
-

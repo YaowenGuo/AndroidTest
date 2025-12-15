@@ -1,15 +1,16 @@
 package tech.yaowen.rtc_demo
 
 import android.Manifest
+import android.app.Activity
 import android.content.pm.PackageManager
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.Toast
+import androidx.activity.ComponentActivity
 
 private const val PERMISSIONS_REQUEST_CODE = 10
 private val PERMISSIONS_REQUIRED = arrayOf(Manifest.permission.CAMERA, Manifest.permission.RECORD_AUDIO)
 
-abstract class BaseActivity : AppCompatActivity() {
+abstract class BaseActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         requestPermissions(PERMISSIONS_REQUIRED, PERMISSIONS_REQUEST_CODE)

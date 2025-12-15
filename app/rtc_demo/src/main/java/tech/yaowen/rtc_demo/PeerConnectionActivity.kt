@@ -4,11 +4,19 @@ import android.hardware.camera2.CameraMetadata
 import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
+import androidx.activity.compose.setContent
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.runtime.*
+import androidx.compose.ui.Modifier
 import org.json.JSONException
 import org.json.JSONObject
 import org.webrtc.*
 import tech.yaowen.rtc_demo.base.log
 import tech.yaowen.rtc_demo.lib.RtcEngine
+import tech.yaowen.rtc_demo.ui.JoinRoomDialog
+import tech.yaowen.rtc_demo.ui.VideoScreen
 import tech.yaowen.signaling.SignalingClient
 
 /**
@@ -27,11 +35,40 @@ class PeerConnectionActivity : BaseActivity(), SignalingClient.Callback {
     private var joined = false
     private var isInitiator = false
     private var videoCapturer: VideoCapturer? = null
-
+    private var localView: org.webrtc.SurfaceViewRenderer? = null
+    private var remoteView: org.webrtc.SurfaceViewRenderer? = null
+    private var showJoinDialogCallback: (() -> Unit)? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.local_peer_connection_activity)
+        setContent {
+            var showDialog by remember { mutableStateOf(false) }
+            showJoinDialogCallback = { showDialog = true }
+            MaterialTheme {
+                Surface(modifier = Modifier.fillMaxSize()) {
+                    VideoScreen(
+                        onLocalViewCreated = { view ->
+                            localView = view
+                        },
+                        onRemoteViewCreated = { view ->
+                            remoteView = view
+                        }
+                    )
+
+                    if (showDialog) {
+                        JoinRoomDialog(
+                            onDismiss = { showDialog = false },
+                            onSubmit = { room ->
+                                showDialog = false
+                                SignalingClient[application]
+                                    .setCallback(this@PeerConnectionActivity)
+                                    .joinRoom(room)
+                            }
+                        )
+                    }
+                }
+            }
+        }
     }
 
     lateinit var peerConnection: PeerConnection
@@ -49,11 +86,13 @@ class PeerConnectionActivity : BaseActivity(), SignalingClient.Callback {
 
             audioTrack = RtcEngine.INSTANCE.createAudioTrack(peerConnectionFactory, "audioId")
             runOnUiThread {
-                RtcEngine.INSTANCE.displayVideo(
-                    videoTrack!!,
-                    findViewById(R.id.localView),
-                    eglBaseContext
-                )
+                localView?.let {
+                    RtcEngine.INSTANCE.displayVideo(
+                        videoTrack!!,
+                        it,
+                        eglBaseContext
+                    )
+                }
             }
         } else {
             hint("获取摄像头失败")
@@ -66,12 +105,7 @@ class PeerConnectionActivity : BaseActivity(), SignalingClient.Callback {
     }
 
     private fun joinRoom() {
-        JoinRoomDialog(this, JoinRoomDialog.OnSubmitListener {
-            SignalingClient[application]
-                .setCallback(this)
-                .joinRoom(it)
-//            captureVideoAndVideo()
-        }).show()
+        showJoinDialogCallback?.invoke()
     }
 
     override fun onCreateRoom() {
@@ -153,11 +187,13 @@ class PeerConnectionActivity : BaseActivity(), SignalingClient.Callback {
                 // 接收数据流
                 runOnUiThread {
                     val video = mediaStream.videoTracks[0]
-                    RtcEngine.INSTANCE.displayVideo(
-                        video,
-                        findViewById(R.id.remoteView),
-                        eglBaseContext
-                    )
+                    remoteView?.let {
+                        RtcEngine.INSTANCE.displayVideo(
+                            video,
+                            it,
+                            eglBaseContext
+                        )
+                    }
                 }
             }
 
@@ -187,11 +223,13 @@ class PeerConnectionActivity : BaseActivity(), SignalingClient.Callback {
                 // 接收数据流
                 runOnUiThread {
                     val video = mediaStream.videoTracks[0]
-                    RtcEngine.INSTANCE.displayVideo(
-                        video!!,
-                        findViewById(R.id.remoteView),
-                        eglBaseContext
-                    )
+                    remoteView?.let {
+                        RtcEngine.INSTANCE.displayVideo(
+                            video!!,
+                            it,
+                            eglBaseContext
+                        )
+                    }
                 }
             }
         })

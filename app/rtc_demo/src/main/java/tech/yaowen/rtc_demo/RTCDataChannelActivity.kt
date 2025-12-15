@@ -2,12 +2,16 @@ package tech.yaowen.rtc_demo
 
 import android.os.Bundle
 import android.util.Log
-import android.view.KeyEvent
-import android.view.View
-import android.widget.EditText
-import android.widget.TextView
+import androidx.activity.compose.setContent
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.runtime.*
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.ComposeView
 import org.webrtc.*
 import tech.yaowen.rtc_demo.lib.RtcEngine
+import tech.yaowen.rtc_demo.ui.RTCDataChannelScreen
 import java.nio.ByteBuffer
 import java.util.*
 
@@ -19,46 +23,58 @@ class RTCDataChannelActivity : BaseActivity() {
     lateinit var remoteDataChannel: DataChannel
     private val byteBuffer: ByteBuffer = ByteBuffer.allocate(1024)
     val buffer = DataChannel.Buffer(byteBuffer, false)
-
+    
+    private var sponsorReceiveText = ""
+    private var responderReceiveText = ""
+    private var sponsorSendText = ""
+    private var responderSendText = ""
+    private var updateUI: (() -> Unit)? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.rtc_data_channel_activity)
+
+        setContent {
+            var sponsorReceive by remember { mutableStateOf("") }
+            var responderReceive by remember { mutableStateOf("") }
+
+            MaterialTheme {
+                Surface(modifier = Modifier.fillMaxSize()) {
+                    RTCDataChannelScreen(
+                        sponsorReceiveText = sponsorReceive,
+                        responderReceiveText = responderReceive,
+                        onSponsorTextChange = { text ->
+                            sponsorSendText = text
+                        },
+                        onResponderTextChange = { text ->
+                            responderSendText = text
+                        },
+                        onSponsorSend = {
+                            if (sponsorSendText.isNotEmpty()) {
+                                byteBuffer.clear()
+                                byteBuffer.put(sponsorSendText.toByteArray())
+                                buffer.data.flip()
+                                localDataChannel.send(buffer)
+                                sponsorSendText = ""
+                            }
+                        },
+                        onResponderSend = {
+                            if (responderSendText.isNotEmpty()) {
+                                byteBuffer.clear()
+                                byteBuffer.put(responderSendText.toByteArray())
+                                buffer.data.flip()
+                                remoteDataChannel.send(buffer)
+                                responderSendText = ""
+                            }
+                        }
+                    )
+                }
+            }
+        }
     }
 
     override fun onHaveCameraPermission() {
         peerConnectionFactory = RtcEngine.INSTANCE.createPeerConnection(eglBaseContext, this)
         call()
-        val sponsorText = findViewById<EditText>(R.id.sponsorSend)
-        sponsorText.setOnKeyListener(object : View.OnKeyListener {
-            override fun onKey(v: View?, keyCode: Int, event: KeyEvent?): Boolean {
-                // 这两个条件必须同时成立，如果仅仅用了enter判断，就会执行两次
-                if (keyCode == KeyEvent.KEYCODE_ENTER && event!!.action == KeyEvent.ACTION_DOWN) {
-                    byteBuffer.clear()
-                    byteBuffer.put(sponsorText.text.toString().toByteArray())
-                    buffer.data.flip() // 必须提前转变为读取模式。send 是通过 buffer.data.remaining() 获取数据大小的。
-                    localDataChannel.send(buffer)
-                    return true
-                }
-                return false
-            }
-        })
-
-        val responderText = findViewById<EditText>(R.id.responderSend)
-        responderText.setOnKeyListener(object : View.OnKeyListener {
-            override fun onKey(v: View?, keyCode: Int, event: KeyEvent?): Boolean {
-                // 这两个条件必须同时成立，如果仅仅用了enter判断，就会执行两次
-                if (keyCode == KeyEvent.KEYCODE_ENTER && event!!.action == KeyEvent.ACTION_DOWN) {
-                    byteBuffer.clear()
-                    byteBuffer.put(responderText.text.toString().toByteArray())
-                    buffer.data.flip() // 必须提前转变为读取模式。send 是通过 buffer.data.remaining() 获取数据大小的。
-                    remoteDataChannel.send(buffer)
-                    return true
-                }
-                return false
-            }
-        })
-
     }
 
     lateinit var peerConnectionLocal: PeerConnection
@@ -92,14 +108,7 @@ class RTCDataChannelActivity : BaseActivity() {
 
             override fun onAddMediaStream(mediaStream: MediaStream) {
                 // 接收数据流
-                runOnUiThread {
-                    val video = mediaStream.videoTracks[0]
-                    RtcEngine.INSTANCE.displayVideo(
-                        video,
-                        findViewById(R.id.localView),
-                        eglBaseContext
-                    )
-                }
+                // Note: This activity doesn't display video, only data channel
             }
         })
     }
@@ -152,15 +161,12 @@ class RTCDataChannelActivity : BaseActivity() {
                     Log.e("onDataChannel", "onDataChannel local")
                     dataChannel.registerObserver(object : DataChannel.Observer {
                         override fun onMessage(msg: DataChannel.Buffer?) {
-                            // 好他妈恶心呀，怎么会有这么难用的 buffer.
-                            //  msg?.data?.flip() // 主要是改变 position 的值。默认的读模式，无法使用 remaining().
-                            //  因为 position = 0, limit = position 也是 0
-                            // remaining = limit - position = 0;
-                            // val remaining = msg?.data?.remaining() ?: 0
                             val data = ByteArray(msg?.data?.remaining() ?: 0)
                             msg?.data?.get(data)
-                            // val value = data.toString() // 返回的是地址。
-                            findViewById<TextView>(R.id.sponsorReceive).text = String(data)
+                            runOnUiThread {
+                                sponsorReceiveText = String(data)
+                                updateUI?.invoke()
+                            }
                         }
 
                         override fun onBufferedAmountChange(amount: Long) {
@@ -240,8 +246,10 @@ class RTCDataChannelActivity : BaseActivity() {
                         override fun onMessage(msg: DataChannel.Buffer?) {
                             val data = ByteArray(msg?.data?.remaining() ?: 0)
                             msg?.data?.get(data)
-                            // val value = data.toString() // 返回的是地址。
-                            findViewById<TextView>(R.id.responderReceive).text = String(data)
+                            runOnUiThread {
+                                responderReceiveText = String(data)
+                                updateUI?.invoke()
+                            }
                         }
 
                         override fun onBufferedAmountChange(amount: Long) {
@@ -282,4 +290,3 @@ class RTCDataChannelActivity : BaseActivity() {
         return peerConnection
     }
 }
-

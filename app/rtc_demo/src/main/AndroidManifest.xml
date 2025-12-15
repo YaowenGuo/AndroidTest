@@ -14,7 +14,7 @@
         android:networkSecurityConfig="@xml/network_security_config"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.App">
+        android:theme="@style/Theme.AndroidTestV2">
         <!-- 对等连接 -->
         <activity android:name=".PeerConnectionActivity"
             android:exported="true">
@@ -30,18 +30,15 @@
         </activity>
         <!-- 本地连接 -->
         <activity
-            android:name=".LocalPeerConnectionActivity"
-            android:screenOrientation="behind">
+            android:name=".LocalPeerConnectionActivity">
         </activity>
         <!-- 数据通道 -->
         <activity
-            android:name=".RTCDataChannelActivity"
-            android:screenOrientation="behind">
+            android:name=".RTCDataChannelActivity">
         </activity>
         <!-- 信令服务 -->
         <activity
-            android:name=".SignalingServiceActivity"
-            android:screenOrientation="behind">
+            android:name=".SignalingServiceActivity">
         </activity>
     </application>
 

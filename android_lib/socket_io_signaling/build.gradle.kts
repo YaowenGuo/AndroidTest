@@ -1,18 +1,48 @@
 plugins {
-    id("com.android.library")
-    id("tech.yaowen.android.module")
-    id("kotlin-android")
-    id("kotlin-kapt")
+    alias(libs.plugins.android.library)
+    alias(libs.plugins.kotlin.android)
+}
+
+android {
+    namespace = "tech.signaling"
+    compileSdk {
+        version = release(36) {
+            minorApiLevel = 1
+        }
+    }
+
+    defaultConfig {
+        minSdk = 24
+    }
+
+    buildTypes {
+        release {
+            isMinifyEnabled = false
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "consumer-rules.pro"
+            )
+        }
+    }
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_11
+        targetCompatibility = JavaVersion.VERSION_11
+    }
+    kotlinOptions {
+        jvmTarget = "11"
+    }
+    buildToolsVersion = "36.1.0"
 }
 
 dependencies {
     // EXIF Interface
-    implementation(libs.exifinterface)
+    implementation(libs.androidx.exifinterface)
 
     api(libs.squareup.okhttp)
     implementation(libs.squareup.okhttplog)
     implementation(libs.socket.io)
-}
-android {
-    namespace = "tech.signaling"
+
+    testImplementation(libs.junit)
+    androidTestImplementation(libs.androidx.junit)
+    androidTestImplementation(libs.androidx.espresso.core)
 }

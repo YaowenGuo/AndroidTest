@@ -1,13 +1,19 @@
 package tech.yaowen.rtc_demo
 
+import android.app.Activity
 import android.os.Bundle
 import android.util.Log
-import android.view.View
-import android.widget.TextView
 import android.widget.Toast
-import androidx.appcompat.app.AppCompatActivity
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.ComposeView
 import okhttp3.*
 import org.json.JSONObject
+import tech.yaowen.rtc_demo.ui.SignalingServiceScreen
 import tech.yaowen.signaling.HttpsUtil
 import tech.yaowen.signaling.Server
 import tech.yaowen.signaling.SignalingClient
@@ -17,25 +23,26 @@ import javax.net.ssl.HostnameVerifier
 import javax.net.ssl.SSLContext
 
 
-class SignalingServiceActivity : AppCompatActivity(), SignalingClient.Callback {
-    lateinit var roomView: TextView
-
+class SignalingServiceActivity : ComponentActivity(), SignalingClient.Callback {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.signaling_service_activity)
-        roomView = findViewById(R.id.room)
+        setContent {
+            MaterialTheme {
+                Surface(modifier = Modifier.fillMaxSize()) {
+                    SignalingServiceScreen(
+                        onJoinRoom = { room ->
+                            if (room.isEmpty()) {
+                                Toast.makeText(this@SignalingServiceActivity, "请输入房间号", Toast.LENGTH_SHORT).show()
+                            } else {
+                                SignalingClient[application].joinRoom(room)
+                            }
+                        }
+                    )
+                }
+            }
+        }
 
         SignalingClient[application].setCallback(this)
-    }
-
-
-    fun joinRoom(view: View) {
-        val room = roomView.text
-        if (room == null || room.isEmpty()) {
-            Toast.makeText(this, "请输入房间号", Toast.LENGTH_SHORT).show()
-        } else {
-            SignalingClient[application].joinRoom(room.toString())
-        }
     }
 
     override fun onCreateRoom() {

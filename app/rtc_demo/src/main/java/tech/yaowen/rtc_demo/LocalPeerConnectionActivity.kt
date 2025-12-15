@@ -2,17 +2,43 @@ package tech.yaowen.rtc_demo
 
 import android.hardware.camera2.CameraMetadata
 import android.os.Bundle
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.ComposeView
 import org.webrtc.*
 import tech.yaowen.rtc_demo.lib.RtcEngine
+import tech.yaowen.rtc_demo.ui.VideoScreen
 
 
 class LocalPeerConnectionActivity : BaseActivity() {
     lateinit var peerConnectionFactory: PeerConnectionFactory
     val eglBaseContext = EglBase.create().eglBaseContext
+    private var localView: org.webrtc.SurfaceViewRenderer? = null
+    private var remoteView: org.webrtc.SurfaceViewRenderer? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.local_peer_connection_activity)
+        
+        setContentView(
+            ComposeView(this).apply {
+                setContent {
+                    MaterialTheme {
+                        Surface(modifier = Modifier.fillMaxSize()) {
+                            VideoScreen(
+                                onLocalViewCreated = { view ->
+                                    localView = view
+                                },
+                                onRemoteViewCreated = { view ->
+                                    remoteView = view
+                                }
+                            )
+                        }
+                    }
+                }
+            }
+        )
     }
 
     override fun onHaveCameraPermission() {
@@ -71,11 +97,13 @@ class LocalPeerConnectionActivity : BaseActivity() {
                 // 接收数据流
                 runOnUiThread {
                     val video = mediaStream.videoTracks[0]
-                    RtcEngine.INSTANCE.displayVideo(
-                        video,
-                        findViewById(R.id.localView),
-                        eglBaseContext
-                    )
+                    localView?.let {
+                        RtcEngine.INSTANCE.displayVideo(
+                            video,
+                            it,
+                            eglBaseContext
+                        )
+                    }
                 }
             }
         })
@@ -99,14 +127,15 @@ class LocalPeerConnectionActivity : BaseActivity() {
                 // 接收数据流
                 runOnUiThread {
                     val video = mediaStream.videoTracks[0]
-                    RtcEngine.INSTANCE.displayVideo(
-                        video!!,
-                        findViewById(R.id.remoteView),
-                        eglBaseContext
-                    )
+                    remoteView?.let {
+                        RtcEngine.INSTANCE.displayVideo(
+                            video!!,
+                            it,
+                            eglBaseContext
+                        )
+                    }
                 }
             }
         })
     }
 }
-
